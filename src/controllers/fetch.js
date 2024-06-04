@@ -1,4 +1,4 @@
-const fetch = async (e, searchOverlayContent) => {
+const fetcher = async (e, searchOverlayContent) => {
     debugger;
     if (e.target.value.trim() === "") {
         searchOverlayContent.handlesearchItemsData([]);
@@ -11,8 +11,37 @@ const fetch = async (e, searchOverlayContent) => {
     else {
         qry = '%' + e.target.value.trim().replaceAll(/\s+/g, "%") + '%';
     }
-    const items = await getItems(state.itemTypeName, qry, e.target.value.trim(), 9, state.defaultImage, searchOverlayContent.cache);
-    searchOverlayContent.handlesearchItemsData(items);
+    if(!localStorage.getItem("_"+state.itemTypeName+"_cache")){
+        const _items = await getItems(state.itemTypeName, qry, e.target.value.trim(), 9999999999, state.defaultImage, searchOverlayContent.cache);
+
+        localStorage.setItem("_"+state.itemTypeName+"_cache", JSON.stringify(_items));
+    }
+    const items = JSON.parse( localStorage.getItem("_"+state.itemTypeName+"_cache")) || [];
+    const fuseOptions = {
+        // isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
+        // includeScore: false,
+        // shouldSort: true,
+        // includeMatches: false,
+        // findAllMatches: false,
+        // minMatchCharLength: 1,
+        // location: 0,
+        // threshold: 0.6,
+        // distance: 100,
+        // useExtendedSearch: false,
+        // ignoreLocation: false,
+        // ignoreFieldNorm: false,
+        // fieldNormWeight: 1,
+        keys: [
+                "itemTypeName",
+                // "id",
+                "name",
+        ]
+};
+
+    const fuse = new Fuse(items, fuseOptions);
+    const searchPattern = e.target.value.trim();
+    const searched = fuse.search(searchPattern)
+    searchOverlayContent.handlesearchItemsData(searched.map((element)=>element.item).slice(0,9));
 }
 
 // TODO check for sg_searchable to find property names
@@ -20,21 +49,10 @@ const getItems = debounce(
     80,
     false,
     (itemTypeName, qryString, originalQryString, maxRecords, defaultImage, cache) => {
-    // TODO select properties
-    const searchableProperties = [
-        "name",
-        "keyed_name",
-        "id"
-    ];
-    console.log(originalQryString);
+
     const items = aras.IomInnovator.applyAML(`
     <AML>
-        <Item type="${itemTypeName}" action="get" maxRecords="${maxRecords}" select="id,name,keyed_name,open_icon,label_plural">
-            <OR>
-                ${(searchableProperties.map(searchableProperty => {
-                    return `<${searchableProperty} condition="like">${qryString}</${searchableProperty}>`
-                })).join("\n")}
-            </OR>
+        <Item type="${itemTypeName}" action="get" select="id,name,keyed_name,open_icon,label_plural">
         </Item>
     </AML>
     `);
@@ -63,20 +81,22 @@ const getItems = debounce(
             image,
             name: item.getProperty("keyed_name"),
             description: item.getAttribute("id"),
-            item,
+            itemId: item.getAttribute("id"),
+            label_plural :item.getProperty("label_plural"),
+            // item,
             itemTypeName,
             imageFileId
         });
     }
 
-    result.sort((a, b) => {
-        if (originalQryString.length === 0) return 0;
-        if (a.name.toLowerCase().startsWith(originalQryString[0].toLowerCase()) && !b.name.toLowerCase().startsWith(originalQryString.toLowerCase())) {
-            return -1;
-        }
-        return 0;
-    });
+    // result.sort((a, b) => {
+    //     if (originalQryString.length === 0) return 0;
+    //     if (a.name.toLowerCase().startsWith(originalQryString[0].toLowerCase()) && !b.name.toLowerCase().startsWith(originalQryString.toLowerCase())) {
+    //         return -1;
+    //     }
+    //     return 0;
+    // });
     
-    return result.slice(0, maxRecords);
+    return result;
 })
 
