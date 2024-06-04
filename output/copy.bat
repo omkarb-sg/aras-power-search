@@ -1,0 +1,1 @@
+clip < compiled.js
