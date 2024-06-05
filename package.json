@@ -4,12 +4,16 @@
   "description": "",
   "main": "output.js",
   "scripts": {
-    "start": "nodemon ./scripts/compile.js --ignore output/*.js",
+    "start": "node ./scripts/emitter.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "fs": "^0.0.1-security",
+    "socket.io": "^4.7.5",
     "terser": "^5.29.2"
   },
   "devDependencies": {

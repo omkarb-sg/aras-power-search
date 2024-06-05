@@ -14,23 +14,28 @@ const sequence = [
     "script.js"
 ];
 
-const outputfilepath = path.join(__dirname, "..", "output", "compiled.js")
-const output = fs.createWriteStream(outputfilepath, {encoding: "utf-8"});
 const intermediate = [];
-
+var options = {
+    mangle: {
+        toplevel: false,
+        module:false,
+    },
+};
 sequence.forEach(file => {
     const filepath = path.join(__dirname, "..", file);
     const code = fs.readFileSync(filepath, {encoding: "utf-8"});
-    const result = terser.minify_sync(code);
-    intermediate.push(result.code);
+    // const result = terser.minify_sync(code, options);
+    intermediate.push(code);
 });
-output.write(terser.minify_sync(intermediate.join("\n"), {
-    // mangle: {
-    //     module:true,
-    // }
-}).code);
+
+const outputfilepath = path.join(__dirname, "..", "output", "compiled.js")
+const output = fs.createWriteStream(outputfilepath, {encoding: "utf-8"});
+// output.write(terser.minify_sync(intermediate.join("\n"), options).code);
+output.write(intermediate.join("\n"));
 output.write("\n");
 output.close();
 
 // Automatically copy output file
-child_process.exec(`clip < ${outputfilepath}`, () => {});
+console.log("Yanking...");
+child_process.exec(`clip.exe < ${outputfilepath}`, () => {});
+console.log("Done!!");
