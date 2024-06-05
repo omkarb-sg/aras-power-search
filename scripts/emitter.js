@@ -1,6 +1,5 @@
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
 const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
@@ -36,6 +35,13 @@ fs.watch(filePath, (eventType, filename) => {
 
 io.on('connection', (socket) => {
   console.log('Client connected');
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading file:', err);
+      return;
+    }
+    io.emit('file-changed', data);
+  });
 });
 
 server.listen(3000, () => {
