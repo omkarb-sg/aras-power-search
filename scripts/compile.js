@@ -1,10 +1,10 @@
 const fs = require("fs");
 const path = require("path");
-const terser = require("terser");
 const child_process = require("child_process");
 
 // Taken from index.js
 const sequence = [
+    "src/vendor/fuse.cjs",
     "src/utils.js",
     "src/aras/utils.js",
     "src/controllers/state.js",
@@ -21,16 +21,11 @@ const intermediate = [];
 sequence.forEach(file => {
     const filepath = path.join(__dirname, "..", file);
     const code = fs.readFileSync(filepath, {encoding: "utf-8"});
-    const result = terser.minify_sync(code);
-    intermediate.push(result.code);
+    intermediate.push(code);
 });
-output.write(terser.minify_sync(intermediate.join("\n"), {
-    // mangle: {
-    //     module:true,
-    // }
-}).code);
+output.write(intermediate.join("\n"));
 output.write("\n");
 output.close();
 
 // Automatically copy output file
-child_process.exec(`clip < ${outputfilepath}`, () => {});
+child_process.exec(`clip.exe < ${outputfilepath}`, () => {});

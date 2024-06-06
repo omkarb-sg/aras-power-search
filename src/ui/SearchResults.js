@@ -125,19 +125,24 @@ class SearchResults {
 
         this.searchItems.forEach(searchItem => {
             const shortcutHandlerOpen = (e) => {
-                if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey) {
+                 if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && searchItem.data.itemTypeName === "ItemType") {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
-                    aras.uiShowItem(searchItem.data.itemTypeName, searchItem.data.item.getAttribute("id"));
+                    arasTabs.openSearch(searchItem.data.itemId);
+                }
+                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey) {
+                    e.preventDefault();
+                    this.searchOverlayContent.elements.input.value = "";
+                    this.searchOverlayContent.deactivate();
+                    aras.uiShowItem(searchItem.data.itemTypeName, searchItem.data.itemId);
                 }
             }
             const shortcutHandlerChangeSearch = searchItem.data.itemTypeName === "ItemType" ? (e) => {
                 if ((e.keyCode === 48 + searchItem.index) && e.altKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
-                    console.log(searchItem.data.item);
-                    state.setItemTypeName(searchItem.data.item.getProperty("name"), searchItem.data.item.getProperty("label_plural") || searchItem.data.item.getProperty("keyed_name"), searchItem.elements.image.src);
+                    state.setItemTypeName(searchItem.data.name, searchItem.data.label_plural || searchItem.data.name, searchItem.elements.image.src);
                 }
             } : null;
             this.associatedShortcuts["keydown"].push(shortcutHandlerOpen);
