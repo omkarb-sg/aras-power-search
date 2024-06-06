@@ -1,5 +1,4 @@
 const fetcher = async (e, searchOverlayContent) => {
-    debugger;
     if (e.target.value.trim() === "") {
         searchOverlayContent.handlesearchItemsData([]);
         return;
@@ -72,7 +71,6 @@ const getItems = debounce(
             }
         }
 
-        // Set default image
         if (!image) {
             image = defaultImage;
         }
@@ -88,15 +86,6 @@ const getItems = debounce(
             imageFileId
         });
     }
-
-    // result.sort((a, b) => {
-    //     if (originalQryString.length === 0) return 0;
-    //     if (a.name.toLowerCase().startsWith(originalQryString[0].toLowerCase()) && !b.name.toLowerCase().startsWith(originalQryString.toLowerCase())) {
-    //         return -1;
-    //     }
-    //     return 0;
-    // });
     
     return result;
 })
-

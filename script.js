@@ -123,7 +123,7 @@ const attachCss = () => {
     document.head.appendChild(styles);
 }
 const start = () => {
-    searchOverlayContent.on("input", fetch, searchOverlayContent);
+    searchOverlayContent.on("input", fetcher, searchOverlayContent);
     document.body.appendChild(searchOverlay);
     attachCss();
     listenShortcut();
