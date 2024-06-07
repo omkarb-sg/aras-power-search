@@ -4,7 +4,8 @@
   "description": "",
   "main": "output.js",
   "scripts": {
-    "start": "node ./scripts/emitter.js",
+    "start": "nodemon ./scripts/compile.js --ignore output/*.js",
+    "emitter": "node ./scripts/emitter.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
