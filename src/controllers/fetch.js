@@ -32,7 +32,7 @@ const fetcher = async (e, searchOverlayContent) => {
         // fieldNormWeight: 1,
         keys: [
                 "itemTypeName",
-                // "id",
+                "id",
                 "name",
         ]
 };
