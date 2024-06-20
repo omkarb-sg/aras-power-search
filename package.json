@@ -4,7 +4,7 @@
   "description": "",
   "main": "output.js",
   "scripts": {
-    "start": "node ./scripts/emitter.js",
+    "start": "node ./scripts/compile.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
