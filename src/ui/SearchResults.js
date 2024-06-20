@@ -131,7 +131,7 @@ class SearchResults {
                     this.searchOverlayContent.deactivate();
                     arasTabs.openSearch(searchItem.data.itemId);
                 }
-                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey) {
+                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && !e.altKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
@@ -139,7 +139,7 @@ class SearchResults {
                 }
             }
             const shortcutHandlerChangeSearch = searchItem.data.itemTypeName === "ItemType" ? (e) => {
-                if ((e.keyCode === 48 + searchItem.index) && e.altKey) {
+                if ((e.keyCode === 48 + searchItem.index) && e.altKey && !e.ctrlKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     state.setItemTypeName(searchItem.data.name, searchItem.data.label_plural || searchItem.data.name, searchItem.elements.image.src);
