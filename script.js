@@ -123,6 +123,8 @@ const attachCss = () => {
     document.head.appendChild(styles);
 }
 const start = () => {
+    if (!window.aras) return;
+    if (!window.top || window.top !== window) return;
     searchOverlayContent.on("input", fetcher, searchOverlayContent);
     document.body.appendChild(searchOverlay);
     attachCss();
