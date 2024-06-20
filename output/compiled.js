@@ -2042,6 +2042,7 @@ function getUrlFromFileId(aras, fileId) {
     let file = aras.IomInnovator.newItem("File", "get");
     file.setAttribute("id", fileId);
     file = file.apply();
+    if (file.isError()) return null;
     return aras.vault.vault.makeFileDownloadUrl(aras.getFileURLEx(file.node));
 }
 
@@ -2214,8 +2215,7 @@ class SearchResults {
                 if ((e.keyCode === 48 + searchItem.index) && e.altKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
-                    console.log(searchItem.data.item);
-                    state.setItemTypeName(searchItem.data.item.getProperty("name"), searchItem.data.item.getProperty("label_plural") || searchItem.data.item.getProperty("keyed_name"), searchItem.elements.image.src);
+                    state.setItemTypeName(searchItem.data.name, searchItem.data.label_plural || searchItem.data.name, searchItem.elements.image.src);
                 }
             } : null;
             this.associatedShortcuts["keydown"].push(shortcutHandlerOpen);
@@ -2239,6 +2239,7 @@ class SearchResults {
         return this.elements.root;
     }
 }
+
 class SearchOverlayContent {
     constructor(title, inputPlaceholder, searchOverlay) {
         this.elements = {};
@@ -2375,7 +2376,6 @@ class SearchOverlayContent {
     }
 }
 const fetcher = async (e, searchOverlayContent) => {
-    debugger;
     if (e.target.value.trim() === "") {
         searchOverlayContent.handlesearchItemsData([]);
         return;
@@ -2388,7 +2388,7 @@ const fetcher = async (e, searchOverlayContent) => {
         qry = '%' + e.target.value.trim().replaceAll(/\s+/g, "%") + '%';
     }
     if(!localStorage.getItem("_"+state.itemTypeName+"_cache")){
-        const _items = await getItems(state.itemTypeName, qry, e.target.value.trim(), 9999999999, state.defaultImage, searchOverlayContent.cache);
+        const _items = await getAllItems(state.itemTypeName, 9999999999, state.defaultImage, searchOverlayContent.cache);
 
         localStorage.setItem("_"+state.itemTypeName+"_cache", JSON.stringify(_items));
     }
@@ -2409,7 +2409,7 @@ const fetcher = async (e, searchOverlayContent) => {
         // fieldNormWeight: 1,
         keys: [
                 "itemTypeName",
-                // "id",
+                "itemId",
                 "name",
         ]
 };
@@ -2421,10 +2421,10 @@ const fetcher = async (e, searchOverlayContent) => {
 }
 
 // TODO check for sg_searchable to find property names
-const getItems = debounce(
+const getAllItems = debounce(
     80,
     false,
-    (itemTypeName, qryString, originalQryString, maxRecords, defaultImage, cache) => {
+    (itemTypeName, maxRecords, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
     <AML>
@@ -2448,7 +2448,6 @@ const getItems = debounce(
             }
         }
 
-        // Set default image
         if (!image) {
             image = defaultImage;
         }
@@ -2464,18 +2463,9 @@ const getItems = debounce(
             imageFileId
         });
     }
-
-    // result.sort((a, b) => {
-    //     if (originalQryString.length === 0) return 0;
-    //     if (a.name.toLowerCase().startsWith(originalQryString[0].toLowerCase()) && !b.name.toLowerCase().startsWith(originalQryString.toLowerCase())) {
-    //         return -1;
-    //     }
-    //     return 0;
-    // });
     
     return result;
 })
-
 
 // const searchOverlay = document.getElementById("searchOverlay");
 const searchOverlay = document.createElement("div");

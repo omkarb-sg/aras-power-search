@@ -11,7 +11,7 @@ const fetcher = async (e, searchOverlayContent) => {
         qry = '%' + e.target.value.trim().replaceAll(/\s+/g, "%") + '%';
     }
     if(!localStorage.getItem("_"+state.itemTypeName+"_cache")){
-        const _items = await getItems(state.itemTypeName, qry, e.target.value.trim(), 9999999999, state.defaultImage, searchOverlayContent.cache);
+        const _items = await getAllItems(state.itemTypeName, 9999999999, state.defaultImage, searchOverlayContent.cache);
 
         localStorage.setItem("_"+state.itemTypeName+"_cache", JSON.stringify(_items));
     }
@@ -32,7 +32,7 @@ const fetcher = async (e, searchOverlayContent) => {
         // fieldNormWeight: 1,
         keys: [
                 "itemTypeName",
-                // "id",
+                "itemId",
                 "name",
         ]
 };
@@ -44,10 +44,10 @@ const fetcher = async (e, searchOverlayContent) => {
 }
 
 // TODO check for sg_searchable to find property names
-const getItems = debounce(
+const getAllItems = debounce(
     80,
     false,
-    (itemTypeName, qryString, originalQryString, maxRecords, defaultImage, cache) => {
+    (itemTypeName, maxRecords, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
     <AML>
