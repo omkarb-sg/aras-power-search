@@ -24,14 +24,14 @@ class SearchOverlayContent {
     createDom(title, inputPlaceholder) {
         this.remove();
 
-        this.elements.root = document.createElement("div");
+        this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("search-overlay-content");
 
-        this.elements.title = document.createElement("h2");
+        this.elements.title = top.document.createElement("h2");
         this.elements.title.classList.add("m-05");
         this.elements.title.textContent = title;
         
-        this.elements.input = document.createElement("input");
+        this.elements.input = top.document.createElement("input");
         this.elements.input.classList.add("search-input");
         this.elements.input.type = "text";
         this.elements.input.placeholder = inputPlaceholder;
@@ -109,7 +109,7 @@ class SearchOverlayContent {
             this.elements.input.addEventListener("input", event.handler);
         }
         for (const event of this.events["keydown"]) {
-            document.addEventListener("keydown", event.handler);
+            top.document.addEventListener("keydown", event.handler);
         }
         this.isActive = true;
     }
@@ -120,7 +120,7 @@ class SearchOverlayContent {
             this.elements.input.removeEventListener("input", handler);
         }
         for (const handler of this.events["keydown"]) {
-            document.removeEventListener("keydown", handler);
+            top.document.removeEventListener("keydown", handler);
         }
         state.reset();
         this.isActive = false;

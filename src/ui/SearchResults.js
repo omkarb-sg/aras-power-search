@@ -9,19 +9,19 @@ class SearchItem {
     createDom(image, name, description, index) {
         this.remove();
 
-        this.elements.root = document.createElement("div");
+        this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("search-item");
         
-        const content = document.createElement("div");
+        const content = top.document.createElement("div");
         content.classList.add("flex-row", "jcc", "aic");
-        this.elements.image = document.createElement("img");
+        this.elements.image = top.document.createElement("img");
         // this.elements.image.src = image || "";
         this.elements.image.src = image || `https://picsum.photos/seed/${Date.now()}/50/50`;
-        const nameDescriptionContainer = document.createElement("div");
+        const nameDescriptionContainer = top.document.createElement("div");
         nameDescriptionContainer.classList.add("flex-col");
-        this.elements.name = document.createElement("span");
+        this.elements.name = top.document.createElement("span");
         this.elements.name.textContent = name;
-        this.elements.description = document.createElement("span");
+        this.elements.description = top.document.createElement("span");
         this.elements.description.classList.add("fw-normal");
         this.elements.description.textContent = description;
         nameDescriptionContainer.appendChild(this.elements.name);
@@ -29,7 +29,7 @@ class SearchItem {
         content.appendChild(this.elements.image);
         content.appendChild(nameDescriptionContainer);
 
-        this.elements.index = document.createElement("div");
+        this.elements.index = top.document.createElement("div");
         this.elements.index.textContent = index;
 
         this.elements.root.appendChild(content);
@@ -94,7 +94,7 @@ class SearchResults {
     
     setSearchResults(searchItemsData) {
         this.remove();
-        this.elements.root = document.createElement("div");
+        this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("searchResults");
         searchItemsData.forEach((searchItemData, i) => {
             this.searchItems[i] = new SearchItem(searchItemData.name, searchItemData.description, searchItemData.image, i+1, searchItemData);
@@ -117,7 +117,7 @@ class SearchResults {
         if (!toSet) {
             for (const event in this.associatedShortcuts) {
                 this.associatedShortcuts[event].forEach(handler => {
-                    document.removeEventListener(event, handler);
+                    top.document.removeEventListener(event, handler);
                 })
             }
             return;
@@ -125,7 +125,7 @@ class SearchResults {
 
         this.searchItems.forEach(searchItem => {
             const shortcutHandlerOpen = (e) => {
-                 if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && searchItem.data.itemTypeName === "ItemType") {
+                if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && searchItem.data.itemTypeName === "ItemType") {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
@@ -146,10 +146,10 @@ class SearchResults {
                 }
             } : null;
             this.associatedShortcuts["keydown"].push(shortcutHandlerOpen);
-            document.addEventListener("keydown", shortcutHandlerOpen);
+            top.document.addEventListener("keydown", shortcutHandlerOpen);
             if (shortcutHandlerChangeSearch) {
                 this.associatedShortcuts["keydown"].push(shortcutHandlerChangeSearch);
-                document.addEventListener("keydown", shortcutHandlerChangeSearch);
+                top.document.addEventListener("keydown", shortcutHandlerChangeSearch);
             }
         })
     }

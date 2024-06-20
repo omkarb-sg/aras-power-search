@@ -78,19 +78,19 @@ class SearchItem {
     createDom(image, name, description, index) {
         this.remove();
 
-        this.elements.root = document.createElement("div");
+        this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("search-item");
         
-        const content = document.createElement("div");
+        const content = top.document.createElement("div");
         content.classList.add("flex-row", "jcc", "aic");
-        this.elements.image = document.createElement("img");
+        this.elements.image = top.document.createElement("img");
         // this.elements.image.src = image || "";
         this.elements.image.src = image || `https://picsum.photos/seed/${Date.now()}/50/50`;
-        const nameDescriptionContainer = document.createElement("div");
+        const nameDescriptionContainer = top.document.createElement("div");
         nameDescriptionContainer.classList.add("flex-col");
-        this.elements.name = document.createElement("span");
+        this.elements.name = top.document.createElement("span");
         this.elements.name.textContent = name;
-        this.elements.description = document.createElement("span");
+        this.elements.description = top.document.createElement("span");
         this.elements.description.classList.add("fw-normal");
         this.elements.description.textContent = description;
         nameDescriptionContainer.appendChild(this.elements.name);
@@ -98,7 +98,7 @@ class SearchItem {
         content.appendChild(this.elements.image);
         content.appendChild(nameDescriptionContainer);
 
-        this.elements.index = document.createElement("div");
+        this.elements.index = top.document.createElement("div");
         this.elements.index.textContent = index;
 
         this.elements.root.appendChild(content);
@@ -163,7 +163,7 @@ class SearchResults {
     
     setSearchResults(searchItemsData) {
         this.remove();
-        this.elements.root = document.createElement("div");
+        this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("searchResults");
         searchItemsData.forEach((searchItemData, i) => {
             this.searchItems[i] = new SearchItem(searchItemData.name, searchItemData.description, searchItemData.image, i+1, searchItemData);
@@ -186,7 +186,7 @@ class SearchResults {
         if (!toSet) {
             for (const event in this.associatedShortcuts) {
                 this.associatedShortcuts[event].forEach(handler => {
-                    document.removeEventListener(event, handler);
+                    top.document.removeEventListener(event, handler);
                 })
             }
             return;
@@ -194,7 +194,7 @@ class SearchResults {
 
         this.searchItems.forEach(searchItem => {
             const shortcutHandlerOpen = (e) => {
-                 if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && searchItem.data.itemTypeName === "ItemType") {
+                if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && searchItem.data.itemTypeName === "ItemType") {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
@@ -215,10 +215,10 @@ class SearchResults {
                 }
             } : null;
             this.associatedShortcuts["keydown"].push(shortcutHandlerOpen);
-            document.addEventListener("keydown", shortcutHandlerOpen);
+            top.document.addEventListener("keydown", shortcutHandlerOpen);
             if (shortcutHandlerChangeSearch) {
                 this.associatedShortcuts["keydown"].push(shortcutHandlerChangeSearch);
-                document.addEventListener("keydown", shortcutHandlerChangeSearch);
+                top.document.addEventListener("keydown", shortcutHandlerChangeSearch);
             }
         })
     }
@@ -262,14 +262,14 @@ class SearchOverlayContent {
     createDom(title, inputPlaceholder) {
         this.remove();
 
-        this.elements.root = document.createElement("div");
+        this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("search-overlay-content");
 
-        this.elements.title = document.createElement("h2");
+        this.elements.title = top.document.createElement("h2");
         this.elements.title.classList.add("m-05");
         this.elements.title.textContent = title;
         
-        this.elements.input = document.createElement("input");
+        this.elements.input = top.document.createElement("input");
         this.elements.input.classList.add("search-input");
         this.elements.input.type = "text";
         this.elements.input.placeholder = inputPlaceholder;
@@ -347,7 +347,7 @@ class SearchOverlayContent {
             this.elements.input.addEventListener("input", event.handler);
         }
         for (const event of this.events["keydown"]) {
-            document.addEventListener("keydown", event.handler);
+            top.document.addEventListener("keydown", event.handler);
         }
         this.isActive = true;
     }
@@ -358,7 +358,7 @@ class SearchOverlayContent {
             this.elements.input.removeEventListener("input", handler);
         }
         for (const handler of this.events["keydown"]) {
-            document.removeEventListener("keydown", handler);
+            top.document.removeEventListener("keydown", handler);
         }
         state.reset();
         this.isActive = false;
@@ -464,9 +464,6 @@ const getAllItems = debounce(
 })
 
 // const searchOverlay = document.getElementById("searchOverlay");
-const searchOverlay = document.createElement("div");
-searchOverlay.classList.add("overlay");
-const searchOverlayContent = new SearchOverlayContent("Search ItemTypes", "ItemTypes", searchOverlay);
 
 const handleshortcut = (e) => {
     if (e.keyCode === 75 && e.ctrlKey) {
@@ -479,7 +476,7 @@ const listenShortcut = async () => {
     document.addEventListener("keydown", handleshortcut);
 }
 const attachCss = () => {
-    const styles = document.createElement("style");
+    const styles = top.document.createElement("style");
     styles.innerHTML = `body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -585,15 +582,22 @@ const attachCss = () => {
     .fw-normal {
         font-weight: normal;
     }`;
-    document.head.appendChild(styles);
+    top.document.head.appendChild(styles);
 }
 const start = () => {
     if (!window.aras) return;
-    if (!window.top || window.top !== window) return;
+    // if (!window.top || window.top !== window) return;
+    if (window.top && window.top === window) return;
+
+    const searchOverlay = top.document.createElement("div");
+    searchOverlay.classList.add("overlay");
+    const searchOverlayContent = new SearchOverlayContent("Search ItemTypes", "ItemTypes", searchOverlay);
+
     searchOverlayContent.on("input", fetcher, searchOverlayContent);
-    document.body.appendChild(searchOverlay);
+    top.document.body.appendChild(searchOverlay);
     attachCss();
     listenShortcut();
 }
 start();
 
+console.log(1718901489758)

@@ -1,7 +1,4 @@
 // const searchOverlay = document.getElementById("searchOverlay");
-const searchOverlay = document.createElement("div");
-searchOverlay.classList.add("overlay");
-const searchOverlayContent = new SearchOverlayContent("Search ItemTypes", "ItemTypes", searchOverlay);
 
 const handleshortcut = (e) => {
     if (e.keyCode === 75 && e.ctrlKey) {
@@ -14,7 +11,7 @@ const listenShortcut = async () => {
     document.addEventListener("keydown", handleshortcut);
 }
 const attachCss = () => {
-    const styles = document.createElement("style");
+    const styles = top.document.createElement("style");
     styles.innerHTML = `body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -120,13 +117,19 @@ const attachCss = () => {
     .fw-normal {
         font-weight: normal;
     }`;
-    document.head.appendChild(styles);
+    top.document.head.appendChild(styles);
 }
 const start = () => {
     if (!window.aras) return;
-    if (!window.top || window.top !== window) return;
+    // if (!window.top || window.top !== window) return;
+    if (window.top && window.top === window) return;
+
+    const searchOverlay = top.document.createElement("div");
+    searchOverlay.classList.add("overlay");
+    const searchOverlayContent = new SearchOverlayContent("Search ItemTypes", "ItemTypes", searchOverlay);
+
     searchOverlayContent.on("input", fetcher, searchOverlayContent);
-    document.body.appendChild(searchOverlay);
+    top.document.body.appendChild(searchOverlay);
     attachCss();
     listenShortcut();
 }
