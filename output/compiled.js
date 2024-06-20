@@ -1,3 +1,18 @@
+
+// ==UserScript==
+// @name         aras-telescope
+// @namespace    http://tampermonkey.net/
+// @version      0.3
+// @description  Gives an amazing Ctrl-K
+// @match        *://*/*
+// @grant        none
+// @author       Omkar Bhale, tusqasi
+// ==/UserScript==
+
+
+
+function aras_telescope() {
+
 /**
  * Fuse.js v7.0.0 - Lightweight fuzzy-search (http://fusejs.io)
  *
@@ -2204,7 +2219,7 @@ class SearchResults {
                     this.searchOverlayContent.deactivate();
                     arasTabs.openSearch(searchItem.data.itemId);
                 }
-                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey) {
+                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && !e.altKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
@@ -2212,7 +2227,7 @@ class SearchResults {
                 }
             }
             const shortcutHandlerChangeSearch = searchItem.data.itemTypeName === "ItemType" ? (e) => {
-                if ((e.keyCode === 48 + searchItem.index) && e.altKey) {
+                if ((e.keyCode === 48 + searchItem.index) && e.altKey && !e.ctrlKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     state.setItemTypeName(searchItem.data.name, searchItem.data.label_plural || searchItem.data.name, searchItem.elements.image.src);
@@ -2599,3 +2614,16 @@ const start = () => {
 }
 start();
 
+}
+
+setTimeout(() => {
+    if(window.aras 
+       && window.arasTabs 
+       && localStorage.getItem("_aras_telescope_loaded") !== "true" 
+    ){
+        aras_telescope();
+        localStorage.setItem("_aras_telescope_loaded", "true");
+        console.log("Telescope loaded");
+        window.addEventListener('beforeunload', () => localStorage.setItem("_aras_telescope_loaded", ""));
+    }
+},2000);
