@@ -195,13 +195,19 @@ class SearchResults {
 
         this.searchItems.forEach(searchItem => {
             const shortcutHandlerOpen = (e) => {
-                if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && searchItem.data.itemTypeName === "ItemType") {
+                if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && !e.shiftKey && searchItem.data.itemTypeName === "ItemType") {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
                     arasTabs.openSearch(searchItem.data.itemId);
                 }
-                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && !e.altKey) {
+                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && e.shiftKey && searchItem.data.itemTypeName === "ItemType") {
+                    const item = aras.IomInnovator.newItem(searchItem.data.name, "add");
+                    this.searchOverlayContent.elements.input.value = "";
+                    this.searchOverlayContent.deactivate();
+                    aras.uiShowItemEx(item.node);
+                }
+                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && !e.altKey && !e.shiftKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
@@ -402,7 +408,7 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
         
         result.push({
             image,
-            name: item.getProperty("keyed_name"),
+            name: item.getProperty("name") || item.getProperty("keyed_name"),
             description: item.getAttribute("id"),
             itemId: item.getAttribute("id"),
             label_plural :item.getProperty("label_plural"),
