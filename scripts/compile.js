@@ -10,7 +10,8 @@ const sequence = [
     "src/controllers/state.js",
     "src/ui/SearchResults.js",
     "src/ui/SearchOverlayContent.js",
-    "src/controllers/fetch.js",
+    "src/controllers/getItems.js",
+    "src/controllers/fetcher.js",
     "script.js"
 ];
 

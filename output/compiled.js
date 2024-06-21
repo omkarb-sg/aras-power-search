@@ -372,56 +372,7 @@ class SearchOverlayContent {
         return this.elements.root;
     }
 }
-const fetcher = async (e, searchOverlayContent) => {
-    if (e.target.value.trim() === "") {
-        searchOverlayContent.handlesearchItemsData([]);
-        return;
-    }
-    let qry;
-    if (e.target.value.trim === "*") {
-        qry = "";
-    }
-    else {
-        qry = '%' + e.target.value.trim().replaceAll(/\s+/g, "%") + '%';
-    }
-    if(!localStorage.getItem("_"+state.itemTypeName+"_cache")){
-        const _items = await getAllItems(state.itemTypeName, 9999999999, state.defaultImage, searchOverlayContent.cache);
-
-        localStorage.setItem("_"+state.itemTypeName+"_cache", JSON.stringify(_items));
-    }
-    const items = JSON.parse( localStorage.getItem("_"+state.itemTypeName+"_cache")) || [];
-    const fuseOptions = {
-        // isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
-        // includeScore: false,
-        // shouldSort: true,
-        // includeMatches: false,
-        // findAllMatches: false,
-        // minMatchCharLength: 1,
-        // location: 0,
-        // threshold: 0.6,
-        // distance: 100,
-        // useExtendedSearch: false,
-        // ignoreLocation: false,
-        // ignoreFieldNorm: false,
-        // fieldNormWeight: 1,
-        keys: [
-                "itemTypeName",
-                "itemId",
-                "name",
-        ]
-};
-
-    const fuse = new Fuse(items, fuseOptions);
-    const searchPattern = e.target.value.trim();
-    const searched = fuse.search(searchPattern)
-    searchOverlayContent.handlesearchItemsData(searched.map((element)=>element.item).slice(0,9));
-}
-
-// TODO check for sg_searchable to find property names
-const getAllItems = debounce(
-    80,
-    false,
-    (itemTypeName, maxRecords, defaultImage, cache) => {
+const getAllItems = (itemTypeName, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
     <AML>
@@ -462,7 +413,41 @@ const getAllItems = debounce(
     }
     
     return result;
-})
+}
+
+const fetcher = async (e, searchOverlayContent) => {
+	if (!localStorage.getItem("_" + state.itemTypeName + "_cache")) {
+		const _items = await getAllItems(
+			state.itemTypeName,
+			state.defaultImage,
+			searchOverlayContent.cache
+		);
+
+		localStorage.setItem("_" + state.itemTypeName + "_cache", JSON.stringify(_items));
+	}
+	const items = JSON.parse(localStorage.getItem("_" + state.itemTypeName + "_cache")) || [];
+	const fuseOptions = {
+		// isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
+		// includeScore: false,
+		// shouldSort: true,
+		// includeMatches: false,
+		// findAllMatches: false,
+		// minMatchCharLength: 1,
+		// location: 0,
+		// threshold: 0.6,
+		// distance: 100,
+		// useExtendedSearch: false,
+		// ignoreLocation: false,
+		// ignoreFieldNorm: false,
+		// fieldNormWeight: 1,
+		keys: ["itemTypeName", "itemId", "name"],
+	};
+
+	const fuse = new Fuse(items, fuseOptions);
+	const searchPattern = e.target.value.trim();
+	const searched = fuse.search(searchPattern);
+	searchOverlayContent.handlesearchItemsData(searched.map((element) => element.item).slice(0, 9));
+};
 
 const listenShortcut = (doc, searchOverlayContent) => {
     const handleshortcut = (e) => {
