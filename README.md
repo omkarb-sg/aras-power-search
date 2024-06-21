@@ -4,9 +4,13 @@
 
 ## 1. Download extension
 [Chrome Violent Monkey](https://chromewebstore.google.com/detail/jinjaccalgkegednnccohejagnlnfdag)
+
 [Edge Violent Monkey](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao)
+
 [Firefox Violent Monkey](https://addons.mozilla.org/en-US/firefox/addon/violentmonkey/)
+
 [GitHub releases](https://github.com/violentmonkey/violentmonkey/releases)
+
 
 ## 2. Use this script
 ```js
