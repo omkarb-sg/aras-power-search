@@ -15,13 +15,13 @@
 ## 2. Use this script
 ```js
 // ==UserScript==
-// @name        New script
+// @name        Aras power search
 // @namespace   Violentmonkey Scripts
 // @match       *://*/*
 // @grant       none
 // @version     1.0
-// @author      -
-// @description 20/6/2024, 9:12:10 pm
+// @author      Omkar BHALE, Tushar KUNTAWAR
+// @description Best searching expirience in aras, yet
 // @require     https://cdn.jsdelivr.net/npm/fuse.js@7.0.0
 // ==/UserScript==
 
