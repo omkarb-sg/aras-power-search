@@ -4,6 +4,7 @@ const state = {
     reset: null,
     setItemTypeName: null,
     defaultImage: null,
+    attachedIframes: [],
 }
 
 state.reset = function() {

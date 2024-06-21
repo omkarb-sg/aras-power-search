@@ -48,6 +48,7 @@ const state = {
     reset: null,
     setItemTypeName: null,
     defaultImage: null,
+    attachedIframes: [],
 }
 
 state.reset = function() {
@@ -463,17 +464,47 @@ const getAllItems = debounce(
     return result;
 })
 
-// const searchOverlay = document.getElementById("searchOverlay");
-
-const handleshortcut = (e) => {
-    if (e.keyCode === 75 && e.ctrlKey) {
-        e.preventDefault();
-        if (searchOverlayContent.isActive) return;
-        searchOverlayContent.activate();
+const listenShortcut = (doc, searchOverlayContent) => {
+    const handleshortcut = (e) => {
+        if (e.keyCode === 75 && e.ctrlKey) {
+            e.preventDefault();
+            if (searchOverlayContent.isActive) return;
+            searchOverlayContent.activate();
+        }
     }
-}
-const listenShortcut = async () => {
-    document.addEventListener("keydown", handleshortcut);
+    doc.addEventListener("keydown", handleshortcut);
+    doc.querySelectorAll("iframe").forEach(iframe => {
+        listenShortcut(iframe.contentWindow.document, searchOverlayContent);
+    });
+
+    const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(node => {
+                    if (node.tagName === 'IFRAME') {
+                        node.addEventListener('load', (e) => {
+                            if (node.getAttribute('id') && state.attachedIframes.find(iframeId => iframeId === node.getAttribute('id')) != undefined) {
+                                return
+                            }
+                            console.log('added listenting to ' + node.getAttribute('id'));
+                            state.attachedIframes.push(node.getAttribute('id'));
+                            listenShortcut(node.contentWindow.document, searchOverlayContent);
+                        })
+                    }
+                });
+                mutation.removedNodes.forEach(node => {
+                    if (node.tagName === 'IFRAME') {
+                        state.attachedIframes.splice(state.attachedIframes.findIndex(iframe => node.getAttribute('id') === iframe), 1);
+                    }
+                });
+            }
+        }
+    });
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+    });
+
 }
 const attachCss = () => {
     const styles = top.document.createElement("style");
@@ -586,8 +617,7 @@ const attachCss = () => {
 }
 const start = () => {
     if (!window.aras) return;
-    // if (!window.top || window.top !== window) return;
-    if (window.top && window.top === window) return;
+    if (!window.top || window.top !== window) return;
 
     const searchOverlay = top.document.createElement("div");
     searchOverlay.classList.add("overlay");
@@ -596,8 +626,7 @@ const start = () => {
     searchOverlayContent.on("input", fetcher, searchOverlayContent);
     top.document.body.appendChild(searchOverlay);
     attachCss();
-    listenShortcut();
+    listenShortcut(top.document, searchOverlayContent);
 }
 start();
 
-console.log(1718901489758)
