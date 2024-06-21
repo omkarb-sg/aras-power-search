@@ -15,19 +15,19 @@
 ## 2. Use this script
 ```js
 // ==UserScript==
-// @name        New script
-// @namespace   Violentmonkey Scripts
+// @name        power-search
+// @namespace   aras-power-tools
 // @match       *://*/*
 // @grant       none
 // @version     1.0
-// @author      -
-// @description 20/6/2024, 9:12:10 pm
+// @author      Omkar BHALE, Tushar KUNTAWAR
 // @require     https://cdn.jsdelivr.net/npm/fuse.js@7.0.0
 // ==/UserScript==
 
-if (window.aras)
-fetch('https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/compiled.js')
-.then(response => response.text())
-.then(eval)
-.catch(error => console.log(error));
+if (window.aras){
+    fetch('https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/compiled.js')
+        .then(response => response.text())
+        .then(eval)
+        .catch(error => console.log(error));
+}
 ```
