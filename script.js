@@ -1,9 +1,24 @@
 const listenShortcut = (doc, searchOverlayContent) => {
     const handleshortcut = (e) => {
-        if (e.keyCode === 75 && e.ctrlKey && !e.altKey && !e.shiftKey) {
+        if (e.keyCode === 75
+            && e.ctrlKey
+            && !e.altKey
+            && !e.shiftKey
+        ) {
+
             e.preventDefault();
             if (searchOverlayContent.isActive) return;
             searchOverlayContent.activate();
+        }
+        else if (e.keyCode === 75
+            && e.ctrlKey
+            && !e.altKey
+            && e.shiftKey
+        ) {
+            e.preventDefault();
+            Object.entries(localStorage)
+                .filter(([key, _]) => key.includes("_aras_power_search_cache"))
+                .forEach(([key, _]) => localStorage.removeItem(key))
         }
     }
     doc.addEventListener("keydown", handleshortcut);

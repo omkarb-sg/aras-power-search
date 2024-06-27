@@ -2,7 +2,7 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
     <AML>
-        <Item type="${itemTypeName}" action="get" select="id,name,keyed_name,open_icon,label_plural">
+        <Item type="${itemTypeName}" action="get" select="config_id,id,name,keyed_name,open_icon,label_plural">
         </Item>
     </AML>
     `);
@@ -25,18 +25,17 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
         if (!image) {
             image = defaultImage;
         }
-        
+
         result.push({
             image,
             name: item.getProperty("name") || item.getProperty("keyed_name"),
-            description: item.getAttribute("id"),
-            itemId: item.getAttribute("id"),
-            label_plural :item.getProperty("label_plural"),
-            // item,
+            description: item.getProperty("config_id"),
+            itemId: item.getProperty("config_id"),
+            label_plural: item.getProperty("label_plural"),
             itemTypeName,
             imageFileId
         });
     }
-    
+
     return result;
 }

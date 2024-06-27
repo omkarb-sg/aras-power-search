@@ -195,13 +195,25 @@ class SearchResults {
 
         this.searchItems.forEach(searchItem => {
             const shortcutHandlerOpen = (e) => {
-                if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && !e.shiftKey && searchItem.data.itemTypeName === "ItemType") {
+                if ((e.keyCode === 48 + searchItem.index)
+                    && e.ctrlKey
+                    && e.altKey
+                    && !e.shiftKey
+                    && searchItem.data.itemTypeName === "ItemType") {
+                    // Open SearchGrid
+
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
                     arasTabs.openSearch(searchItem.data.itemId);
                 }
-                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && e.altKey && e.shiftKey && searchItem.data.itemTypeName === "ItemType") {
+                else if (
+                    (e.keyCode === 48 + searchItem.index)
+                    && e.ctrlKey
+                    && !e.altKey
+                    && !e.shiftKey
+                ) {
+                    // Open item
                     const item = aras.IomInnovator.newItem(searchItem.data.name, "add");
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
@@ -213,9 +225,27 @@ class SearchResults {
                     this.searchOverlayContent.deactivate();
                     aras.uiShowItem(searchItem.data.itemTypeName, searchItem.data.itemId);
                 }
+                else if (
+                    (e.keyCode === 48 + searchItem.index) 
+                    && e.ctrlKey
+                    && e.altKey
+                    && e.shiftKey
+                    && searchItem.data.itemTypeName === "ItemType"
+                ) {
+                    // Add item
+                    const item = aras.IomInnovator.newItem(searchItem.data.name, "add");
+                    this.searchOverlayContent.elements.input.value = "";
+                    this.searchOverlayContent.deactivate();
+                    aras.uiShowItemEx(item.node);
+                }
             }
             const shortcutHandlerChangeSearch = searchItem.data.itemTypeName === "ItemType" ? (e) => {
-                if ((e.keyCode === 48 + searchItem.index) && e.altKey && !e.ctrlKey) {
+                if ((e.keyCode === 48 + searchItem.index)
+                    && e.altKey
+                    && !e.ctrlKey
+                    && !e.shiftKey
+                ) {
+                    // Search Items
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     state.setItemTypeName(searchItem.data.name, searchItem.data.label_plural || searchItem.data.name, searchItem.elements.image.src);
