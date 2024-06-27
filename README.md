@@ -15,12 +15,13 @@
 ## 2. Use this script
 ```js
 // ==UserScript==
-// @name        power-search
+// @name        Aras power search
 // @namespace   aras-power-tools
 // @match       *://*/*
 // @grant       none
 // @version     1.0
 // @author      Omkar BHALE, Tushar KUNTAWAR
+// @description Best searching expirience in aras, yet
 // @require     https://cdn.jsdelivr.net/npm/fuse.js@7.0.0
 // ==/UserScript==
 

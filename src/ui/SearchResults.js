@@ -125,6 +125,7 @@ class SearchResults {
 
         this.searchItems.forEach(searchItem => {
             const shortcutHandlerOpen = (e) => {
+
                 if ((e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
                     && e.altKey
@@ -136,6 +137,7 @@ class SearchResults {
                     this.searchOverlayContent.deactivate();
                     arasTabs.openSearch(searchItem.data.itemId);
                 }
+
                 else if (
                     (e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
@@ -143,6 +145,12 @@ class SearchResults {
                     && !e.shiftKey
                 ) {
                     // Open item
+                    const item = aras.IomInnovator.newItem(searchItem.data.name, "add");
+                    this.searchOverlayContent.elements.input.value = "";
+                    this.searchOverlayContent.deactivate();
+                    aras.uiShowItemEx(item.node);
+                }
+                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && !e.altKey && !e.shiftKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();

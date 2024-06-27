@@ -5,6 +5,7 @@ const listenShortcut = (doc, searchOverlayContent) => {
             && !e.altKey
             && !e.shiftKey
         ) {
+
             e.preventDefault();
             if (searchOverlayContent.isActive) return;
             searchOverlayContent.activate();

@@ -28,11 +28,10 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
 
         result.push({
             image,
-            name: item.getProperty("keyed_name"),
+            name: item.getProperty("name") || item.getProperty("keyed_name"),
             description: item.getProperty("config_id"),
             itemId: item.getProperty("config_id"),
             label_plural: item.getProperty("label_plural"),
-            // item,
             itemTypeName,
             imageFileId
         });
