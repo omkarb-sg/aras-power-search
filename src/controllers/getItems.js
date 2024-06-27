@@ -28,7 +28,7 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
         
         result.push({
             image,
-            name: item.getProperty("keyed_name"),
+            name: item.getProperty("name") || item.getProperty("keyed_name"),
             description: item.getAttribute("id"),
             itemId: item.getAttribute("id"),
             label_plural :item.getProperty("label_plural"),
