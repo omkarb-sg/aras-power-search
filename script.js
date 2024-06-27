@@ -1,6 +1,10 @@
 const listenShortcut = (doc, searchOverlayContent) => {
     const handleshortcut = (e) => {
-        if (e.keyCode === 75 && e.ctrlKey) {
+        if (e.keyCode === 75
+            && e.ctrlKey
+            && !e.altKey
+            && !e.shiftKey
+        ) {
             e.preventDefault();
             if (searchOverlayContent.isActive) return;
             searchOverlayContent.activate();
