@@ -1,14 +1,14 @@
 const fetcher = async (e, searchOverlayContent) => {
-	if (!localStorage.getItem("_" + state.itemTypeName + "_aras_power_search_cache")) {
+	if (!_get(`_${state.itemTypeName}_cache`)) {
 		const _items = await getAllItems(
 			state.itemTypeName,
 			state.defaultImage,
 			searchOverlayContent.cache
 		);
 
-		localStorage.setItem("_" + state.itemTypeName + "_aras_power_search_cache", JSON.stringify(_items));
+		_set(`_${state.itemTypeName}_cache`, _items);
 	}
-	const items = JSON.parse(localStorage.getItem("_" + state.itemTypeName + "_aras_power_search_cache")) || [];
+	const items = _get(`_${state.itemTypeName}_cache`) || [];
 	const fuseOptions = {
 		// isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
 		// includeScore: false,

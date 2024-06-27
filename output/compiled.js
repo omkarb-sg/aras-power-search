@@ -42,6 +42,81 @@ function getUrlFromFileId(aras, fileId) {
     return aras.vault.vault.makeFileDownloadUrl(aras.getFileURLEx(file.node));
 }
 
+class LocalStorage {
+    /**
+     * 
+     * @param {Window} window 
+     */
+    constructor(window) {
+        /**
+         * @type {Window}
+         */
+        this.window = window;
+    }
+
+    /**
+     * 
+     * @param {string} key Key to look for
+     * @param {boolean} deserialize If true, will JSON parse the value
+     * @returns {string | object}
+     */
+    get(key, deserialize=false) {
+        let value = this.window.localStorage.getItem(key);
+        if (deserialize) {
+            value = JSON.parse(value);
+        }
+        return value;
+    }
+
+    /**
+     * 
+     * @param {string} key Key to store in
+     * @param {string | object} value Value: String or object
+     * @param {boolean} serialize Will JSON serialize passed value before storing
+     * @returns {void}
+     */
+    set(key, value, serialize=false) {
+        if (value == null) {
+            this.clear(key);
+            return;
+        }
+
+        if (serialize) {
+            value = JSON.stringify(value);
+        }
+        this.window.localStorage.setItem(key, value);
+    }
+
+    clear() {
+        this.window.localStorage.clear();
+    }
+
+    /**
+     * 
+     * @param {string} key Key to remove
+     * @returns {void}
+     */
+    remove(key) {
+        this.window.localStorage.removeItem();
+    }
+}
+
+const StorageDependency = LocalStorage;
+
+/**
+ * @type {LocalStorage}
+ */
+const storage = new StorageDependency(window.top || window);
+
+// Feel free to rename these
+function _set(key, value) {
+	storage.set(key, value, true);
+}
+
+function _get(key) {
+	return storage.get(key, true);
+}
+
 const state = {
     itemTypeName: "ItemType",
     searchOverlayContent: null,
@@ -452,16 +527,16 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
 }
 
 const fetcher = async (e, searchOverlayContent) => {
-	if (!localStorage.getItem("_" + state.itemTypeName + "_cache")) {
+	if (!_get(`_${state.itemTypeName}_cache`)) {
 		const _items = await getAllItems(
 			state.itemTypeName,
 			state.defaultImage,
 			searchOverlayContent.cache
 		);
 
-		localStorage.setItem("_" + state.itemTypeName + "_cache", JSON.stringify(_items));
+		_set(`_${state.itemTypeName}_cache`, _items);
 	}
-	const items = JSON.parse(localStorage.getItem("_" + state.itemTypeName + "_cache")) || [];
+	const items = _get(`_${state.itemTypeName}_cache`) || [];
 	const fuseOptions = {
 		// isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
 		// includeScore: false,
@@ -487,7 +562,7 @@ const fetcher = async (e, searchOverlayContent) => {
 
 const listenShortcut = (doc, searchOverlayContent) => {
     const handleshortcut = (e) => {
-        if (e.keyCode === 75 && e.ctrlKey) {
+        if (e.keyCode === 75 && e.ctrlKey && !e.altKey && !e.shiftKey) {
             e.preventDefault();
             if (searchOverlayContent.isActive) return;
             searchOverlayContent.activate();
