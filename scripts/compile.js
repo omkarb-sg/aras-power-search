@@ -7,6 +7,7 @@ const sequence = [
     // "src/vendor/fuse.cjs",
     "src/utils.js",
     "src/aras/utils.js",
+    "src/storage/indexedDB.js",
     "src/storage/localStorage.js",
     "src/storage/storage.js",
     "src/controllers/state.js",

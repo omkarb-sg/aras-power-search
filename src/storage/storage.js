@@ -1,15 +1,11 @@
-const StorageDependency = LocalStorage;
-
-/**
- * @type {LocalStorage}
- */
+const StorageDependency = IndexedDB;
 const storage = new StorageDependency(window.top || window);
 
 // Feel free to rename these
-function _set(key, value) {
-	storage.set(key, value, true);
+async function _set(key, value) {
+	await storage.set(key, value);
 }
 
-function _get(key) {
-	return storage.get(key, true);
+async function _get(key) {
+	return await storage.get(key);
 }
