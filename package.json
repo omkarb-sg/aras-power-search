@@ -5,6 +5,7 @@
   "main": "output.js",
   "scripts": {
     "start": "node ./scripts/compile.js",
+    "emit": "nodemon  --ignore ./output/compiled.js ./scripts/compile.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
