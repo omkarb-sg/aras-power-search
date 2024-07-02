@@ -81,7 +81,7 @@ class SearchItem {
 
         this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("search-item");
-        
+
         const content = top.document.createElement("div");
         content.classList.add("flex-row", "jcc", "aic");
         this.elements.image = top.document.createElement("img");
@@ -128,7 +128,7 @@ class SearchItem {
         }
         this.elements = {};
     }
-    
+
     getRoot() {
         if (!this.elements.root) {
             throw new Error("Call to get root but root doesn't exist");
@@ -161,13 +161,13 @@ class SearchResults {
             ]
         };
     }
-    
+
     setSearchResults(searchItemsData) {
         this.remove();
         this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("searchResults");
         searchItemsData.forEach((searchItemData, i) => {
-            this.searchItems[i] = new SearchItem(searchItemData.name, searchItemData.description, searchItemData.image, i+1, searchItemData);
+            this.searchItems[i] = new SearchItem(searchItemData.name, searchItemData.description, searchItemData.image, i + 1, searchItemData);
             this.elements.root.appendChild(this.searchItems[i].getRoot());
         });
 
@@ -195,18 +195,32 @@ class SearchResults {
 
         this.searchItems.forEach(searchItem => {
             const shortcutHandlerOpen = (e) => {
+
                 if ((e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
                     && e.altKey
                     && !e.shiftKey
-                    && searchItem.data.itemTypeName === "ItemType") {
+                    && searchItem.data.itemTypeName === "ItemType"
+                ) {
                     // Open SearchGrid
-
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
                     arasTabs.openSearch(searchItem.data.itemId);
                 }
+                if ((e.keyCode === 48 + searchItem.index)
+                    && e.ctrlKey
+                    && e.altKey
+                    && !e.shiftKey
+                    && searchItem.data.itemTypeName !== "ItemType"
+                ) {
+                    // Open SearchGrid
+                    e.preventDefault();
+                    this.searchOverlayContent.elements.input.value = "";
+                    this.searchOverlayContent.deactivate();
+                    arasTabs.openSearch(searchItem.data.itemId);
+                }
+
                 else if (
                     (e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
@@ -214,19 +228,13 @@ class SearchResults {
                     && !e.shiftKey
                 ) {
                     // Open item
-                    const item = aras.IomInnovator.newItem(searchItem.data.name, "add");
-                    this.searchOverlayContent.elements.input.value = "";
-                    this.searchOverlayContent.deactivate();
-                    aras.uiShowItemEx(item.node);
-                }
-                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && !e.altKey && !e.shiftKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
                     aras.uiShowItem(searchItem.data.itemTypeName, searchItem.data.itemId);
                 }
                 else if (
-                    (e.keyCode === 48 + searchItem.index) 
+                    (e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
                     && e.altKey
                     && e.shiftKey
@@ -408,16 +416,23 @@ class SearchOverlayContent {
         return this.elements.root;
     }
 }
+
 const getAllItems = (itemTypeName, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
     <AML>
-        <Item type="${itemTypeName}" action="get" select="id,name,keyed_name,open_icon,label_plural">
+        <Item
+            type="${itemTypeName}"
+            action="get"
+            select="config_id,id,name,keyed_name,open_icon,label_plural"
+            serverEvents="0"
+        >
         </Item>
     </AML>
     `);
 
     const result = [];
+    localStorage.setItem(`_${itemTypeName}_aras_power_search_timestamp`, Date.now().toString());
     for (let i = 0; i < items.getItemCount(); i++) {
         const item = items.getItemByIndex(i);
 
@@ -435,33 +450,34 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
         if (!image) {
             image = defaultImage;
         }
-        
+
         result.push({
             image,
             name: item.getProperty("name") || item.getProperty("keyed_name"),
-            description: item.getAttribute("id"),
-            itemId: item.getAttribute("id"),
-            label_plural :item.getProperty("label_plural"),
-            // item,
+            description: item.getProperty("config_id"),
+            itemId: item.getProperty("id"),
+            itemConfigId: item.getProperty("config_id"),
+            label_plural: item.getProperty("label_plural"),
+            itemTypeId: item.getProperty("itemtype"),
             itemTypeName,
             imageFileId
         });
     }
-    
+
     return result;
 }
 
 const fetcher = async (e, searchOverlayContent) => {
-	if (!localStorage.getItem("_" + state.itemTypeName + "_cache")) {
+	if (!localStorage.getItem("_" + state.itemTypeName + "_aras_power_search_cache")) {
 		const _items = await getAllItems(
 			state.itemTypeName,
 			state.defaultImage,
 			searchOverlayContent.cache
 		);
 
-		localStorage.setItem("_" + state.itemTypeName + "_cache", JSON.stringify(_items));
+		localStorage.setItem("_" + state.itemTypeName + "_aras_power_search_cache", JSON.stringify(_items));
 	}
-	const items = JSON.parse(localStorage.getItem("_" + state.itemTypeName + "_cache")) || [];
+	const items = JSON.parse(localStorage.getItem("_" + state.itemTypeName + "_aras_power_search_cache")) || [];
 	const fuseOptions = {
 		// isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
 		// includeScore: false,
@@ -487,10 +503,26 @@ const fetcher = async (e, searchOverlayContent) => {
 
 const listenShortcut = (doc, searchOverlayContent) => {
     const handleshortcut = (e) => {
-        if (e.keyCode === 75 && e.ctrlKey) {
+        if (e.keyCode === 75
+            && e.ctrlKey
+            && !e.altKey
+            && !e.shiftKey
+        ) {
+
             e.preventDefault();
             if (searchOverlayContent.isActive) return;
             searchOverlayContent.activate();
+        }
+        else if (e.keyCode === 75
+            && e.ctrlKey
+            && !e.altKey
+            && e.shiftKey
+        ) {
+            e.preventDefault();
+            Object.entries(localStorage)
+                .filter(([key, _]) => key.endsWith("_aras_power_search_cache") || key.endsWith("_aras_power_search_timestamp"))
+                .forEach(([key, _]) => localStorage.removeItem(key));
+            top.aras.AlertSuccess("Cleared aras-power-search cache")
         }
     }
     doc.addEventListener("keydown", handleshortcut);
@@ -636,6 +668,60 @@ const attachCss = () => {
     }`;
     top.document.head.appendChild(styles);
 }
+const aras_time_from_js_time = (timestamp) => {
+    let date = new Date(timestamp);
+    let isoString = date.toISOString(); // "2024-06-27T14:31:36.000Z"
+
+    // Removing milliseconds and the 'Z' character (if needed)
+    isoString = isoString.split('.')[0];
+}
+const refresh_cache_bak = () => {
+    console.log("Cleared aras-power-search cache");
+    top.aras.AlertSuccess("refresh_cache");
+    const itemTypesToUpdate = Object.entries(localStorage)
+        .filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
+        .map(([key, _]) => key.slice(1, -("_aras_power_search_cache".length)));
+    console.log(itemTypesToUpdate);
+    for (let itemTypeName of itemTypesToUpdate) {
+        const modified_on_time = Number.parseInt(localStorage.getItem(`_${itemTypeName}_aras_power_search_timestamp`));
+        const aras_time = aras_time_from_js_time(modified_on_time);
+        const raw_result = aras.IomInnovator.applyAML(`
+    <AML>
+        <Item type="${itemTypeName}" 
+              action="get" 
+              select"config_id">
+            <modified_on condition="ge">${aras_time}</modified_on>
+        </Item>
+    </AML>`);
+        const results = [];
+        for (let i = 0; i < raw_result.getItemCount(); i++) {
+            results.push({
+                config_id: raw_result.getProperty("config_id"),
+                id: raw_result.getProperty("id")
+            });
+        }
+        const cached_items = JSON.parse(localStorage.getItem(`_${itemTypeName}_aras_power_search_cache`));
+        debugger;
+        for (let i = 0; i < results.length; i++) {
+            for (let j = 0; j < cached_items.length; j++) {
+                if (results[i].config_id == cached_items[j].config_id) {
+                    console.assert(
+                        typeof (cached_items[j].id) === "string"
+                        && typeof (results[i].id === "string"),
+                        "Major fault",
+                    )
+                    cached_items[j].id = results[i].id;
+                }
+            }
+        }
+
+        localStorage.setItem(`_${itemTypeName}_aras_power_search_cache`, JSON.stringify(cached_items),);
+
+    }
+
+};
+
+
 const start = () => {
     if (!window.aras) return;
     if (!window.top || window.top !== window) return;
@@ -648,6 +734,14 @@ const start = () => {
     top.document.body.appendChild(searchOverlay);
     attachCss();
     listenShortcut(top.document, searchOverlayContent);
+    const refresh_cache = () => {
+        const itemtypes = JSON.parse("_ItemType_aras_power_search_cache");
+        for (let itemTypeName of Object.entries(localStorage).filter(([key, _]) => key.endsWith("_aras_power_search_cache"))) {
+            const items = getAllItems(itemTypeName, null, searchOverlayContent.cache);
+            localStorage.setItem("_" + state.itemTypeName + "_aras_power_search_cache", JSON.stringify(items));
+        }
+    }
+    // setInterval(refresh_cache, 10_000);
 }
 start();
 

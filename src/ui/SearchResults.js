@@ -11,7 +11,7 @@ class SearchItem {
 
         this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("search-item");
-        
+
         const content = top.document.createElement("div");
         content.classList.add("flex-row", "jcc", "aic");
         this.elements.image = top.document.createElement("img");
@@ -58,7 +58,7 @@ class SearchItem {
         }
         this.elements = {};
     }
-    
+
     getRoot() {
         if (!this.elements.root) {
             throw new Error("Call to get root but root doesn't exist");
@@ -91,13 +91,13 @@ class SearchResults {
             ]
         };
     }
-    
+
     setSearchResults(searchItemsData) {
         this.remove();
         this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("searchResults");
         searchItemsData.forEach((searchItemData, i) => {
-            this.searchItems[i] = new SearchItem(searchItemData.name, searchItemData.description, searchItemData.image, i+1, searchItemData);
+            this.searchItems[i] = new SearchItem(searchItemData.name, searchItemData.description, searchItemData.image, i + 1, searchItemData);
             this.elements.root.appendChild(this.searchItems[i].getRoot());
         });
 
@@ -130,7 +130,20 @@ class SearchResults {
                     && e.ctrlKey
                     && e.altKey
                     && !e.shiftKey
-                    && searchItem.data.itemTypeName === "ItemType") {
+                    && searchItem.data.itemTypeName === "ItemType"
+                ) {
+                    // Open SearchGrid
+                    e.preventDefault();
+                    this.searchOverlayContent.elements.input.value = "";
+                    this.searchOverlayContent.deactivate();
+                    arasTabs.openSearch(searchItem.data.itemId);
+                }
+                if ((e.keyCode === 48 + searchItem.index)
+                    && e.ctrlKey
+                    && e.altKey
+                    && !e.shiftKey
+                    && searchItem.data.itemTypeName !== "ItemType"
+                ) {
                     // Open SearchGrid
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
@@ -145,19 +158,13 @@ class SearchResults {
                     && !e.shiftKey
                 ) {
                     // Open item
-                    const item = aras.IomInnovator.newItem(searchItem.data.name, "add");
-                    this.searchOverlayContent.elements.input.value = "";
-                    this.searchOverlayContent.deactivate();
-                    aras.uiShowItemEx(item.node);
-                }
-                else if ((e.keyCode === 48 + searchItem.index) && e.ctrlKey && !e.altKey && !e.shiftKey) {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
                     aras.uiShowItem(searchItem.data.itemTypeName, searchItem.data.itemId);
                 }
                 else if (
-                    (e.keyCode === 48 + searchItem.index) 
+                    (e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
                     && e.altKey
                     && e.shiftKey
