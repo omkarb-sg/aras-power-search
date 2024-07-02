@@ -218,7 +218,7 @@ class SearchResults {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
-                    arasTabs.openSearch(searchItem.data.itemId);
+                    arasTabs.openSearch(searchItem.data.itemTypeId);
                 }
 
                 else if (
