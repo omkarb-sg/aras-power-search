@@ -453,6 +453,7 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
 
         result.push({
             image,
+
             name: item.getProperty("name") || item.getProperty("keyed_name"),
             description: item.getProperty("config_id"),
             itemId: item.getProperty("id"),
@@ -744,4 +745,3 @@ const start = () => {
     // setInterval(refresh_cache, 10_000);
 }
 start();
-
