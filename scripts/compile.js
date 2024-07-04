@@ -4,7 +4,7 @@ const child_process = require("child_process");
 
 // Taken from index.js
 const sequence = [
-    // "src/vendor/fuse.cjs",
+    "src/vendor/fuse.cjs",
     "src/utils.js",
     "src/aras/utils.js",
     "src/storage/indexedDB.js",
@@ -20,19 +20,18 @@ const sequence = [
 
 const intermediate = [];
 const folderName = "output";
-if (!fs.existsSync(folderName))
-{
+if (!fs.existsSync(folderName)) {
     fs.mkdirSync(folderName);
-} 
+}
 
 sequence.forEach(file => {
     const filepath = path.join(__dirname, "..", file);
-    const code = fs.readFileSync(filepath, {encoding: "utf-8"});
+    const code = fs.readFileSync(filepath, { encoding: "utf-8" });
     intermediate.push(code);
 });
 
 const outputfilepath = path.join(__dirname, "..", "output", "compiled.js")
-const output = fs.createWriteStream(outputfilepath, {encoding: "utf-8"});
+const output = fs.createWriteStream(outputfilepath, { encoding: "utf-8" });
 
 output.write(intermediate.join("\n"));
 output.write("\n");
