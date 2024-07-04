@@ -22,7 +22,6 @@
 // @version     1.0
 // @author      Omkar BHALE, Tushar KUNTAWAR
 // @description Best searching expirience in aras, yet
-// @require     https://cdn.jsdelivr.net/npm/fuse.js@7.0.0
 // ==/UserScript==
 
 if (window.aras){
