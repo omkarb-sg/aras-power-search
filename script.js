@@ -36,7 +36,6 @@ const listenShortcut = (doc, searchOverlayContent) => {
                             if (node.getAttribute('id') && state.attachedIframes.find(iframeId => iframeId === node.getAttribute('id')) != undefined) {
                                 return
                             }
-                            console.log('added listenting to ' + node.getAttribute('id'));
                             state.attachedIframes.push(node.getAttribute('id'));
                             listenShortcut(node.contentWindow.document, searchOverlayContent);
                         })
@@ -178,7 +177,6 @@ const refresh_cache_bak = () => {
     const itemTypesToUpdate = Object.entries(localStorage)
         .filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
         .map(([key, _]) => key.slice(1, -("_aras_power_search_cache".length)));
-    console.log(itemTypesToUpdate);
     for (let itemTypeName of itemTypesToUpdate) {
         const modified_on_time = Number.parseInt(localStorage.getItem(`_${itemTypeName}_aras_power_search_timestamp`));
         const aras_time = aras_time_from_js_time(modified_on_time);
@@ -232,12 +230,15 @@ const start = () => {
     attachCss();
     listenShortcut(top.document, searchOverlayContent);
     const refresh_cache = () => {
-        const itemtypes = JSON.parse("_ItemType_aras_power_search_cache");
-        for (let itemTypeName of Object.entries(localStorage).filter(([key, _]) => key.endsWith("_aras_power_search_cache"))) {
-            const items = getAllItems(itemTypeName, null, searchOverlayContent.cache);
-            localStorage.setItem("_" + state.itemTypeName + "_aras_power_search_cache", JSON.stringify(items));
+        const itemTypes = Object.entries(localStorage)
+            .filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
+            .map(([key, _]) => key.slice(1).slice(0, -("_aras_power_search_cache").length));
+        for (let itemTypeName of itemTypes) {
+            const items = getAllItems(itemTypeName, state.defaultImage, searchOverlayContent.cache);
+            localStorage.setItem(`_${itemTypeName}_aras_power_search_cache`, JSON.stringify(items));
         }
+        aras.AlertSuccess("Cache Refreshed")
     }
-    // setInterval(refresh_cache, 10_000);
+    setInterval(refresh_cache, 30_000);
 }
 start();

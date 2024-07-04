@@ -13,7 +13,6 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
     `);
 
     const result = [];
-    localStorage.setItem(`_${itemTypeName}_aras_power_search_timestamp`, Date.now().toString());
     for (let i = 0; i < items.getItemCount(); i++) {
         const item = items.getItemByIndex(i);
 
