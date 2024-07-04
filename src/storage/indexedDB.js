@@ -120,4 +120,3 @@ class IndexedDB {
 	}
 }
 
-export default IndexedDB;

@@ -42,6 +42,200 @@ function getUrlFromFileId(aras, fileId) {
     return aras.vault.vault.makeFileDownloadUrl(aras.getFileURLEx(file.node));
 }
 
+class IndexedDB {
+	/**
+	 *
+	 * @param {Window} window
+	 */
+	constructor(window) {
+		/**
+		 * @type {Window}
+		 */
+		this.window = window;
+		/**
+		 * @type {IDBDatabase}
+		 */
+		this.db = null;
+		this.start();
+	}
+
+	// Private methods
+	async start() {
+		this.db = await new Promise((res, rej) => {
+			const open_request = this.window.indexedDB.open("_aras_power_search");
+			open_request.onsuccess = (event) => {
+				res(event.target.result);
+			};
+			open_request.onupgradeneeded = async (event) => {
+				const db = event.target.result;
+				this.createObjectStore(db, "table", { keyPath: "key" }, [
+					{ name: "key", keyPath: "key", options: { unique: true } },
+					{ name: "value", keyPath: "value", options: { unique: false } },
+				]);
+				// this.itemtypesObjectStore = this.createObjectStore(db, "itemtypes", { keyPath: "itemtypename" }, [
+				// 	{ name: "itemtypename", keyPath: "itemtypename", options: { unique: true } },
+				// 	{ name: "items", keyPath: "items" },
+				// ]);
+				// this.itemtypesObjectStore = this.createObjectStore(
+				// 	db,
+				// 	"lastfetched",
+				// 	{ keyPath: "itemtypename" },
+				// 	[
+				// 		{ name: "itemtypename", keyPath: "itemtypename", options: { unique: true } },
+				// 		{ name: "fetchedat", keyPath: "fetchedat" },
+				// 	]
+				// );
+			};
+			open_request.onerror = rej;
+		});
+
+		return this;
+	}
+
+	/**
+	 * @typedef {Object} IndexInfo
+	 * @property {string} name
+	 * @property {string | Iterable<string>} keyPath
+	 * @property {IDBIndexParameters | undefined} options
+	 */
+
+	/**
+	 *
+	 * @param {IDBDatabase} db
+	 * @param {string} name
+	 * @param {IDBObjectStoreParameters | undefined} options
+	 * @param {IndexInfo[]} indexes
+	 * @returns {Promise<IDBObjectStore>}
+	 */
+	async createObjectStore(db, name, options, indexes) {
+		return await new Promise((res, rej) => {
+			const objectStore = db.createObjectStore(name, options);
+			for (const indexInfo of indexes) {
+				objectStore.createIndex(indexInfo.name, indexInfo.keyPath, indexInfo.options);
+			}
+			objectStore.transaction.oncomplete = () => res(objectStore);
+			objectStore.transaction.onabort = rej;
+			objectStore.transaction.onerror = rej;
+		});
+	}
+
+	async waitForDb() {
+		return new Promise((res, rej) => {
+			const interval = setInterval(() => {
+				if (this.db != null) {
+					clearInterval(interval);
+					res(this.db);
+				}
+			}, 100);
+		});
+	}
+
+	// Public methods
+	async get(key) {
+		if (this.db == null) await this.waitForDb();
+        const transaction = this.db.transaction("table", "readonly");
+        const tableStore = transaction.objectStore("table");
+        const request = tableStore.get(key);
+        const result = await new Promise((res, rej) => {
+            request.onsuccess = (event) => res(request.result);
+            request.onerror = rej;
+        });
+        return result;
+	}
+
+	async set(key, value) {
+		if (this.db == null) await this.waitForDb();
+        const transaction = this.db.transaction("table", "readwrite");
+        const tableStore = transaction.objectStore("table");
+        const request = tableStore.add({ key, value });
+        const result = await new Promise((res, rej) => {
+            request.onsuccess = (event) => res(true);
+            request.onerror = rej;
+        });
+        return result;
+	}
+
+	async clear() {
+		if (this.db == null) await this.waitForDb();
+	}
+
+	async remove() {
+		if (this.db == null) await this.waitForDb();
+	}
+}
+
+
+class LocalStorage {
+    /**
+     * 
+     * @param {Window} window 
+     */
+    constructor(window) {
+        /**
+         * @type {Window}
+         */
+        this.window = window;
+    }
+
+    /**
+     * 
+     * @param {string} key Key to look for
+     * @param {boolean} deserialize If true, will JSON parse the value
+     * @returns {string | object}
+     */
+    get(key, deserialize=false) {
+        let value = this.window.localStorage.getItem(key);
+        if (deserialize) {
+            value = JSON.parse(value);
+        }
+        return value;
+    }
+
+    /**
+     * 
+     * @param {string} key Key to store in
+     * @param {string | object} value Value: String or object
+     * @param {boolean} serialize Will JSON serialize passed value before storing
+     * @returns {void}
+     */
+    set(key, value, serialize=false) {
+        if (value == null) {
+            this.clear(key);
+            return;
+        }
+
+        if (serialize) {
+            value = JSON.stringify(value);
+        }
+        this.window.localStorage.setItem(key, value);
+    }
+
+    clear() {
+        this.window.localStorage.clear();
+    }
+
+    /**
+     * 
+     * @param {string} key Key to remove
+     * @returns {void}
+     */
+    remove(key) {
+        this.window.localStorage.removeItem();
+    }
+}
+
+const StorageDependency = IndexedDB;
+const storage = new StorageDependency(window.top || window);
+
+// Feel free to rename these
+async function _set(key, value) {
+	await storage.set(key, value);
+}
+
+async function _get(key) {
+	return await storage.get(key);
+}
+
 const state = {
     itemTypeName: "ItemType",
     searchOverlayContent: null,
@@ -81,7 +275,7 @@ class SearchItem {
 
         this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("search-item");
-        
+
         const content = top.document.createElement("div");
         content.classList.add("flex-row", "jcc", "aic");
         this.elements.image = top.document.createElement("img");
@@ -128,7 +322,7 @@ class SearchItem {
         }
         this.elements = {};
     }
-    
+
     getRoot() {
         if (!this.elements.root) {
             throw new Error("Call to get root but root doesn't exist");
@@ -161,13 +355,13 @@ class SearchResults {
             ]
         };
     }
-    
+
     setSearchResults(searchItemsData) {
         this.remove();
         this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("searchResults");
         searchItemsData.forEach((searchItemData, i) => {
-            this.searchItems[i] = new SearchItem(searchItemData.name, searchItemData.description, searchItemData.image, i+1, searchItemData);
+            this.searchItems[i] = new SearchItem(searchItemData.name, searchItemData.description, searchItemData.image, i + 1, searchItemData);
             this.elements.root.appendChild(this.searchItems[i].getRoot());
         });
 
@@ -195,17 +389,32 @@ class SearchResults {
 
         this.searchItems.forEach(searchItem => {
             const shortcutHandlerOpen = (e) => {
+
                 if ((e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
                     && e.altKey
                     && !e.shiftKey
-                    && searchItem.data.itemTypeName === "ItemType") {
+                    && searchItem.data.itemTypeName === "ItemType"
+                ) {
                     // Open SearchGrid
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
                     arasTabs.openSearch(searchItem.data.itemId);
                 }
+                if ((e.keyCode === 48 + searchItem.index)
+                    && e.ctrlKey
+                    && e.altKey
+                    && !e.shiftKey
+                    && searchItem.data.itemTypeName !== "ItemType"
+                ) {
+                    // Open SearchGrid
+                    e.preventDefault();
+                    this.searchOverlayContent.elements.input.value = "";
+                    this.searchOverlayContent.deactivate();
+                    arasTabs.openSearch(searchItem.data.itemTypeId);
+                }
+
                 else if (
                     (e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
@@ -219,7 +428,7 @@ class SearchResults {
                     aras.uiShowItem(searchItem.data.itemTypeName, searchItem.data.itemId);
                 }
                 else if (
-                    (e.keyCode === 48 + searchItem.index) 
+                    (e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
                     && e.altKey
                     && e.shiftKey
@@ -405,7 +614,12 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
     <AML>
-        <Item type="${itemTypeName}" action="get" select="id,name,keyed_name,open_icon,label_plural">
+        <Item
+            type="${itemTypeName}"
+            action="get"
+            select="config_id,id,name,keyed_name,open_icon,label_plural"
+            serverEvents="0"
+        >
         </Item>
     </AML>
     `);
@@ -428,33 +642,34 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
         if (!image) {
             image = defaultImage;
         }
-        
+
         result.push({
             image,
-            name: item.getProperty("keyed_name"),
-            description: item.getAttribute("id"),
-            itemId: item.getAttribute("id"),
-            label_plural :item.getProperty("label_plural"),
-            // item,
+            name: item.getProperty("name") || item.getProperty("keyed_name"),
+            description: item.getProperty("config_id"),
+            itemId: item.getProperty("id"),
+            itemConfigId: item.getProperty("config_id"),
+            label_plural: item.getProperty("label_plural"),
+            itemTypeId: item.getProperty("itemtype"),
             itemTypeName,
             imageFileId
         });
     }
-    
+
     return result;
 }
 
 const fetcher = async (e, searchOverlayContent) => {
-	if (!localStorage.getItem("_" + state.itemTypeName + "_cache")) {
-		const _items = await getAllItems(
+	if (!localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)) {
+		const _items = getAllItems(
 			state.itemTypeName,
 			state.defaultImage,
 			searchOverlayContent.cache
 		);
 
-		localStorage.setItem("_" + state.itemTypeName + "_cache", JSON.stringify(_items));
+		localStorage.setItem(`_${state.itemTypeName}_aras_power_search_cache`, JSON.stringify(_items));
 	}
-	const items = JSON.parse(localStorage.getItem("_" + state.itemTypeName + "_cache")) || [];
+	const items = JSON.parse(localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)) || [];
 	const fuseOptions = {
 		// isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
 		// includeScore: false,
@@ -480,10 +695,26 @@ const fetcher = async (e, searchOverlayContent) => {
 
 const listenShortcut = (doc, searchOverlayContent) => {
     const handleshortcut = (e) => {
-        if (e.keyCode === 75 && e.ctrlKey) {
+        if (e.keyCode === 75
+            && e.ctrlKey
+            && !e.altKey
+            && !e.shiftKey
+        ) {
+
             e.preventDefault();
             if (searchOverlayContent.isActive) return;
             searchOverlayContent.activate();
+        }
+        else if (e.keyCode === 75
+            && e.ctrlKey
+            && !e.altKey
+            && e.shiftKey
+        ) {
+            e.preventDefault();
+            Object.entries(localStorage)
+                .filter(([key, _]) => key.endsWith("_aras_power_search_cache") || key.endsWith("_aras_power_search_timestamp"))
+                .forEach(([key, _]) => localStorage.removeItem(key));
+            top.aras.AlertSuccess("Cleared aras-power-search cache")
         }
     }
     doc.addEventListener("keydown", handleshortcut);
@@ -500,7 +731,6 @@ const listenShortcut = (doc, searchOverlayContent) => {
                             if (node.getAttribute('id') && state.attachedIframes.find(iframeId => iframeId === node.getAttribute('id')) != undefined) {
                                 return
                             }
-                            console.log('added listenting to ' + node.getAttribute('id'));
                             state.attachedIframes.push(node.getAttribute('id'));
                             listenShortcut(node.contentWindow.document, searchOverlayContent);
                         })
@@ -629,6 +859,59 @@ const attachCss = () => {
     }`;
     top.document.head.appendChild(styles);
 }
+const aras_time_from_js_time = (timestamp) => {
+    let date = new Date(timestamp);
+    let isoString = date.toISOString(); // "2024-06-27T14:31:36.000Z"
+
+    // Removing milliseconds and the 'Z' character (if needed)
+    isoString = isoString.split('.')[0];
+}
+const refresh_cache_bak = () => {
+    console.log("Cleared aras-power-search cache");
+    top.aras.AlertSuccess("refresh_cache");
+    const itemTypesToUpdate = Object.entries(localStorage)
+        .filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
+        .map(([key, _]) => key.slice(1, -("_aras_power_search_cache".length)));
+    for (let itemTypeName of itemTypesToUpdate) {
+        const modified_on_time = Number.parseInt(localStorage.getItem(`_${itemTypeName}_aras_power_search_timestamp`));
+        const aras_time = aras_time_from_js_time(modified_on_time);
+        const raw_result = aras.IomInnovator.applyAML(`
+    <AML>
+        <Item type="${itemTypeName}" 
+              action="get" 
+              select"config_id">
+            <modified_on condition="ge">${aras_time}</modified_on>
+        </Item>
+    </AML>`);
+        const results = [];
+        for (let i = 0; i < raw_result.getItemCount(); i++) {
+            results.push({
+                config_id: raw_result.getProperty("config_id"),
+                id: raw_result.getProperty("id")
+            });
+        }
+        const cached_items = JSON.parse(localStorage.getItem(`_${itemTypeName}_aras_power_search_cache`));
+        debugger;
+        for (let i = 0; i < results.length; i++) {
+            for (let j = 0; j < cached_items.length; j++) {
+                if (results[i].config_id == cached_items[j].config_id) {
+                    console.assert(
+                        typeof (cached_items[j].id) === "string"
+                        && typeof (results[i].id === "string"),
+                        "Major fault",
+                    )
+                    cached_items[j].id = results[i].id;
+                }
+            }
+        }
+
+        localStorage.setItem(`_${itemTypeName}_aras_power_search_cache`, JSON.stringify(cached_items),);
+
+    }
+
+};
+
+
 const start = () => {
     if (!window.aras) return;
     if (!window.top || window.top !== window) return;
@@ -641,5 +924,17 @@ const start = () => {
     top.document.body.appendChild(searchOverlay);
     attachCss();
     listenShortcut(top.document, searchOverlayContent);
+    const refresh_cache = () => {
+        const itemTypes = Object.entries(localStorage)
+            .filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
+            .map(([key, _]) => key.slice(1).slice(0, -("_aras_power_search_cache").length));
+        for (let itemTypeName of itemTypes) {
+            const items = getAllItems(itemTypeName, state.defaultImage, searchOverlayContent.cache);
+            localStorage.setItem(`_${itemTypeName}_aras_power_search_cache`, JSON.stringify(items));
+        }
+        aras.AlertSuccess("Cache Refreshed")
+    }
+    setInterval(refresh_cache, 30_000);
 }
 start();
+
