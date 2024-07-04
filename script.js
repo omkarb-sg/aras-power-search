@@ -57,29 +57,7 @@ const listenShortcut = (doc, searchOverlayContent) => {
 }
 const attachCss = () => {
     const styles = top.document.createElement("style");
-    styles.innerHTML = `body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
-    
-    header {
-        background-color: #333;
-        color: #fff;
-        padding: 10px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
-    button {
-        background-color: #007bff;
-        color: #fff;
-        border: none;
-        padding: 8px 16px;
-        cursor: pointer;
-    }
-    
+    styles.innerHTML = `
     .overlay {
         display: none;
         position: fixed;
@@ -87,7 +65,8 @@ const attachCss = () => {
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(0px) ;
+        transition: backdrop-filter 0.2s linear ;
         z-index: 1000;
     }
     
@@ -239,6 +218,6 @@ const start = () => {
         }
         aras.AlertSuccess("Cache Refreshed")
     }
-    setInterval(refresh_cache, 30_000);
+    // setInterval(refresh_cache, 30_000);
 }
 start();

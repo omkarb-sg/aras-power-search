@@ -99,10 +99,13 @@ class SearchOverlayContent {
         this.elements.searchResults.setSearchResults(searchItemsData);
         this.elements.root.appendChild(this.elements.searchResults.getRoot());
     }
-    
+
     activate() {
         console.assert(this.elements.root !== null, "Root is null when content is activated");
         this.searchOverlay.style.display = "block";
+        setTimeout(() => {
+            this.searchOverlay.style.backdropFilter = "blur(3px) brightness(25%)";
+        }, 1);
         this.elements.input.focus();
 
         for (const event of this.events["input"]) {
@@ -115,7 +118,12 @@ class SearchOverlayContent {
     }
 
     deactivate() {
-        this.searchOverlay.style.display = "none";
+        setTimeout(() => {
+            this.searchOverlay.style.backdropFilter = "blur(0px) brightness(25%)";
+            setTimeout(() => {
+                this.searchOverlay.style.display = "none";
+            }, 400)
+        }, 1);
         for (const handler of this.events["input"]) {
             this.elements.input.removeEventListener("input", handler);
         }
