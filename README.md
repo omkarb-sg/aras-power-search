@@ -1,8 +1,29 @@
 # Aras Power Search 🔥
 
-# Usage
+## Usage
 
-## 1. Download extension
+This is intended for keyboard driven navigation. For Aras Power Search, speed is everything.
+Once installed,
+- Leave your mouse
+- Press Ctrl-K
+- Don't touch your mouse
+
+![](./assets/pc_mouse.jpg)
+
+### Keybinds
+
+
+
+| Keybind                   | Description              |
+| ------------------------- | ------------------------ |
+| `Ctrl-k`                  | Launch aras-power-search |
+| `Alt-<number>`            | Further Search items     |
+| `Ctrl-Alt-<number>`       | Launch Search Grid       |
+| `Ctrl-<number>`           | Open form of item        |
+| `Ctrl-Shift-k`            | Clear aras-power-cache   |
+| `Ctrl-Alt-Shift-<number>` | Create item              |
+
+### 1. Download extension
 [Chrome Violent Monkey](https://chromewebstore.google.com/detail/jinjaccalgkegednnccohejagnlnfdag)
 
 [Edge Violent Monkey](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao)
@@ -12,7 +33,7 @@
 [GitHub releases](https://github.com/violentmonkey/violentmonkey/releases)
 
 
-## 2. Use this script
+### 2. Use this script
 ```js
 // ==UserScript==
 // @name        Aras power search
