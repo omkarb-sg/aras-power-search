@@ -2002,6 +2002,13 @@ Fuse$1.config = Config;
 var Fuse = Fuse$1;
 
 
+/**
+ * All  aras power globals
+ */
+const _aras_power_globals = {
+	key_prefix: ""
+}
+
 const jq_throttle = function (delay, no_trailing, callback, debounce_mode) {
     var timeout_id, last_exec = 0;
     if (typeof no_trailing !== 'boolean') {
@@ -2232,11 +2239,11 @@ const StorageDependency = IndexedDB;
 const storage = new StorageDependency(window.top || window);
 
 // Feel free to rename these
-async function _set(key, value) {
+async function aras_power_set(key, value) {
 	await storage.set(key, value);
 }
 
-async function _get(key) {
+async function aras_power_get(key) {
 	return await storage.get(key);
 }
 
@@ -2614,7 +2621,7 @@ class SearchOverlayContent {
         state.reset();
         this.isActive = false;
     }
-
+    
     getRoot() {
         if (!this.elements.root) {
             throw new Error("Call to get root but root doesn't exist");
@@ -2622,7 +2629,6 @@ class SearchOverlayContent {
         return this.elements.root;
     }
 }
-
 const getAllItems = (itemTypeName, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
@@ -2673,16 +2679,17 @@ const getAllItems = (itemTypeName, defaultImage, cache) => {
 }
 
 const fetcher = async (e, searchOverlayContent) => {
-	if (!localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)) {
+	if (aras_power_get(`_${state.itemTypeName}_aras_power_search_cache_${_aras_power_globals.key_prefix}`)) {
 		const _items = getAllItems(
 			state.itemTypeName,
 			state.defaultImage,
 			searchOverlayContent.cache
 		);
+		aras_power_set(`_${state.itemTypeName}_aras_power_search_cache_${_aras_power_globals.key_prefix}`, _items);
+		/// localStorage.setItem(``, JSON.stringify(_items));
 
-		localStorage.setItem(`_${state.itemTypeName}_aras_power_search_cache`, JSON.stringify(_items));
 	}
-	const items = JSON.parse(localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)) || [];
+	const items = aras_power_get(`_${state.itemTypeName}_aras_power_search_cache_${_aras_power_globals.key_prefix}`)
 	const fuseOptions = {
 		// isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
 		// includeScore: false,
@@ -2816,7 +2823,6 @@ const attachCss = () => {
         cursor: pointer;
         border-radius: 5px;
     }
-
     .search-item:hover {
         background-color: rgba(0, 0, 0, 0.08);
     }
@@ -2859,56 +2865,14 @@ const aras_time_from_js_time = (timestamp) => {
     // Removing milliseconds and the 'Z' character (if needed)
     isoString = isoString.split('.')[0];
 }
-const refresh_cache_bak = () => {
-    console.log("Cleared aras-power-search cache");
-    top.aras.AlertSuccess("refresh_cache");
-    const itemTypesToUpdate = Object.entries(localStorage)
-        .filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
-        .map(([key, _]) => key.slice(1, -("_aras_power_search_cache".length)));
-    for (let itemTypeName of itemTypesToUpdate) {
-        const modified_on_time = Number.parseInt(localStorage.getItem(`_${itemTypeName}_aras_power_search_timestamp`));
-        const aras_time = aras_time_from_js_time(modified_on_time);
-        const raw_result = aras.IomInnovator.applyAML(`
-    <AML>
-        <Item type="${itemTypeName}" 
-              action="get" 
-              select"config_id">
-            <modified_on condition="ge">${aras_time}</modified_on>
-        </Item>
-    </AML>`);
-        const results = [];
-        for (let i = 0; i < raw_result.getItemCount(); i++) {
-            results.push({
-                config_id: raw_result.getProperty("config_id"),
-                id: raw_result.getProperty("id")
-            });
-        }
-        const cached_items = JSON.parse(localStorage.getItem(`_${itemTypeName}_aras_power_search_cache`));
-        debugger;
-        for (let i = 0; i < results.length; i++) {
-            for (let j = 0; j < cached_items.length; j++) {
-                if (results[i].config_id == cached_items[j].config_id) {
-                    console.assert(
-                        typeof (cached_items[j].id) === "string"
-                        && typeof (results[i].id === "string"),
-                        "Major fault",
-                    )
-                    cached_items[j].id = results[i].id;
-                }
-            }
-        }
-
-        localStorage.setItem(`_${itemTypeName}_aras_power_search_cache`, JSON.stringify(cached_items),);
-
-    }
-
-};
-
 
 const start = () => {
     if (!window.aras) return;
     if (!window.top || window.top !== window) return;
 
+    console.assert(aras.getDatabase() !== undefined, "database not loaded yet.");
+    console.assert(aras.getInnovatorUrl() !== undefined, "Fault, very very bad fault.");
+    _aras_power_globals.key_prefix = aras.getInnovatorUrl() + aras.getDatabase();
     const searchOverlay = top.document.createElement("div");
     searchOverlay.classList.add("overlay");
     const searchOverlayContent = new SearchOverlayContent("Search ItemTypes", "ItemTypes", searchOverlay);
@@ -2929,5 +2893,5 @@ const start = () => {
     }
     // setInterval(refresh_cache, 30_000);
 }
-start();
+setTimeout(start, 4000);
 

@@ -1,14 +1,15 @@
 const fetcher = async (e, searchOverlayContent) => {
-	if (!localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)) {
+	if (aras_power_get(`_${state.itemTypeName}_aras_power_search_cache_${_aras_power_globals.key_prefix}`)) {
 		const _items = getAllItems(
 			state.itemTypeName,
 			state.defaultImage,
 			searchOverlayContent.cache
 		);
+		aras_power_set(`_${state.itemTypeName}_aras_power_search_cache_${_aras_power_globals.key_prefix}`, _items);
+		/// localStorage.setItem(``, JSON.stringify(_items));
 
-		localStorage.setItem(`_${state.itemTypeName}_aras_power_search_cache`, JSON.stringify(_items));
 	}
-	const items = JSON.parse(localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)) || [];
+	const items = aras_power_get(`_${state.itemTypeName}_aras_power_search_cache_${_aras_power_globals.key_prefix}`)
 	const fuseOptions = {
 		// isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
 		// includeScore: false,

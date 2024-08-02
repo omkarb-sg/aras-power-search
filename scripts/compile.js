@@ -5,6 +5,7 @@ const child_process = require("child_process");
 // Taken from index.js
 const sequence = [
     "src/vendor/fuse.cjs",
+    "src/controllers/globals.js",
     "src/utils.js",
     "src/aras/utils.js",
     "src/storage/indexedDB.js",
@@ -39,6 +40,6 @@ output.close();
 
 // Automatically copy output file
 console.log("Yanking...");
-child_process.exec(`clip < ${outputfilepath}`, () => {});
-child_process.exec(`clip.exe < ${outputfilepath}`, () => {});
+child_process.exec(`clip < ${outputfilepath}`, () => { });
+child_process.exec(`clip.exe < ${outputfilepath}`, () => { });
 console.log("Done!!");
