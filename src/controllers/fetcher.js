@@ -1,5 +1,5 @@
 const fetcher = async (e, searchOverlayContent) => {
-	if (aras_power_get(`_${state.itemTypeName}_aras_power_search_cache_${_aras_power_globals.key_prefix}`)) {
+	if (!aras_power_get(`_${state.itemTypeName}_aras_power_search_cache_${_aras_power_globals.key_prefix}`)) {
 		const _items = getAllItems(
 			state.itemTypeName,
 			state.defaultImage,
