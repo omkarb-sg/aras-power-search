@@ -200,6 +200,7 @@ const start = () => {
     if (!window.aras) return;
     if (!window.top || window.top !== window) return;
 
+
     const searchOverlay = top.document.createElement("div");
     searchOverlay.classList.add("overlay");
     const searchOverlayContent = new SearchOverlayContent("Search ItemTypes", "ItemTypes", searchOverlay);
@@ -208,6 +209,7 @@ const start = () => {
     top.document.body.appendChild(searchOverlay);
     attachCss();
     listenShortcut(top.document, searchOverlayContent);
+    console.info("aras-power-search loaded");
     const refresh_cache = () => {
         const itemTypes = Object.entries(localStorage)
             .filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
