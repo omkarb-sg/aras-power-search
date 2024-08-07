@@ -2039,11 +2039,19 @@ const debounce = function (delay, at_begin, callback) {
     return jq_throttle(delay, callback, at_begin !== false);
 };
 function getUrlFromFileId(aras, fileId) {
-    let file = aras.IomInnovator.newItem("File", "get");
-    file.setAttribute("id", fileId);
-    file = file.apply();
-    if (file.isError()) return null;
-    return aras.vault.vault.makeFileDownloadUrl(aras.getFileURLEx(file.node));
+	let file = aras.IomInnovator.newItem("File", "get");
+	file.setAttribute("id", fileId);
+	file = file.apply();
+	if (file.isError()) return null;
+
+    try {
+	    const url = aras.vault.vault.makeFileDownloadUrl(aras.getFileURLEx(file.node));
+        return url;
+    } catch (e) {
+        console.log('hi');
+        console.log(e);
+        return null;
+    }
 }
 
 class IndexedDB {
@@ -2614,7 +2622,7 @@ class SearchOverlayContent {
         state.reset();
         this.isActive = false;
     }
-
+    
     getRoot() {
         if (!this.elements.root) {
             throw new Error("Call to get root but root doesn't exist");
@@ -2622,7 +2630,6 @@ class SearchOverlayContent {
         return this.elements.root;
     }
 }
-
 const getAllItems = (itemTypeName, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
@@ -2816,7 +2823,6 @@ const attachCss = () => {
         cursor: pointer;
         border-radius: 5px;
     }
-
     .search-item:hover {
         background-color: rgba(0, 0, 0, 0.08);
     }
