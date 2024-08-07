@@ -218,6 +218,7 @@ const start = () => {
         }
         aras.AlertSuccess("Cache Refreshed")
     }
-    // setInterval(refresh_cache, 30_000);
+
+    disableTOC(top.document).then(didDisable => didDisable ? setTimeout(() => aras.AlertSuccess("TOC Disabled"), 2000) : undefined);
 }
 start();

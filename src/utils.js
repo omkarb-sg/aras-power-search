@@ -34,3 +34,18 @@ const debounce = function (delay, at_begin, callback) {
     console.assert(callback !== null, "Callback is null");
     return jq_throttle(delay, callback, at_begin !== false);
 };
+
+async function waitForSelector(document, selector, timeout, step=100) {
+    let timeSpent = 0;
+    return new Promise((res, rej) => {
+        const interval = setInterval(() => {
+            const element = document.querySelector(selector);
+            if (element != null) {
+                clearInterval(interval);
+                res(element);
+            }
+            timeSpent += step;
+            if (step > timeout) rej(`Selector ${selector} not found after waiting ${timeout}ms`);
+        }, step);
+    })
+}

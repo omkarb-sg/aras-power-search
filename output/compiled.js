@@ -2038,12 +2038,43 @@ const debounce = function (delay, at_begin, callback) {
     console.assert(callback !== null, "Callback is null");
     return jq_throttle(delay, callback, at_begin !== false);
 };
+
+async function waitForSelector(document, selector, timeout, step=100) {
+    let timeSpent = 0;
+    return new Promise((res, rej) => {
+        const interval = setInterval(() => {
+            const element = document.querySelector(selector);
+            if (element != null) {
+                clearInterval(interval);
+                res(element);
+            }
+            timeSpent += step;
+            if (step > timeout) rej(`Selector ${selector} not found after waiting ${timeout}ms`);
+        }, step);
+    })
+}
 function getUrlFromFileId(aras, fileId) {
-    let file = aras.IomInnovator.newItem("File", "get");
-    file.setAttribute("id", fileId);
-    file = file.apply();
-    if (file.isError()) return null;
-    return aras.vault.vault.makeFileDownloadUrl(aras.getFileURLEx(file.node));
+	let file = aras.IomInnovator.newItem("File", "get");
+	file.setAttribute("id", fileId);
+	file = file.apply();
+	if (file.isError()) return null;
+
+    try {
+	    const url = aras.vault.vault.makeFileDownloadUrl(aras.getFileURLEx(file.node));
+    } catch (e) {
+        return null;
+    }
+	return url;
+}
+
+async function disableTOC(document) {
+	try {
+		const tocElement = await waitForSelector(document, "aras-navigation-panel", 10_000);
+		tocElement.style.pointerEvents = "none";
+		return true;
+	} catch (e) {
+		return false;
+	}
 }
 
 class IndexedDB {
@@ -2614,7 +2645,7 @@ class SearchOverlayContent {
         state.reset();
         this.isActive = false;
     }
-
+    
     getRoot() {
         if (!this.elements.root) {
             throw new Error("Call to get root but root doesn't exist");
@@ -2622,7 +2653,6 @@ class SearchOverlayContent {
         return this.elements.root;
     }
 }
-
 const getAllItems = (itemTypeName, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
@@ -2816,7 +2846,6 @@ const attachCss = () => {
         cursor: pointer;
         border-radius: 5px;
     }
-
     .search-item:hover {
         background-color: rgba(0, 0, 0, 0.08);
     }
@@ -2927,7 +2956,8 @@ const start = () => {
         }
         aras.AlertSuccess("Cache Refreshed")
     }
-    // setInterval(refresh_cache, 30_000);
+
+    disableTOC(top.document).then(didDisable => didDisable ? setTimeout(() => aras.AlertSuccess("TOC Disabled"), 2000) : undefined);
 }
 start();
 
