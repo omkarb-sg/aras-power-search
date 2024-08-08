@@ -1,3 +1,7 @@
+/**
+ * @param {Element} doc
+ * @param {SearchOverlayContent} searchOverlayContent
+ */
 const listenShortcut = (doc, searchOverlayContent) => {
     const handleshortcut = (e) => {
         if (e.keyCode === 75
@@ -8,6 +12,8 @@ const listenShortcut = (doc, searchOverlayContent) => {
 
             e.preventDefault();
             if (searchOverlayContent.isActive) return;
+            state.openedItems = state.openedItems.slice(-9);
+            searchOverlayContent.handlesearchItemsData(state.openedItems.map(x => x.data).reverse());
             searchOverlayContent.activate();
         }
         else if (e.keyCode === 75
@@ -140,7 +146,57 @@ const attachCss = () => {
     /* Font weights */
     .fw-normal {
         font-weight: normal;
-    }`;
+    }
+    /**
+    * power-border start
+    */
+    .card {
+      padding: 1rem;
+      position: relative;
+      border-radius: 10px;
+    }
+    @property --angle {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    .card::after,
+    .card::before {
+      content: "";
+      position: absolute;
+      background-image: conic-gradient(from var(--angle), orange, transparent, blue, transparent, orange);
+
+      height: 100%;
+      width: 100%;
+      top: 50%;
+      left: 50%;
+      translate: -50% -50%;
+      z-index: -1;
+      padding: 3px;
+      border-radius: 10px;
+      animation: 3s spin linear infinite;
+    }
+
+    .card::before {
+      filter: blur(5px);
+      opacity: 30%;
+    }
+
+    @keyframes spin {
+      from {
+        --angle: 0deg;
+      }
+      to {
+        --angle: 360deg;
+      }
+    }
+
+    /**
+    * power-border end
+    */
+
+    ` ;
     top.document.head.appendChild(styles);
 }
 const aras_time_from_js_time = (timestamp) => {
