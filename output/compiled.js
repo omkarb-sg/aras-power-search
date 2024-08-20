@@ -2002,7 +2002,7 @@ Fuse$1.config = Config;
 var Fuse = Fuse$1;
 
 
-const jq_throttle = function (delay, no_trailing, callback, debounce_mode) {
+const jq_throttle = function(delay, no_trailing, callback, debounce_mode) {
     var timeout_id, last_exec = 0;
     if (typeof no_trailing !== 'boolean') {
         debounce_mode = callback;
@@ -2011,9 +2011,9 @@ const jq_throttle = function (delay, no_trailing, callback, debounce_mode) {
     }
     function wrapper() {
         return new Promise((res, rej) => {
-                var that = this,
+            var that = this,
                 elapsed = +new Date() - last_exec, args = arguments;
-                function exec() {
+            function exec() {
                 last_exec = +new Date();
                 return callback.apply(that, args);
             };
@@ -2027,17 +2027,21 @@ const jq_throttle = function (delay, no_trailing, callback, debounce_mode) {
             if (debounce_mode === undefined && elapsed > delay) {
                 return res(exec());
             } else if (no_trailing !== true) {
-                timeout_id = setTimeout(debounce_mode ? clear : () => {res(exec())}, debounce_mode === undefined ? delay - elapsed : delay);
+                timeout_id = setTimeout(debounce_mode ? clear : () => { res(exec()) }, debounce_mode === undefined ? delay - elapsed : delay);
             }
         })
     };
     return wrapper;
 };
 
-const debounce = function (delay, at_begin, callback) {
+const debounce = function(delay, at_begin, callback) {
     console.assert(callback !== null, "Callback is null");
     return jq_throttle(delay, callback, at_begin !== false);
 };
+const keepUniqueOrdered = (arr) => {
+    return [...new Set(arr.map(JSON.stringify))].map(JSON.parse);
+}
+
 function getUrlFromFileId(aras, fileId) {
 	let file = aras.IomInnovator.newItem("File", "get");
 	file.setAttribute("id", fileId);
@@ -2248,32 +2252,43 @@ async function _get(key) {
 	return await storage.get(key);
 }
 
+/**
+ * @type {Object} 
+ * @prop {String} itemTypeName
+ * @prop {SearchOverlayContent} searchOverlayContent
+ * @prop {Function} reset
+ * @prop {Function} setItemTypeName
+ * @prop {String} defaultImage
+ * @prop {Element[]} attachedIframes
+ * @prop {SearchItem[]} openedItems
+ */
 const state = {
-    itemTypeName: "ItemType",
-    searchOverlayContent: null,
-    reset: null,
-    setItemTypeName: null,
-    defaultImage: null,
-    attachedIframes: [],
+	itemTypeName: "ItemType",
+	searchOverlayContent: null,
+	reset: function() {
+		this.itemTypeName = "ItemType";
+		this.defaultImage = "../images/ItemType.svg";
+		this.searchOverlayContent.elements.title.textContent = "ItemTypes";
+		this.searchOverlayContent.elements.input.value = "";
+		this.searchOverlayContent.elements.input.placeholder = `Search ItemType`;
+		this.openedItems = this.openedItems.slice(-9)
+		this.searchOverlayContent.handlesearchItemsData(this.openedItems.map(s => s.data).reverse());
+	}
+	,
+	setItemTypeName: function(name, label_plural, defaultImage) {
+		this.itemTypeName = name;
+		this.defaultImage = defaultImage || "../images/DefaultItemType.svg";
+		this.searchOverlayContent.elements.title.textContent = label_plural;
+		this.searchOverlayContent.elements.input.value = "";
+		this.searchOverlayContent.elements.input.placeholder = `Search ${label_plural}`;
+		this.searchOverlayContent.handlesearchItemsData([]);
+	},
+	defaultImage: null,
+	attachedIframes: [],
+	openedItems: [],
 }
 
-state.reset = function() {
-    this.itemTypeName = "ItemType",
-    this.defaultImage = "../images/ItemType.svg";
-    this.searchOverlayContent.elements.title.textContent = "ItemTypes";
-    this.searchOverlayContent.elements.input.value = "";
-    this.searchOverlayContent.elements.input.placeholder = `Search ItemType`;
-    this.searchOverlayContent.handlesearchItemsData([]);
-}
 
-state.setItemTypeName = function(name, label_plural, defaultImage) {
-    this.itemTypeName = name;
-    this.defaultImage = defaultImage || "../images/DefaultItemType.svg";
-    this.searchOverlayContent.elements.title.textContent = label_plural;
-    this.searchOverlayContent.elements.input.value = "";
-    this.searchOverlayContent.elements.input.placeholder = `Search ${label_plural}`;
-    this.searchOverlayContent.handlesearchItemsData([]);
-}
 class SearchItem {
     constructor(name, description, image, index, data) {
         this.elements = {};
@@ -2414,7 +2429,7 @@ class SearchResults {
                     this.searchOverlayContent.deactivate();
                     arasTabs.openSearch(searchItem.data.itemId);
                 }
-                if ((e.keyCode === 48 + searchItem.index)
+                else if ((e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
                     && e.altKey
                     && !e.shiftKey
@@ -2424,6 +2439,9 @@ class SearchResults {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
+                    state.openedItems.push(searchItem);
+                    state.openedItems = keepUniqueOrdered(state.openedItems)
+                    console.log(state.openedItems)
                     arasTabs.openSearch(searchItem.data.itemTypeId);
                 }
 
@@ -2437,6 +2455,8 @@ class SearchResults {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
+                    state.openedItems.push(searchItem);
+                    state.openedItems = keepUniqueOrdered(state.openedItems)
                     aras.uiShowItem(searchItem.data.itemTypeName, searchItem.data.itemId);
                 }
                 else if (
@@ -2462,6 +2482,8 @@ class SearchResults {
                     // Search Items
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
+                    state.openedItems.push(searchItem);
+                    state.openedItems = keepUniqueOrdered(state.openedItems)
                     state.setItemTypeName(searchItem.data.name, searchItem.data.label_plural || searchItem.data.name, searchItem.elements.image.src);
                 }
             } : null;
@@ -2713,6 +2735,10 @@ const fetcher = async (e, searchOverlayContent) => {
 	searchOverlayContent.handlesearchItemsData(searched.map((element) => element.item).slice(0, 9));
 };
 
+/**
+ * @param {Element} doc
+ * @param {SearchOverlayContent} searchOverlayContent
+ */
 const listenShortcut = (doc, searchOverlayContent) => {
     const handleshortcut = (e) => {
         if (e.keyCode === 75
@@ -2723,6 +2749,8 @@ const listenShortcut = (doc, searchOverlayContent) => {
 
             e.preventDefault();
             if (searchOverlayContent.isActive) return;
+            state.openedItems = state.openedItems.slice(-9);
+            searchOverlayContent.handlesearchItemsData(state.openedItems.map(x => x.data).reverse());
             searchOverlayContent.activate();
         }
         else if (e.keyCode === 75
@@ -2855,7 +2883,57 @@ const attachCss = () => {
     /* Font weights */
     .fw-normal {
         font-weight: normal;
-    }`;
+    }
+    /**
+    * power-border start
+    */
+    .card {
+      padding: 1rem;
+      position: relative;
+      border-radius: 10px;
+    }
+    @property --angle {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: false;
+    }
+
+    .card::after,
+    .card::before {
+      content: "";
+      position: absolute;
+      background-image: conic-gradient(from var(--angle), orange, transparent, blue, transparent, orange);
+
+      height: 100%;
+      width: 100%;
+      top: 50%;
+      left: 50%;
+      translate: -50% -50%;
+      z-index: -1;
+      padding: 3px;
+      border-radius: 10px;
+      animation: 3s spin linear infinite;
+    }
+
+    .card::before {
+      filter: blur(5px);
+      opacity: 30%;
+    }
+
+    @keyframes spin {
+      from {
+        --angle: 0deg;
+      }
+      to {
+        --angle: 360deg;
+      }
+    }
+
+    /**
+    * power-border end
+    */
+
+    ` ;
     top.document.head.appendChild(styles);
 }
 const aras_time_from_js_time = (timestamp) => {

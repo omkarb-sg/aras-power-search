@@ -34,3 +34,6 @@ const debounce = function (delay, at_begin, callback) {
     console.assert(callback !== null, "Callback is null");
     return jq_throttle(delay, callback, at_begin !== false);
 };
+const keepUniqueOrdered = (arr) => {
+    return [...new Set(arr.map(JSON.stringify))].map(JSON.parse);
+}
