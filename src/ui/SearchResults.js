@@ -138,7 +138,7 @@ class SearchResults {
                     this.searchOverlayContent.deactivate();
                     arasTabs.openSearch(searchItem.data.itemId);
                 }
-                if ((e.keyCode === 48 + searchItem.index)
+                else if ((e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
                     && e.altKey
                     && !e.shiftKey
@@ -148,6 +148,9 @@ class SearchResults {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
+                    state.openedItems.push(searchItem);
+                    state.openedItems = keepUniqueOrdered(state.openedItems)
+                    console.log(state.openedItems)
                     arasTabs.openSearch(searchItem.data.itemTypeId);
                 }
 
@@ -161,6 +164,8 @@ class SearchResults {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
+                    state.openedItems.push(searchItem);
+                    state.openedItems = keepUniqueOrdered(state.openedItems)
                     aras.uiShowItem(searchItem.data.itemTypeName, searchItem.data.itemId);
                 }
                 else if (
@@ -186,6 +191,8 @@ class SearchResults {
                     // Search Items
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
+                    state.openedItems.push(searchItem);
+                    state.openedItems = keepUniqueOrdered(state.openedItems)
                     state.setItemTypeName(searchItem.data.name, searchItem.data.label_plural || searchItem.data.name, searchItem.elements.image.src);
                 }
             } : null;
