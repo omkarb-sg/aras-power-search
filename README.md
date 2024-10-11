@@ -36,19 +36,21 @@ Once installed,
 ### 2. Use this script
 ```js
 // ==UserScript==
-// @name        Aras power search
+// @name        Aras power search (Main)
 // @namespace   aras-power-tools
 // @match       *://*/*
 // @grant       none
 // @version     1.0
 // @author      Omkar BHALE, Tushar KUNTAWAR
 // @description Best searching expirience in aras, yet
+// @require     https://cdn.jsdelivr.net/npm/fuse.js@7.0.0
 // ==/UserScript==
 
-if (window.aras){
-    fetch('https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/compiled.js')
-        .then(response => response.text())
-        .then(eval)
-        .catch(error => console.log(error));
-}
+setTimeout(() =>
+		window.aras && fetch("https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/compiled.js")
+			.then((response) => response.text())
+			.then(eval)
+			.catch((error) => console.log(error)),
+    1000
+);
 ```
