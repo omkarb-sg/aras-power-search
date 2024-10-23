@@ -2002,7 +2002,7 @@ Fuse$1.config = Config;
 var Fuse = Fuse$1;
 
 
-const jq_throttle = function(delay, no_trailing, callback, debounce_mode) {
+const jq_throttle = function (delay, no_trailing, callback, debounce_mode) {
     var timeout_id, last_exec = 0;
     if (typeof no_trailing !== 'boolean') {
         debounce_mode = callback;
@@ -2011,9 +2011,9 @@ const jq_throttle = function(delay, no_trailing, callback, debounce_mode) {
     }
     function wrapper() {
         return new Promise((res, rej) => {
-            var that = this,
+                var that = this,
                 elapsed = +new Date() - last_exec, args = arguments;
-            function exec() {
+                function exec() {
                 last_exec = +new Date();
                 return callback.apply(that, args);
             };
@@ -2027,14 +2027,14 @@ const jq_throttle = function(delay, no_trailing, callback, debounce_mode) {
             if (debounce_mode === undefined && elapsed > delay) {
                 return res(exec());
             } else if (no_trailing !== true) {
-                timeout_id = setTimeout(debounce_mode ? clear : () => { res(exec()) }, debounce_mode === undefined ? delay - elapsed : delay);
+                timeout_id = setTimeout(debounce_mode ? clear : () => {res(exec())}, debounce_mode === undefined ? delay - elapsed : delay);
             }
         })
     };
     return wrapper;
 };
 
-const debounce = function(delay, at_begin, callback) {
+const debounce = function (delay, at_begin, callback) {
     console.assert(callback !== null, "Callback is null");
     return jq_throttle(delay, callback, at_begin !== false);
 };
@@ -2052,8 +2052,6 @@ function getUrlFromFileId(aras, fileId) {
 	    const url = aras.vault.vault.makeFileDownloadUrl(aras.getFileURLEx(file.node));
         return url;
     } catch (e) {
-        console.log('hi');
-        console.log(e);
         return null;
     }
 }
