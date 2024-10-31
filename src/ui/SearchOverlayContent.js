@@ -7,7 +7,7 @@ class SearchOverlayContent {
         }
         this.searchOverlay = searchOverlay;
 
-        this.createDom(title, inputPlaceholder);
+        this.createDom(title, inputPlaceholder, searchOverlay);
         searchOverlay.appendChild(this.getRoot());
         this.applyKeyEvents();
         this.isActive = false;
@@ -21,7 +21,7 @@ class SearchOverlayContent {
         state.reset();
     }
     
-    createDom(title, inputPlaceholder) {
+    createDom(title, inputPlaceholder, searchOverlay) {
         this.remove();
 
         this.elements.root = top.document.createElement("div");
@@ -42,6 +42,11 @@ class SearchOverlayContent {
         this.elements.root.appendChild(this.elements.title);
         this.elements.root.appendChild(this.elements.input);
         this.elements.root.appendChild(this.elements.searchResults.getRoot());
+
+        // Dark mode
+        if (state.darkMode === true) {
+            searchOverlay.classList.add("dark");
+        }
     }
 
     applyKeyEvents() {
