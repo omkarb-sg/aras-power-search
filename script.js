@@ -74,6 +74,12 @@ const attachCss = () => {
         backdrop-filter: blur(0px) ;
         transition: backdrop-filter 0.2s linear ;
         z-index: 1000;
+
+        --primary-color: #ddd;
+        --secondary-color: #ccc;
+        --border-color: #777;
+        --primary-text: #333;
+        --secondary-text: #444;
     }
     
     .search-overlay-content {
@@ -82,14 +88,11 @@ const attachCss = () => {
         left: 50%;
         min-width: 60vw;
         transform: translateX(-50%);
-        background-color: #fff;
+        background-color: var(--primary-color);
         padding: 20px;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-    .dark .search-overlay-content {
-        background-color: #444444;
-        color: #ddd;
+        color: var(--primary-text);
     }
     
     .search-input {
@@ -100,14 +103,12 @@ const attachCss = () => {
         font-family: sans-serif;
         font-size: 1.3rem;
         outline: none;
+        background-color: var(--secondary-color);
+        border: 1px solid var(--border-color);
+        color: var(--primary-text);
     }
-    .dark .search-input {
-        background-color: #555555;
-        border: 1px solid gray;
-        color: #ddd;
-    }
-    .dark search-input::placeholder {
-        color: #aaa;
+    .search-input::placeholder {
+        color: var(--secondary-text);
     }
     
     .searchResults {
@@ -124,23 +125,15 @@ const attachCss = () => {
         margin-bottom: -1px;
         cursor: pointer;
         border-radius: 5px;
-        border: 1px solid lightgray;
     }
     .search-item:hover {
         background-color: rgba(0, 0, 0, 0.08);
-    }
-    .dark .search-item {
-        border: 1px solid gray;
     }
     
     .search-item img {
         width: 50px;
         height: 50px;
         margin-right: 10px;
-    }
-    .dark .search-item img {
-        background-color: #eee;
-        border-radius: .5rem;
     }
     
     .flex-row {

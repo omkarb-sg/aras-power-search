@@ -2538,26 +2538,56 @@ class SearchOverlayContent {
         this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("search-overlay-content");
 
+        const titleContainer = document.createElement("div");
+        titleContainer.classList.add("flex-row");
+        titleContainer.style.justifyContent = "space-between";
+        titleContainer.style.alignItems = "center";
+
         this.elements.title = top.document.createElement("h2");
         this.elements.title.classList.add("m-05");
         this.elements.title.textContent = title;
         
+        // Colors
+        const colorPickerContainer = document.createElement("span");
+        this.elements.primaryColorPicker = document.createElement("input");
+        this.elements.secondaryColorPicker = document.createElement("input");
+        this.elements.borderColorPicker = document.createElement("input");
+        this.elements.primaryTextPicker = document.createElement("input");
+        this.elements.secondaryTextPicker = document.createElement("input");
+        [
+            this.elements.primaryColorPicker,
+            this.elements.secondaryColorPicker,
+            this.elements.borderColorPicker,
+            this.elements.primaryTextPicker,
+            this.elements.secondaryTextPicker
+        ].forEach(element => {
+            element.type = "color";
+            element.style.width = "25px";
+            element.style.height = "25px";
+            element.style.padding = "0px";
+            element.style.marginLeft = "10px";
+            element.addEventListener("input", (e) => {
+                this.updateColors();
+            })
+            colorPickerContainer.appendChild(element);
+        })
+
         this.elements.input = top.document.createElement("input");
         this.elements.input.classList.add("search-input");
         this.elements.input.type = "text";
         this.elements.input.placeholder = inputPlaceholder;
-        this.elements.input.spellCheck = false;
+        this.elements.input.setAttribute("spellcheck", "false");
 
         this.elements.searchResults = new SearchResults([], this);
         
-        this.elements.root.appendChild(this.elements.title);
+        titleContainer.appendChild(this.elements.title);
+        titleContainer.appendChild(colorPickerContainer);
+
+        this.elements.root.appendChild(titleContainer);
         this.elements.root.appendChild(this.elements.input);
         this.elements.root.appendChild(this.elements.searchResults.getRoot());
 
-        // Dark mode
-        if (state.darkMode === true) {
-            searchOverlay.classList.add("dark");
-        }
+        this.applyDefaultColors()
     }
 
     applyKeyEvents() {
@@ -2578,6 +2608,43 @@ class SearchOverlayContent {
             },
             originalHandler: (e) => {} // Only needed when perma removing handler, not required
         })
+    }
+
+    applyDefaultColors() {
+        const prefix = "_aras_power_search_";
+        
+        this.elements.primaryColorPicker.value = localStorage.getItem(prefix + "primary") || "#eee";
+        this.elements.secondaryColorPicker.value = localStorage.getItem(prefix + "secondary") || "#ccc";
+        this.elements.borderColorPicker.value = localStorage.getItem(prefix + "border") || "#000";
+        this.elements.primaryTextPicker.value = localStorage.getItem(prefix + "primarytext") || "#111";
+        this.elements.secondaryTextPicker.value = localStorage.getItem(prefix + "secondarytext") || "#444";
+
+        this.elements.primaryColorPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+        this.elements.secondaryColorPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+        this.elements.borderColorPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+        this.elements.primaryTextPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+        this.elements.secondaryTextPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+    }
+
+    updateColors() {
+        const primaryColor = this.elements.primaryColorPicker.value;
+        const secondaryColor = this.elements.secondaryColorPicker.value;
+        const borderColor = this.elements.borderColorPicker.value;
+        const primaryText = this.elements.primaryTextPicker.value;
+        const secondaryText = this.elements.secondaryTextPicker.value;
+
+        const prefix = "_aras_power_search_";
+        localStorage.setItem(prefix + "primary", primaryColor);
+        localStorage.setItem(prefix + "secondary", secondaryColor);
+        localStorage.setItem(prefix + "border", borderColor);
+        localStorage.setItem(prefix + "primarytext", primaryText);
+        localStorage.setItem(prefix + "secondarytext", secondaryText);
+
+        this.searchOverlay.style.setProperty("--primary-color", primaryColor);
+        this.searchOverlay.style.setProperty("--secondary-color", secondaryColor);
+        this.searchOverlay.style.setProperty("--border-color", borderColor);
+        this.searchOverlay.style.setProperty("--primary-text", primaryText);
+        this.searchOverlay.style.setProperty("--secondary-text", secondaryText);
     }
     
     remove() {
@@ -2816,6 +2883,12 @@ const attachCss = () => {
         backdrop-filter: blur(0px) ;
         transition: backdrop-filter 0.2s linear ;
         z-index: 1000;
+
+        --primary-color: #ddd;
+        --secondary-color: #ccc;
+        --border-color: #777;
+        --primary-text: #333;
+        --secondary-text: #444;
     }
     
     .search-overlay-content {
@@ -2824,14 +2897,11 @@ const attachCss = () => {
         left: 50%;
         min-width: 60vw;
         transform: translateX(-50%);
-        background-color: #fff;
+        background-color: var(--primary-color);
         padding: 20px;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-    }
-    .dark .search-overlay-content {
-        background-color: #444444;
-        color: #ddd;
+        color: var(--primary-text);
     }
     
     .search-input {
@@ -2842,11 +2912,12 @@ const attachCss = () => {
         font-family: sans-serif;
         font-size: 1.3rem;
         outline: none;
+        background-color: var(--secondary-color);
+        border: 1px solid var(--border-color);
+        color: var(--primary-text);
     }
-    .dark .search-input {
-        background-color: #555555;
-        border: 1px solid gray;
-        color: #ddd;
+    .search-input::placeholder {
+        color: var(--secondary-text);
     }
     
     .searchResults {
@@ -2863,23 +2934,15 @@ const attachCss = () => {
         margin-bottom: -1px;
         cursor: pointer;
         border-radius: 5px;
-        border: 1px solid lightgray;
     }
     .search-item:hover {
         background-color: rgba(0, 0, 0, 0.08);
-    }
-    .dark .search-item {
-        border: 1px solid gray;
     }
     
     .search-item img {
         width: 50px;
         height: 50px;
         margin-right: 10px;
-    }
-    .dark .search-item img {
-        background-color: #eee;
-        border-radius: .5rem;
     }
     
     .flex-row {
