@@ -136,7 +136,7 @@ class SearchResults {
                     e.preventDefault();
                     this.searchOverlayContent.elements.input.value = "";
                     this.searchOverlayContent.deactivate();
-                    arasTabs.openSearch(searchItem.data.itemId);
+                    arasTabs.openSearch(searchItem.data.itemConfigId);
                 }
                 else if ((e.keyCode === 48 + searchItem.index)
                     && e.ctrlKey
@@ -151,7 +151,7 @@ class SearchResults {
                     state.openedItems.push(searchItem);
                     state.openedItems = keepUniqueOrdered(state.openedItems)
                     console.log(state.openedItems)
-                    arasTabs.openSearch(searchItem.data.itemTypeId);
+                    arasTabs.openSearch(searchItem.data.itemConfigId);
                 }
 
                 else if (
@@ -166,7 +166,10 @@ class SearchResults {
                     this.searchOverlayContent.deactivate();
                     state.openedItems.push(searchItem);
                     state.openedItems = keepUniqueOrdered(state.openedItems)
-                    aras.uiShowItem(searchItem.data.itemTypeName, searchItem.data.itemId);
+                    const item = aras.IomInnovator.newItem(searchItem.data.itemTypeName, "get");
+                    item.setAttribute("select", "id");
+                    item.setProperty("config_id", searchItem.data.itemConfigId);
+                    aras.uiShowItem(searchItem.data.itemTypeName, item.apply().getID());
                 }
                 else if (
                     (e.keyCode === 48 + searchItem.index)

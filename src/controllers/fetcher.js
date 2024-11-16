@@ -23,7 +23,7 @@ const fetcher = async (e, searchOverlayContent) => {
 		// ignoreLocation: false,
 		// ignoreFieldNorm: false,
 		// fieldNormWeight: 1,
-		keys: ["itemTypeName", "itemId", "name"],
+		keys: ["itemTypeName", "itemConfigId", "name"],
 	};
 
 	const fuse = new Fuse(items, fuseOptions);
