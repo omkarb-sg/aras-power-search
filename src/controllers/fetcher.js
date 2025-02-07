@@ -1,4 +1,8 @@
-const fetcher = async (e, searchOverlayContent) => {
+import { getAllItems } from "./getItems";
+import { state } from "./state";
+import Fuse from "fuse.js";
+
+export const fetcher = async (e, searchOverlayContent) => {
 	if (!localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)) {
 		const _items = getAllItems(
 			state.itemTypeName,

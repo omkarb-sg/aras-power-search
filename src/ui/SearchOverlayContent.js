@@ -1,4 +1,7 @@
-class SearchOverlayContent {
+import { state } from "../controllers/state";
+import { SearchResults } from "./SearchResults";
+
+export class SearchOverlayContent {
     constructor(title, inputPlaceholder, searchOverlay) {
         this.elements = {};
         this.events = {

@@ -8,7 +8,7 @@
  * @prop {Element[]} attachedIframes
  * @prop {SearchItem[]} openedItems
  */
-const state = {
+export const state = {
 	itemTypeName: "ItemType",
 	searchOverlayContent: null,
 	reset: function() {

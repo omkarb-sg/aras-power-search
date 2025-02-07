@@ -1,4 +1,4 @@
-const getAllItems = (itemTypeName, defaultImage, cache) => {
+export const getAllItems = (itemTypeName, defaultImage, cache) => {
 
     const items = aras.IomInnovator.applyAML(`
     <AML>

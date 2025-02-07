@@ -1,4 +1,4 @@
-class IndexedDB {
+export class IndexedDB {
 	/**
 	 *
 	 * @param {Window} window

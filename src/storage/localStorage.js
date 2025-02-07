@@ -1,4 +1,4 @@
-class LocalStorage {
+export class LocalStorage {
     /**
      * 
      * @param {Window} window 

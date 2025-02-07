@@ -1,4 +1,6 @@
-class SearchItem {
+import { state } from "../controllers/state";
+
+export class SearchItem {
     constructor(name, description, image, index, data) {
         this.elements = {};
         this.data = data; // Straight from what fetch() returns
@@ -67,7 +69,7 @@ class SearchItem {
     }
 }
 
-class SearchResults {
+export class SearchResults {
     /**
      *  ```js
      *  searchItemsData = {

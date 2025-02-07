@@ -47,7 +47,7 @@ Once installed,
 // ==/UserScript==
 
 setTimeout(() =>
-		window.aras && fetch("https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/compiled.js")
+		window.aras && fetch("https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/aras-power-search.iife.js")
 			.then((response) => response.text())
 			.then(eval)
 			.catch((error) => console.log(error)),
