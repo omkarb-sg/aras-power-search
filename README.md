@@ -4,6 +4,7 @@
 
 This is intended for keyboard driven navigation. For Aras Power Search, speed is everything.
 Once installed,
+
 - Leave your mouse
 - Press Ctrl-K
 - Don't touch your mouse. The mouse is dirty.
@@ -11,8 +12,6 @@ Once installed,
 ![](./assets/pc_mouse.jpg)
 
 ### Keybinds
-
-
 
 | Keybind                   | Description              |
 | ------------------------- | ------------------------ |
@@ -24,6 +23,7 @@ Once installed,
 | `Ctrl-Alt-Shift-<number>` | Create item              |
 
 ### 1. Download extension
+
 [Chrome Violent Monkey](https://chromewebstore.google.com/detail/jinjaccalgkegednnccohejagnlnfdag)
 
 [Edge Violent Monkey](https://microsoftedge.microsoft.com/addons/detail/violentmonkey/eeagobfjdenkkddmbclomhiblgggliao)
@@ -32,8 +32,8 @@ Once installed,
 
 [GitHub releases](https://github.com/violentmonkey/violentmonkey/releases)
 
-
 ### 2. Use this script
+
 ```js
 // ==UserScript==
 // @name        Aras power search (Main)
@@ -46,11 +46,15 @@ Once installed,
 // @require     https://cdn.jsdelivr.net/npm/fuse.js@7.0.0
 // ==/UserScript==
 
-setTimeout(() =>
-		window.aras && fetch("https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/aras-power-search.iife.js")
+setTimeout(
+	() =>
+		window.aras &&
+		fetch(
+			"https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/aras-power-search.iife.js",
+		)
 			.then((response) => response.text())
 			.then(eval)
 			.catch((error) => console.log(error)),
-    1000
+	1000,
 );
 ```

@@ -1,6 +1,5 @@
 export const getAllItems = (itemTypeName, defaultImage, cache) => {
-
-    const items = aras.IomInnovator.applyAML(`
+	const items = aras.IomInnovator.applyAML(`
     <AML>
         <Item
             type="${itemTypeName}"
@@ -12,37 +11,42 @@ export const getAllItems = (itemTypeName, defaultImage, cache) => {
     </AML>
     `);
 
-    const result = [];
-    for (let i = 0; i < items.getItemCount(); i++) {
-        const item = items.getItemByIndex(i);
+	const result = [];
+	for (let i = 0; i < items.getItemCount(); i++) {
+		const item = items.getItemByIndex(i);
 
-        let image = null;
-        let imageFileId = null;
-        if (item.getProperty("open_icon") && item.getPropertyAttribute("open_icon", "is_null") !== "1") {
-            if (item.getProperty("open_icon").includes("vault:")) {
-                imageFileId = item.getProperty("open_icon").split("=")[1];
-                image = cache.images[imageFileId] || getUrlFromFileId(aras, imageFileId);
-            } else {
-                image = item.getProperty("open_icon");
-            }
-        }
+		let image = null;
+		let imageFileId = null;
+		if (
+			item.getProperty("open_icon") &&
+			item.getPropertyAttribute("open_icon", "is_null") !== "1"
+		) {
+			if (item.getProperty("open_icon").includes("vault:")) {
+				imageFileId = item.getProperty("open_icon").split("=")[1];
+				image =
+					cache.images[imageFileId] ||
+					getUrlFromFileId(aras, imageFileId);
+			} else {
+				image = item.getProperty("open_icon");
+			}
+		}
 
-        if (!image) {
-            image = defaultImage;
-        }
+		if (!image) {
+			image = defaultImage;
+		}
 
-        result.push({
-            image,
-            name: item.getProperty("name") || item.getProperty("keyed_name"),
-            description: item.getProperty("config_id"),
-            itemId: item.getProperty("id"),
-            itemConfigId: item.getProperty("config_id"),
-            label_plural: item.getProperty("label_plural"),
-            itemTypeId: item.getProperty("itemtype"),
-            itemTypeName,
-            imageFileId
-        });
-    }
+		result.push({
+			image,
+			name: item.getProperty("name") || item.getProperty("keyed_name"),
+			description: item.getProperty("config_id"),
+			itemId: item.getProperty("id"),
+			itemConfigId: item.getProperty("config_id"),
+			label_plural: item.getProperty("label_plural"),
+			itemTypeId: item.getProperty("itemtype"),
+			itemTypeName,
+			imageFileId,
+		});
+	}
 
-    return result;
-}
+	return result;
+};

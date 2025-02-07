@@ -3,16 +3,26 @@ import { state } from "./state";
 import Fuse from "fuse.js";
 
 export const fetcher = async (e, searchOverlayContent) => {
-	if (!localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)) {
+	if (
+		!localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)
+	) {
 		const _items = getAllItems(
 			state.itemTypeName,
 			state.defaultImage,
-			searchOverlayContent.cache
+			searchOverlayContent.cache,
 		);
 
-		localStorage.setItem(`_${state.itemTypeName}_aras_power_search_cache`, JSON.stringify(_items));
+		localStorage.setItem(
+			`_${state.itemTypeName}_aras_power_search_cache`,
+			JSON.stringify(_items),
+		);
 	}
-	const items = JSON.parse(localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)) || [];
+	const items =
+		JSON.parse(
+			localStorage.getItem(
+				`_${state.itemTypeName}_aras_power_search_cache`,
+			),
+		) || [];
 	const fuseOptions = {
 		// isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
 		// includeScore: false,
@@ -33,5 +43,7 @@ export const fetcher = async (e, searchOverlayContent) => {
 	const fuse = new Fuse(items, fuseOptions);
 	const searchPattern = e.target.value.trim();
 	const searched = fuse.search(searchPattern);
-	searchOverlayContent.handlesearchItemsData(searched.map((element) => element.item).slice(0, 9));
+	searchOverlayContent.handlesearchItemsData(
+		searched.map((element) => element.item).slice(0, 9),
+	);
 };

@@ -12,14 +12,17 @@ const listenShortcut = (doc, searchOverlayContent) => {
 			e.preventDefault();
 			if (searchOverlayContent.isActive) return;
 			state.openedItems = state.openedItems.slice(-9);
-			searchOverlayContent.handlesearchItemsData(state.openedItems.map((x) => x.data).reverse());
+			searchOverlayContent.handlesearchItemsData(
+				state.openedItems.map((x) => x.data).reverse(),
+			);
 			searchOverlayContent.activate();
 		} else if (e.keyCode === 75 && e.ctrlKey && !e.altKey && e.shiftKey) {
 			e.preventDefault();
 			Object.entries(localStorage)
 				.filter(
 					([key, _]) =>
-						key.endsWith("_aras_power_search_cache") || key.endsWith("_aras_power_search_timestamp")
+						key.endsWith("_aras_power_search_cache") ||
+						key.endsWith("_aras_power_search_timestamp"),
 				)
 				.forEach(([key, _]) => localStorage.removeItem(key));
 			top.aras.AlertSuccess("Cleared aras-power-search cache");
@@ -38,21 +41,28 @@ const listenShortcut = (doc, searchOverlayContent) => {
 						node.addEventListener("load", (e) => {
 							if (
 								node.getAttribute("id") &&
-								state.attachedIframes.find((iframeId) => iframeId === node.getAttribute("id")) !=
-									undefined
+								state.attachedIframes.find(
+									(iframeId) =>
+										iframeId === node.getAttribute("id"),
+								) != undefined
 							) {
 								return;
 							}
 							state.attachedIframes.push(node.getAttribute("id"));
-							listenShortcut(node.contentWindow.document, searchOverlayContent);
+							listenShortcut(
+								node.contentWindow.document,
+								searchOverlayContent,
+							);
 						});
 					}
 				});
 				mutation.removedNodes.forEach((node) => {
 					if (node.tagName === "IFRAME") {
 						state.attachedIframes.splice(
-							state.attachedIframes.findIndex((iframe) => node.getAttribute("id") === iframe),
-							1
+							state.attachedIframes.findIndex(
+								(iframe) => node.getAttribute("id") === iframe,
+							),
+							1,
 						);
 					}
 				});
@@ -216,7 +226,11 @@ const refresh_cache_bak = () => {
 		.filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
 		.map(([key, _]) => key.slice(1, -"_aras_power_search_cache".length));
 	for (let itemTypeName of itemTypesToUpdate) {
-		const modified_on_time = Number.parseInt(localStorage.getItem(`_${itemTypeName}_aras_power_search_timestamp`));
+		const modified_on_time = Number.parseInt(
+			localStorage.getItem(
+				`_${itemTypeName}_aras_power_search_timestamp`,
+			),
+		);
 		const aras_time = aras_time_from_js_time(modified_on_time);
 		const raw_result = aras.IomInnovator.applyAML(`
     <AML>
@@ -233,21 +247,27 @@ const refresh_cache_bak = () => {
 				id: raw_result.getProperty("id"),
 			});
 		}
-		const cached_items = JSON.parse(localStorage.getItem(`_${itemTypeName}_aras_power_search_cache`));
+		const cached_items = JSON.parse(
+			localStorage.getItem(`_${itemTypeName}_aras_power_search_cache`),
+		);
 		debugger;
 		for (let i = 0; i < results.length; i++) {
 			for (let j = 0; j < cached_items.length; j++) {
 				if (results[i].config_id == cached_items[j].config_id) {
 					console.assert(
-						typeof cached_items[j].id === "string" && typeof (results[i].id === "string"),
-						"Major fault"
+						typeof cached_items[j].id === "string" &&
+							typeof (results[i].id === "string"),
+						"Major fault",
 					);
 					cached_items[j].id = results[i].id;
 				}
 			}
 		}
 
-		localStorage.setItem(`_${itemTypeName}_aras_power_search_cache`, JSON.stringify(cached_items));
+		localStorage.setItem(
+			`_${itemTypeName}_aras_power_search_cache`,
+			JSON.stringify(cached_items),
+		);
 	}
 };
 
@@ -257,7 +277,11 @@ const start = () => {
 
 	const searchOverlay = top.document.createElement("div");
 	searchOverlay.classList.add("overlay");
-	const searchOverlayContent = new SearchOverlayContent("Search ItemTypes", "ItemTypes", searchOverlay);
+	const searchOverlayContent = new SearchOverlayContent(
+		"Search ItemTypes",
+		"ItemTypes",
+		searchOverlay,
+	);
 
 	searchOverlayContent.on("input", fetcher, searchOverlayContent);
 	top.document.body.appendChild(searchOverlay);
@@ -266,10 +290,19 @@ const start = () => {
 	const refresh_cache = () => {
 		const itemTypes = Object.entries(localStorage)
 			.filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
-			.map(([key, _]) => key.slice(1).slice(0, -"_aras_power_search_cache".length));
+			.map(([key, _]) =>
+				key.slice(1).slice(0, -"_aras_power_search_cache".length),
+			);
 		for (let itemTypeName of itemTypes) {
-			const items = getAllItems(itemTypeName, state.defaultImage, searchOverlayContent.cache);
-			localStorage.setItem(`_${itemTypeName}_aras_power_search_cache`, JSON.stringify(items));
+			const items = getAllItems(
+				itemTypeName,
+				state.defaultImage,
+				searchOverlayContent.cache,
+			);
+			localStorage.setItem(
+				`_${itemTypeName}_aras_power_search_cache`,
+				JSON.stringify(items),
+			);
 		}
 		aras.AlertSuccess("Cache Refreshed");
 	};

@@ -1,22 +1,24 @@
 {
-  "name": "aras-power-search",
-  "version": "1.0.0",
-  "description": "## Usage",
-  "main": "index.js",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "terser": "^5.38.1",
-    "vite": "^6.1.0"
-  },
-  "dependencies": {
-    "fuse.js": "^7.1.0"
-  }
+	"name": "aras-power-search",
+	"version": "1.0.0",
+	"description": "## Usage",
+	"main": "index.js",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"format": "prettier --write .",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"prettier": "^3.4.2",
+		"terser": "^5.38.1",
+		"vite": "^6.1.0"
+	},
+	"dependencies": {
+		"fuse.js": "^7.1.0"
+	}
 }
