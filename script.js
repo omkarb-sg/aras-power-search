@@ -74,12 +74,6 @@ const attachCss = () => {
         backdrop-filter: blur(0px) ;
         transition: backdrop-filter 0.2s linear ;
         z-index: 1000;
-
-        --primary-color: #ddd;
-        --secondary-color: #ccc;
-        --border-color: #777;
-        --primary-text: #333;
-        --secondary-text: #444;
     }
     
     .search-overlay-content {
@@ -88,31 +82,25 @@ const attachCss = () => {
         left: 50%;
         min-width: 60vw;
         transform: translateX(-50%);
-        background-color: var(--primary-color);
+        background-color: #fff;
         padding: 20px;
         border-radius: 5px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-        color: var(--primary-text);
     }
     
     .search-input {
-        width: -webkit-fill-available;
+        width: 90%;
         margin: auto;
         display: block;
         padding: 10px 20px;
         font-family: sans-serif;
         font-size: 1.3rem;
         outline: none;
-        background-color: var(--secondary-color);
-        border: 1px solid var(--border-color);
-        color: var(--primary-text);
-    }
-    .search-input::placeholder {
-        color: var(--secondary-text);
+    
     }
     
     .searchResults {
-        margin-top: 15px;
+        margin-top: 10px;
     }
     
     .search-item {
@@ -122,7 +110,7 @@ const attachCss = () => {
         font-weight: bold;
         font-size: 1.2rem;
         padding: 5px 15px 5px 5px;
-        margin-bottom: -1px;
+        /* margin-bottom: 5px; */
         cursor: pointer;
         border-radius: 5px;
     }

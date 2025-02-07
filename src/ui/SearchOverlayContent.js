@@ -7,7 +7,7 @@ class SearchOverlayContent {
         }
         this.searchOverlay = searchOverlay;
 
-        this.createDom(title, inputPlaceholder, searchOverlay);
+        this.createDom(title, inputPlaceholder);
         searchOverlay.appendChild(this.getRoot());
         this.applyKeyEvents();
         this.isActive = false;
@@ -21,62 +21,27 @@ class SearchOverlayContent {
         state.reset();
     }
     
-    createDom(title, inputPlaceholder, searchOverlay) {
+    createDom(title, inputPlaceholder) {
         this.remove();
 
         this.elements.root = top.document.createElement("div");
         this.elements.root.classList.add("search-overlay-content");
 
-        const titleContainer = document.createElement("div");
-        titleContainer.classList.add("flex-row");
-        titleContainer.style.justifyContent = "space-between";
-        titleContainer.style.alignItems = "center";
-
         this.elements.title = top.document.createElement("h2");
         this.elements.title.classList.add("m-05");
         this.elements.title.textContent = title;
         
-        // Colors
-        const colorPickerContainer = document.createElement("span");
-        this.elements.primaryColorPicker = document.createElement("input");
-        this.elements.secondaryColorPicker = document.createElement("input");
-        this.elements.borderColorPicker = document.createElement("input");
-        this.elements.primaryTextPicker = document.createElement("input");
-        this.elements.secondaryTextPicker = document.createElement("input");
-        [
-            this.elements.primaryColorPicker,
-            this.elements.secondaryColorPicker,
-            this.elements.borderColorPicker,
-            this.elements.primaryTextPicker,
-            this.elements.secondaryTextPicker
-        ].forEach(element => {
-            element.type = "color";
-            element.style.width = "25px";
-            element.style.height = "25px";
-            element.style.padding = "0px";
-            element.style.marginLeft = "10px";
-            element.addEventListener("input", (e) => {
-                this.updateColors();
-            })
-            colorPickerContainer.appendChild(element);
-        })
-
         this.elements.input = top.document.createElement("input");
         this.elements.input.classList.add("search-input");
         this.elements.input.type = "text";
         this.elements.input.placeholder = inputPlaceholder;
-        this.elements.input.setAttribute("spellcheck", "false");
+        this.elements.input.spellCheck = false;
 
         this.elements.searchResults = new SearchResults([], this);
         
-        titleContainer.appendChild(this.elements.title);
-        titleContainer.appendChild(colorPickerContainer);
-
-        this.elements.root.appendChild(titleContainer);
+        this.elements.root.appendChild(this.elements.title);
         this.elements.root.appendChild(this.elements.input);
         this.elements.root.appendChild(this.elements.searchResults.getRoot());
-
-        this.applyDefaultColors()
     }
 
     applyKeyEvents() {
@@ -97,43 +62,6 @@ class SearchOverlayContent {
             },
             originalHandler: (e) => {} // Only needed when perma removing handler, not required
         })
-    }
-
-    applyDefaultColors() {
-        const prefix = "_aras_power_search_";
-        
-        this.elements.primaryColorPicker.value = localStorage.getItem(prefix + "primary") || "#eee";
-        this.elements.secondaryColorPicker.value = localStorage.getItem(prefix + "secondary") || "#ccc";
-        this.elements.borderColorPicker.value = localStorage.getItem(prefix + "border") || "#000";
-        this.elements.primaryTextPicker.value = localStorage.getItem(prefix + "primarytext") || "#111";
-        this.elements.secondaryTextPicker.value = localStorage.getItem(prefix + "secondarytext") || "#444";
-
-        this.elements.primaryColorPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
-        this.elements.secondaryColorPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
-        this.elements.borderColorPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
-        this.elements.primaryTextPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
-        this.elements.secondaryTextPicker.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
-    }
-
-    updateColors() {
-        const primaryColor = this.elements.primaryColorPicker.value;
-        const secondaryColor = this.elements.secondaryColorPicker.value;
-        const borderColor = this.elements.borderColorPicker.value;
-        const primaryText = this.elements.primaryTextPicker.value;
-        const secondaryText = this.elements.secondaryTextPicker.value;
-
-        const prefix = "_aras_power_search_";
-        localStorage.setItem(prefix + "primary", primaryColor);
-        localStorage.setItem(prefix + "secondary", secondaryColor);
-        localStorage.setItem(prefix + "border", borderColor);
-        localStorage.setItem(prefix + "primarytext", primaryText);
-        localStorage.setItem(prefix + "secondarytext", secondaryText);
-
-        this.searchOverlay.style.setProperty("--primary-color", primaryColor);
-        this.searchOverlay.style.setProperty("--secondary-color", secondaryColor);
-        this.searchOverlay.style.setProperty("--border-color", borderColor);
-        this.searchOverlay.style.setProperty("--primary-text", primaryText);
-        this.searchOverlay.style.setProperty("--secondary-text", secondaryText);
     }
     
     remove() {

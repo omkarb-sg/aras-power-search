@@ -1,6 +1,5 @@
 /**
  * @type {Object} 
- * @prop {Boolean} darkMode
  * @prop {String} itemTypeName
  * @prop {SearchOverlayContent} searchOverlayContent
  * @prop {Function} reset
@@ -10,7 +9,6 @@
  * @prop {SearchItem[]} openedItems
  */
 const state = {
-	darkMode: true,
 	itemTypeName: "ItemType",
 	searchOverlayContent: null,
 	reset: function() {
