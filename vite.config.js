@@ -9,18 +9,18 @@ export default defineConfig({
 			formats: ["es", "cjs", "iife", "system", "umd"],
 		},
 		outDir: "output",
-		minify: "terser",
-		terserOptions: {
-			mangle: {
-				properties: true,
-				toplevel: true,
-				nth_identifier: {
-					get: (n) => {
-						return `_aps_${n}`;
-					},
-				},
-			},
-		},
+		// minify: "terser",
+		// terserOptions: {
+		// 	mangle: {
+		// 		properties: true,
+		// 		toplevel: true,
+		// 		// nth_identifier: {
+		// 		// 	get: (n) => {
+		// 		// 		return `_aps_${n}`;
+		// 		// 	},
+		// 		// },
+		// 	},
+		// },
 		rollupOptions: {
 			external: [],
 		},

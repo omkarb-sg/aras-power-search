@@ -1,4 +1,4 @@
-const jq_throttle = function (delay, no_trailing, callback, debounce_mode) {
+export const jq_throttle = function (delay, no_trailing, callback, debounce_mode) {
 	var timeout_id,
 		last_exec = 0;
 	if (typeof no_trailing !== "boolean") {
@@ -39,10 +39,10 @@ const jq_throttle = function (delay, no_trailing, callback, debounce_mode) {
 	return wrapper;
 };
 
-const debounce = function (delay, at_begin, callback) {
+export const debounce = function (delay, at_begin, callback) {
 	console.assert(callback !== null, "Callback is null");
 	return jq_throttle(delay, callback, at_begin !== false);
 };
-const keepUniqueOrdered = (arr) => {
+export const keepUniqueOrdered = (arr) => {
 	return [...new Set(arr.map(JSON.stringify))].map(JSON.parse);
 };

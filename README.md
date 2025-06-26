@@ -50,7 +50,7 @@ setTimeout(
 	() =>
 		window.aras &&
 		fetch(
-			"https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/aras-power-search.iife.js",
+			"https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/aras-power-search.js",
 		)
 			.then((response) => response.text())
 			.then(eval)
@@ -58,3 +58,23 @@ setTimeout(
 	1000,
 );
 ```
+
+
+### 3. Advance features
+Extended search
+Prefix with Query modifiers starting with `/`
+
+Extended search:
+https://www.fusejs.io/examples.html#extended-search
+
+| Query        | Match type                 | Description                            |
+| -----------  | -------------------------- | -------------------------------------- |
+| `/jscript`   | fuzzy-match                | Items that fuzzy match `jscript`       |
+| `/=scheme`   | exact-match                | Items that are `scheme`                |
+| `/'python`   | include-match              | Items that include `python`            |
+| `/!ruby`     | inverse-exact-match        | Items that do not include `ruby`       |
+| `/^java`     | prefix-exact-match         | Items that start with `java`           |
+| `/!^earlang` | inverse-prefix-exact-match | Items that do not start with `earlang` |
+| `/.js$`      | suffix-exact-match         | Items that end with `.js`              |
+| `/!.go$`     | inverse-suffix-exact-match | Items that do not end with `.go`       |
+

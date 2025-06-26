@@ -2,7 +2,11 @@ import { getAllItems } from "./getItems";
 import { state } from "./state";
 import Fuse from "fuse.js";
 
+const stripExtQuery = (query)=>{ 
+	return query.trimStart().replace(/^\/+/, "")
+}
 export const fetcher = async (e, searchOverlayContent) => {
+	const searchPattern = e.target.value.trim();
 	if (
 		!localStorage.getItem(`_${state.itemTypeName}_aras_power_search_cache`)
 	) {
@@ -23,6 +27,8 @@ export const fetcher = async (e, searchOverlayContent) => {
 				`_${state.itemTypeName}_aras_power_search_cache`,
 			),
 		) || [];
+	const modeExtended = searchPattern.trimStart().startsWith("/");
+
 	const fuseOptions = {
 		// isCaseSensitive: e.target.value.trim().toLowerCase() != e.target.value.trim(),
 		// includeScore: false,
@@ -33,7 +39,7 @@ export const fetcher = async (e, searchOverlayContent) => {
 		// location: 0,
 		// threshold: 0.6,
 		// distance: 100,
-		// useExtendedSearch: false,
+		useExtendedSearch: modeExtended,
 		// ignoreLocation: false,
 		// ignoreFieldNorm: false,
 		// fieldNormWeight: 1,
@@ -41,8 +47,7 @@ export const fetcher = async (e, searchOverlayContent) => {
 	};
 
 	const fuse = new Fuse(items, fuseOptions);
-	const searchPattern = e.target.value.trim();
-	const searched = fuse.search(searchPattern);
+	const searched = fuse.search(stripExtQuery(searchPattern));
 	searchOverlayContent.handlesearchItemsData(
 		searched.map((element) => element.item).slice(0, 9),
 	);
