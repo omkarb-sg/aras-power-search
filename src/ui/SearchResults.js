@@ -1,4 +1,5 @@
 import { state } from "../controllers/state";
+import {keepUniqueOrdered } from "../utils";
 
 export class SearchItem {
 	constructor(name, description, image, index, data) {
