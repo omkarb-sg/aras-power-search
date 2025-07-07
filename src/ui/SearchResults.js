@@ -202,7 +202,18 @@ export class SearchResults {
 					this.searchOverlayContent.elements.input.value = "";
 					this.searchOverlayContent.deactivate();
 					aras.uiShowItemEx(item.node);
-				}
+				} else if (
+					e.keyCode === 48 + searchItem.index &&
+					e.altKey &&
+					e.shiftKey &&
+					searchItem.data.itemTypeName === "ItemType"
+				) {
+					// Item where used
+					Dependencies.view(searchItem.data.name, searchItem.data.itemConfigId, true, top.window.aras);
+
+					this.searchOverlayContent.elements.input.value = "";
+					this.searchOverlayContent.deactivate();
+				} 
 			};
 			const shortcutHandlerChangeSearch =
 				searchItem.data.itemTypeName === "ItemType"
