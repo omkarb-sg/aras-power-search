@@ -206,7 +206,20 @@ export class SearchResults {
 					e.keyCode === 48 + searchItem.index &&
 					e.altKey &&
 					e.shiftKey &&
+					!e.ctrlKey &&
 					searchItem.data.itemTypeName === "ItemType"
+				) {
+					// ItemType where used
+					Dependencies.view(searchItem.data.name, searchItem.data.itemConfigId, true, top.window.aras);
+
+					this.searchOverlayContent.elements.input.value = "";
+					this.searchOverlayContent.deactivate();
+				} else if (
+					e.keyCode === 48 + searchItem.index &&
+					e.altKey &&
+					e.shiftKey &&
+					!e.ctrlKey &&
+					searchItem.data.itemTypeName !== "ItemType"
 				) {
 					// Item where used
 					Dependencies.view(searchItem.data.name, searchItem.data.itemConfigId, true, top.window.aras);
