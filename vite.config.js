@@ -6,7 +6,7 @@ export default defineConfig({
 			entry: "src/main.js",
 			name: "ArasPowerSearch",
 			fileName: "aras-power-search",
-			formats: ["js"],
+			formats: ["cjs", ],
 		},
 		outDir: "output",
 		// minify: "terser",
