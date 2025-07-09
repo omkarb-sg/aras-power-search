@@ -44,5 +44,14 @@ export const debounce = function (delay, at_begin, callback) {
 	return jq_throttle(delay, callback, at_begin !== false);
 };
 export const keepUniqueOrdered = (arr) => {
-	return [...new Set(arr.map(JSON.stringify))].map(JSON.parse);
+	const key = "data";
+	const seen = new Set();
+	  return arr.filter(item => {
+		const valueObj = item[key];
+		const serialized = JSON.stringify(valueObj, Object.keys(valueObj).sort());
+		if (seen.has(serialized)) return false;
+		seen.add(serialized);
+		return true;
+	  });
+	// return [...new Set(arr.map(JSON.stringify))].map(JSON.parse);
 };
