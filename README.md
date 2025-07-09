@@ -21,6 +21,7 @@ Once installed,
 | `Ctrl-<number>`           | Open form of item        |
 | `Ctrl-Shift-k`            | Clear aras-power-cache   |
 | `Ctrl-Alt-Shift-<number>` | Create item              |
+| `Alt-Shift-<number>`      | Item Where Used          |
 
 ### 1. Download extension
 
@@ -43,7 +44,6 @@ Once installed,
 // @version     1.0
 // @author      Omkar BHALE, Tushar KUNTAWAR
 // @description Best searching expirience in aras, yet
-// @require     https://cdn.jsdelivr.net/npm/fuse.js@7.0.0
 // ==/UserScript==
 
 setTimeout(
