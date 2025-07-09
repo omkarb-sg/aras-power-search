@@ -206,7 +206,7 @@ export class SearchResults {
 					e.keyCode === 48 + searchItem.index &&
 					!e.ctrlKey &&
 					e.altKey &&
-					e.shiftKey &&
+					e.shiftKey
 				) {
 					// Where used
 					Dependencies.view(searchItem.data.itemTypeName, searchItem.data.itemConfigId, true, top.window.aras);
