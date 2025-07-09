@@ -250,7 +250,6 @@ const refresh_cache_bak = () => {
 		const cached_items = JSON.parse(
 			localStorage.getItem(`_${itemTypeName}_aras_power_search_cache`),
 		);
-		debugger;
 		for (let i = 0; i < results.length; i++) {
 			for (let j = 0; j < cached_items.length; j++) {
 				if (results[i].config_id == cached_items[j].config_id) {
