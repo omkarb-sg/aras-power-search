@@ -163,7 +163,6 @@ export class SearchResults {
 					this.searchOverlayContent.deactivate();
 					state.openedItems.push(searchItem);
 					state.openedItems = keepUniqueOrdered(state.openedItems);
-					console.log(state.openedItems);
 					arasTabs.openSearch(searchItem.data.itemConfigId);
 				} else if (
 					e.keyCode === 48 + searchItem.index &&
@@ -211,6 +210,8 @@ export class SearchResults {
 					// Where used
 					Dependencies.view(searchItem.data.itemTypeName, searchItem.data.itemConfigId, true, top.window.aras);
 
+					state.openedItems.push(searchItem);
+					state.openedItems = keepUniqueOrdered(state.openedItems);
 					this.searchOverlayContent.elements.input.value = "";
 					this.searchOverlayContent.deactivate();
 				}	
@@ -220,11 +221,12 @@ export class SearchResults {
 					? (e) => {
 							if (
 								e.keyCode === 48 + searchItem.index &&
-								e.altKey &&
-								!e.ctrlKey &&
-								!e.shiftKey
+								(( // search
+									e.altKey && !e.ctrlKey && !e.shiftKey) 
+								|| ( // history
+									e.altKey && !e.ctrlKey && e.shiftKey))
 							) {
-								// Search Items
+
 								e.preventDefault();
 								this.searchOverlayContent.elements.input.value =
 									"";

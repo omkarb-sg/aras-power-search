@@ -212,64 +212,6 @@ const attachCss = () => {
     `;
 	top.document.head.appendChild(styles);
 };
-const aras_time_from_js_time = (timestamp) => {
-	let date = new Date(timestamp);
-	let isoString = date.toISOString(); // "2024-06-27T14:31:36.000Z"
-
-	// Removing milliseconds and the 'Z' character (if needed)
-	isoString = isoString.split(".")[0];
-};
-const refresh_cache_bak = () => {
-	console.log("Cleared aras-power-search cache");
-	top.aras.AlertSuccess("refresh_cache");
-	const itemTypesToUpdate = Object.entries(localStorage)
-		.filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
-		.map(([key, _]) => key.slice(1, -"_aras_power_search_cache".length));
-	for (let itemTypeName of itemTypesToUpdate) {
-		const modified_on_time = Number.parseInt(
-			localStorage.getItem(
-				`_${itemTypeName}_aras_power_search_timestamp`,
-			),
-		);
-		const aras_time = aras_time_from_js_time(modified_on_time);
-		const raw_result = aras.IomInnovator.applyAML(`
-    <AML>
-        <Item type="${itemTypeName}" 
-              action="get" 
-              select"config_id">
-            <modified_on condition="ge">${aras_time}</modified_on>
-        </Item>
-    </AML>`);
-		const results = [];
-		for (let i = 0; i < raw_result.getItemCount(); i++) {
-			results.push({
-				config_id: raw_result.getProperty("config_id"),
-				id: raw_result.getProperty("id"),
-			});
-		}
-		const cached_items = JSON.parse(
-			localStorage.getItem(`_${itemTypeName}_aras_power_search_cache`),
-		);
-		for (let i = 0; i < results.length; i++) {
-			for (let j = 0; j < cached_items.length; j++) {
-				if (results[i].config_id == cached_items[j].config_id) {
-					console.assert(
-						typeof cached_items[j].id === "string" &&
-							typeof (results[i].id === "string"),
-						"Major fault",
-					);
-					cached_items[j].id = results[i].id;
-				}
-			}
-		}
-
-		localStorage.setItem(
-			`_${itemTypeName}_aras_power_search_cache`,
-			JSON.stringify(cached_items),
-		);
-	}
-};
-
 const start = () => {
 	if (!window.aras) return;
 	if (!window.top || window.top !== window) return;
@@ -286,25 +228,5 @@ const start = () => {
 	top.document.body.appendChild(searchOverlay);
 	attachCss();
 	listenShortcut(top.document, searchOverlayContent);
-	const refresh_cache = () => {
-		const itemTypes = Object.entries(localStorage)
-			.filter(([key, _]) => key.endsWith("_aras_power_search_cache"))
-			.map(([key, _]) =>
-				key.slice(1).slice(0, -"_aras_power_search_cache".length),
-			);
-		for (let itemTypeName of itemTypes) {
-			const items = getAllItems(
-				itemTypeName,
-				state.defaultImage,
-				searchOverlayContent.cache,
-			);
-			localStorage.setItem(
-				`_${itemTypeName}_aras_power_search_cache`,
-				JSON.stringify(items),
-			);
-		}
-		aras.AlertSuccess("Cache Refreshed");
-	};
-	// setInterval(refresh_cache, 30_000);
 };
 start();
