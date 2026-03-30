@@ -65,6 +65,7 @@
 	align-items: center;
 	font-weight: bold;
 	font-size: 1.2rem;
+	gap: 12px;
 	padding: 5px 15px 5px 5px;
 	cursor: pointer;
 	border-radius: 5px;
@@ -78,6 +79,38 @@
 	width: 50px;
 	height: 50px;
 	margin-right: 10px;
+}
+
+.search-item-meta {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.search-item-actions {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.search-item-action {
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	background: #fff;
+	font-size: 0.75rem;
+	font-weight: 600;
+	padding: 3px 8px;
+	border-radius: 999px;
+	cursor: pointer;
+}
+
+.search-item-action:hover {
+	background: rgba(0, 0, 0, 0.08);
+}
+
+.search-item-index {
+	min-width: 20px;
+	text-align: right;
+	font-size: 0.95rem;
 }
 
 .flex-row {

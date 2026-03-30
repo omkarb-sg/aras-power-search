@@ -3,9 +3,21 @@ import { SearchResultRow } from "./SearchResultRow";
 
 interface SearchResultsListProps {
 	items: SearchItemData[];
+	onPrimaryAction: (item: SearchItemData) => void;
+	onSearchGrid: (item: SearchItemData) => void;
+	onWhereUsed: (item: SearchItemData) => void;
+	onDrillToItemType: (item: SearchItemData) => void;
+	onCreateItem: (item: SearchItemData) => void;
 }
 
-export function SearchResultsList({ items }: SearchResultsListProps) {
+export function SearchResultsList({
+	items,
+	onPrimaryAction,
+	onSearchGrid,
+	onWhereUsed,
+	onDrillToItemType,
+	onCreateItem,
+}: SearchResultsListProps) {
 	return (
 		<div className="searchResults">
 			{items.map((item, index) => (
@@ -13,6 +25,11 @@ export function SearchResultsList({ items }: SearchResultsListProps) {
 					key={`${item.itemTypeName}-${item.itemConfigId}-${index}`}
 					item={item}
 					index={index}
+					onPrimaryAction={onPrimaryAction}
+					onSearchGrid={onSearchGrid}
+					onWhereUsed={onWhereUsed}
+					onDrillToItemType={onDrillToItemType}
+					onCreateItem={onCreateItem}
 				/>
 			))}
 		</div>

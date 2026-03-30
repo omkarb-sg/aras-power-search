@@ -171,7 +171,14 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				query={query}
 				onQueryChange={performSearch}
 			>
-				<SearchResultsList items={results} />
+				<SearchResultsList
+					items={results}
+					onPrimaryAction={resultActions.openItemForm}
+					onSearchGrid={resultActions.activateSearchGrid}
+					onWhereUsed={resultActions.whereUsed}
+					onDrillToItemType={resultActions.drillToItemType}
+					onCreateItem={resultActions.createItem}
+				/>
 			</SearchPanel>
 		</SearchOverlay>
 	);
