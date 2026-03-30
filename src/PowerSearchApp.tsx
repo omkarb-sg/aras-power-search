@@ -48,6 +48,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		resetScope();
 	};
 
+	const closeOverlayAfterAction = () => {
+		setIsActive(false);
+		resetScope();
+	};
+
 	const performSearch = (nextQuery: string, nextScope = scope) => {
 		setQuery(nextQuery);
 		const aras = topWindow.aras;
@@ -104,6 +109,40 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		closeOverlay();
 	};
 
+	const resultActions = {
+		activateSearchGrid: (item: SearchItemData) => {
+			if (item.itemTypeName !== "ItemType") {
+				addOpenedItem(item);
+			}
+			closeOverlayAfterAction();
+			openSearchGrid(topWindow, item);
+		},
+		openItemForm: (item: SearchItemData) => {
+			addOpenedItem(item);
+			closeOverlayAfterAction();
+			openItemForm(topWindow, item);
+		},
+		createItem: (item: SearchItemData) => {
+			closeOverlayAfterAction();
+			addItemForm(topWindow, item);
+		},
+		whereUsed: (item: SearchItemData) => {
+			addOpenedItem(item);
+			closeOverlayAfterAction();
+			openWhereUsed(topWindow, item);
+		},
+		drillToItemType: (item: SearchItemData) => {
+			addOpenedItem(item);
+			const nextScope = setItemTypeScope(
+				item.name,
+				item.label_plural || item.name,
+				item.image,
+			);
+			setScope(nextScope);
+			performSearch("", nextScope);
+		},
+	};
+
 	useGlobalShortcuts({
 		topWindow,
 		isActive,
@@ -112,45 +151,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			openOverlay,
 			onEscape,
 			clearCache: () => clearCacheAndNotify(topWindow),
-			activateSearchGrid: (item) => {
-				if (item.itemTypeName !== "ItemType") {
-					addOpenedItem(item);
-				}
-				setQuery("");
-				setIsActive(false);
-				resetScope();
-				openSearchGrid(topWindow, item);
-			},
-			openItemForm: (item) => {
-				addOpenedItem(item);
-				setQuery("");
-				setIsActive(false);
-				resetScope();
-				openItemForm(topWindow, item);
-			},
-			createItem: (item) => {
-				setQuery("");
-				setIsActive(false);
-				resetScope();
-				addItemForm(topWindow, item);
-			},
-			whereUsed: (item) => {
-				addOpenedItem(item);
-				setQuery("");
-				setIsActive(false);
-				resetScope();
-				openWhereUsed(topWindow, item);
-			},
-			drillToItemType: (item) => {
-				addOpenedItem(item);
-				const nextScope = setItemTypeScope(
-					item.name,
-					item.label_plural || item.name,
-					item.image,
-				);
-				setScope(nextScope);
-				performSearch("", nextScope);
-			},
+			activateSearchGrid: resultActions.activateSearchGrid,
+			openItemForm: resultActions.openItemForm,
+			createItem: resultActions.createItem,
+			whereUsed: resultActions.whereUsed,
+			drillToItemType: resultActions.drillToItemType,
 		},
 	});
 
