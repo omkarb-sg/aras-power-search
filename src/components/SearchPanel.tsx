@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from "react";
+import type { MouseEvent, PropsWithChildren } from "react";
 
 interface SearchPanelProps extends PropsWithChildren {
 	title: string;
@@ -14,8 +14,12 @@ export function SearchPanel({
 	onQueryChange,
 	children,
 }: SearchPanelProps) {
+	const stopBackdropClick = (event: MouseEvent<HTMLDivElement>) => {
+		event.stopPropagation();
+	};
+
 	return (
-		<div className="search-overlay-content">
+		<div className="search-overlay-content" onClick={stopBackdropClick}>
 			<div className="search-header">
 				<h2 className="m-05">{title}</h2>
 				<a

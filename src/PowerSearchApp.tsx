@@ -164,7 +164,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	}
 
 	return (
-		<SearchOverlay isActive={isActive}>
+		<SearchOverlay isActive={isActive} onBackdropClick={onEscape}>
 			<SearchPanel
 				title={scope.title}
 				placeholder={scope.placeholder}
