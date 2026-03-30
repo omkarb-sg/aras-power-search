@@ -1,15 +1,13 @@
-export function getUrlFromFileId(aras, fileId) {
+export function getUrlFromFileId(aras: ArasGlobal, fileId: string) {
 	let file = aras.IomInnovator.newItem("File", "get");
 	file.setAttribute("id", fileId);
 	file = file.apply();
 	if (file.isError()) return null;
 
 	try {
-		const url = aras.vault.vault.makeFileDownloadUrl(
-			aras.getFileURLEx(file.node),
-		);
+		const url = aras.vault.vault.makeFileDownloadUrl(aras.getFileURLEx(file.node));
 		return url;
-	} catch (e) {
+	} catch {
 		return null;
 	}
 }

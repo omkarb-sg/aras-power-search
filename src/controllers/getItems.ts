@@ -1,6 +1,12 @@
 import { getUrlFromFileId } from "../aras/utils";
+import type { SearchItemData } from "../types/search";
 
-export const getAllItems = (itemTypeName, defaultImage, cache) => {
+export const getAllItems = (
+	aras: ArasGlobal,
+	itemTypeName: string,
+	defaultImage: string,
+	imageCache: Record<string, string>,
+): SearchItemData[] => {
 	const items = aras.IomInnovator.applyAML(`
     <AML>
         <Item
@@ -13,21 +19,22 @@ export const getAllItems = (itemTypeName, defaultImage, cache) => {
     </AML>
     `);
 
-	const result = [];
+	const result: SearchItemData[] = [];
 	for (let i = 0; i < items.getItemCount(); i++) {
 		const item = items.getItemByIndex(i);
 
-		let image = null;
-		let imageFileId = null;
+		let image: string | null = null;
+		let imageFileId: string | null = null;
+
 		if (
 			item.getProperty("open_icon") &&
 			item.getPropertyAttribute("open_icon", "is_null") !== "1"
 		) {
 			if (item.getProperty("open_icon").includes("vault:")) {
-				imageFileId = item.getProperty("open_icon").split("=")[1];
-				image =
-					cache.images[imageFileId] ||
-					getUrlFromFileId(aras, imageFileId);
+				imageFileId = item.getProperty("open_icon").split("=")[1] ?? null;
+				image = imageFileId
+					? imageCache[imageFileId] ?? getUrlFromFileId(aras, imageFileId)
+					: null;
 			} else {
 				image = item.getProperty("open_icon");
 			}
@@ -35,6 +42,10 @@ export const getAllItems = (itemTypeName, defaultImage, cache) => {
 
 		if (!image) {
 			image = defaultImage;
+		}
+
+		if (imageFileId && image) {
+			imageCache[imageFileId] = image;
 		}
 
 		result.push({
