@@ -112,7 +112,7 @@
 	border-radius: 10px;
 }
 
-@property --angle {
+/* @property --angle {
 	syntax: "<angle>";
 	initial-value: 0deg;
 	inherits: false;
@@ -153,4 +153,4 @@
 	to {
 		--angle: 360deg;
 	}
-}
+} */
