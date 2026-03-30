@@ -1,3 +1,5 @@
+import { getUrlFromFileId } from "../aras/utils";
+
 export const getAllItems = (itemTypeName, defaultImage, cache) => {
 	const items = aras.IomInnovator.applyAML(`
     <AML>

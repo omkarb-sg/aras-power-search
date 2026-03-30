@@ -221,10 +221,9 @@ export class SearchResults {
 					? (e) => {
 							if (
 								e.keyCode === 48 + searchItem.index &&
-								(( // search
-									e.altKey && !e.ctrlKey && !e.shiftKey) 
-								|| ( // history
-									e.altKey && !e.ctrlKey && e.shiftKey))
+								e.altKey &&
+								!e.ctrlKey &&
+								!e.shiftKey
 							) {
 
 								e.preventDefault();

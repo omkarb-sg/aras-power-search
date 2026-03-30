@@ -1,4 +1,4 @@
-function getUrlFromFileId(aras, fileId) {
+export function getUrlFromFileId(aras, fileId) {
 	let file = aras.IomInnovator.newItem("File", "get");
 	file.setAttribute("id", fileId);
 	file = file.apply();

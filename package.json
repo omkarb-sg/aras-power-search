@@ -2,7 +2,7 @@
 	"name": "aras-power-search",
 	"version": "1.0.0",
 	"description": "## Usage",
-	"main": "index.js",
+	"main": "output/aras-power-search.js",
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
