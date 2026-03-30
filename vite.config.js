@@ -5,7 +5,7 @@ export default defineConfig({
 		lib: {
 			entry: "src/main.js",
 			name: "ArasPowerSearch",
-			fileName: "aras-power-search",
+			fileName: "compiled",
 			formats: ["cjs", ],
 		},
 		outDir: "output",

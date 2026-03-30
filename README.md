@@ -50,7 +50,7 @@ setTimeout(
 	() =>
 		window.aras &&
 		fetch(
-			"https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/aras-power-search.js",
+			"https://raw.githubusercontent.com/omkarb-sg/aras-power-search/main/output/compiled.js",
 		)
 			.then((response) => response.text())
 			.then(eval)
