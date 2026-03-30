@@ -2,12 +2,12 @@
 
 ## Usage
 
-This is intended for keyboard driven navigation. For Aras Power Search, speed is everything.
+This is keyboard-first navigation. For Aras Power Search, speed is everything.
 Once installed,
 
-- Leave your mouse
+- Use keyboard-first flow for fastest actions
 - Press Ctrl-K
-- Don't touch your mouse. The mouse is dirty.
+- Optional mouse interactions are available for result actions.
 
 ![](./assets/pc_mouse.jpg)
 
@@ -22,6 +22,17 @@ Once installed,
 | `Ctrl-Shift-k`            | Clear aras-power-cache   |
 | `Ctrl-Alt-Shift-<number>` | Create item              |
 | `Alt-Shift-<number>`      | Item Where Used          |
+
+### Mouse interactions
+
+- Click a result row: open item form.
+- Use inline row actions:
+  - `Grid`: open search grid
+  - `Where used`: open dependencies view
+  - `Drill`: only for `ItemType`, drills search scope
+  - `Create`: only for `ItemType`, opens add form
+- Click the backdrop to follow the same progression as `Escape`:
+  - clear query, then reset scope, then close overlay.
 
 ### 1. Download extension
 

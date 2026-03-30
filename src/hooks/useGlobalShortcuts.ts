@@ -64,23 +64,7 @@ export const useGlobalShortcuts = ({
 			const item = current.results[index];
 			if (!item) return;
 
-			if (
-				event.ctrlKey &&
-				event.altKey &&
-				!event.shiftKey &&
-				item.itemTypeName === "ItemType"
-			) {
-				event.preventDefault();
-				current.actions.activateSearchGrid(item);
-				return;
-			}
-
-			if (
-				event.ctrlKey &&
-				event.altKey &&
-				!event.shiftKey &&
-				item.itemTypeName !== "ItemType"
-			) {
+			if (event.ctrlKey && event.altKey && !event.shiftKey) {
 				event.preventDefault();
 				current.actions.activateSearchGrid(item);
 				return;
