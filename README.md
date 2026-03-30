@@ -35,15 +35,19 @@ Once installed,
 
 ### 2. Use this script
 
+Canonical userscript source in this repo:
+
+- `scripts/aras-power-search.user.js`
+
 ```js
 // ==UserScript==
 // @name        Aras power search (Main)
 // @namespace   aras-power-tools
 // @match       *://*/*
 // @grant       none
-// @version     1.0
+// @version     1.1
 // @author      Omkar BHALE, Tushar KUNTAWAR
-// @description Best searching expirience in aras, yet
+// @description Best searching experience in aras, yet
 // ==/UserScript==
 
 setTimeout(
@@ -58,6 +62,11 @@ setTimeout(
 	1000,
 );
 ```
+
+### Build outputs
+
+- `output/compiled.js`: browser userscript artifact (served from GitHub raw content).
+- `output/compiled.cjs`: CommonJS-compatible build artifact.
 
 
 ### 3. Advance features
