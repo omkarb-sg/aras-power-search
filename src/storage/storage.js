@@ -1,3 +1,6 @@
+import { IndexedDB } from "./indexedDB";
+import { LocalStorage } from "./localStorage";
+
 const StorageDependency = IndexedDB;
 const storage = new StorageDependency(window.top || window);
 
