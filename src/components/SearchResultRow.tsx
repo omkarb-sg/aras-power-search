@@ -31,7 +31,12 @@ export function SearchResultRow({
 		};
 
 	return (
-		<div className="search-item" onClick={() => onPrimaryAction(item)}>
+		<div
+			className="search-item"
+			role="listitem"
+			aria-label={`Result ${index + 1}: ${item.name}`}
+			onClick={() => onPrimaryAction(item)}
+		>
 			<div className="flex-row jcc aic">
 				<img src={displayImage} alt={item.name} />
 				<div className="flex-col">
@@ -40,10 +45,11 @@ export function SearchResultRow({
 				</div>
 			</div>
 			<div className="search-item-meta">
-				<div className="search-item-actions">
+				<div className="search-item-actions" role="group" aria-label={`Actions for ${item.name}`}>
 					<button
 						type="button"
 						className="search-item-action"
+						aria-label={`Open search grid for ${item.name}`}
 						title="Open search grid"
 						onClick={handleInlineAction(onSearchGrid)}
 					>
@@ -52,6 +58,7 @@ export function SearchResultRow({
 					<button
 						type="button"
 						className="search-item-action"
+						aria-label={`Open where used for ${item.name}`}
 						title="Open where used"
 						onClick={handleInlineAction(onWhereUsed)}
 					>
@@ -62,6 +69,7 @@ export function SearchResultRow({
 							<button
 								type="button"
 								className="search-item-action"
+								aria-label={`Drill into item type ${item.name}`}
 								title="Drill into item type"
 								onClick={handleInlineAction(onDrillToItemType)}
 							>
@@ -70,6 +78,7 @@ export function SearchResultRow({
 							<button
 								type="button"
 								className="search-item-action"
+								aria-label={`Create ${item.name}`}
 								title="Create item"
 								onClick={handleInlineAction(onCreateItem)}
 							>

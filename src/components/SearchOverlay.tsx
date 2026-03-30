@@ -18,6 +18,9 @@ export function SearchOverlay({
 	return (
 		<div
 			className={`overlay ${isActive ? "active" : ""}`}
+			role={isActive ? "dialog" : undefined}
+			aria-modal={isActive || undefined}
+			aria-label={isActive ? "Aras power search" : undefined}
 			aria-hidden={!isActive}
 			onClick={handleClick}
 		>

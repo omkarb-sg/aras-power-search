@@ -19,7 +19,7 @@ export function SearchResultsList({
 	onCreateItem,
 }: SearchResultsListProps) {
 	return (
-		<div className="searchResults">
+		<div className="searchResults" role="list" aria-label="Search results">
 			{items.map((item, index) => (
 				<SearchResultRow
 					key={`${item.itemTypeName}-${item.itemConfigId}-${index}`}
