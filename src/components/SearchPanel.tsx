@@ -15,7 +15,7 @@ export function SearchPanel({
 	children,
 }: SearchPanelProps) {
 	return (
-		<div className="search-overlay-content card">
+		<div className="search-overlay-content">
 			<div className="search-header">
 				<h2 className="m-05">{title}</h2>
 				<a
@@ -39,6 +39,7 @@ export function SearchPanel({
 				className="search-input"
 				type="text"
 				spellCheck={false}
+				autoFocus
 				value={query}
 				onChange={(event) => onQueryChange(event.target.value)}
 				placeholder={placeholder}
