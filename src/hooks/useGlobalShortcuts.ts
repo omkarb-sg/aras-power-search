@@ -10,6 +10,12 @@ interface GlobalShortcutActions {
 	createItem: (item: SearchItemData) => void;
 	whereUsed: (item: SearchItemData) => void;
 	drillToItemType: (item: SearchItemData) => void;
+	// TODO(pinned-items): Add togglePin: (item: SearchItemData) => void here.
+	// Wire it to Ctrl+D (keyCode 68, ctrlKey, !altKey, !shiftKey) inside handleKeyDown,
+	// only firing when isActive and a digit shortcut selects a result. The handler
+	// should read the item at results[index] (same index resolution as the other
+	// digit shortcuts) and call actions.togglePin(item). In PowerSearchApp, togglePin
+	// should add/remove the item from pinnedItems state and persist to localStorage.
 }
 
 interface UseGlobalShortcutsParams {

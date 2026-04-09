@@ -48,8 +48,22 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		resetScope();
 	};
 
+	// TODO(pinned-items): Add a `pinnedItems` state (SearchItemData[]) persisted to
+	// localStorage under '_aras_power_search_pinned'. On every search, prepend pinned
+	// items that match the current scope to the top of `results`, deduplicating against
+	// the Fuse results so pinned items don't appear twice. A togglePin(item) action
+	// should be wired to a Ctrl+D shortcut in useGlobalShortcuts — see the TODO there.
+
 	const performSearch = (nextQuery: string, nextScope = scope) => {
 		setQuery(nextQuery);
+
+		// TODO(recent-items): Fuse.js returns [] for an empty string query, so clearing
+		// the search box currently leaves the results blank. Fall back to recentItems
+		// when the query is empty so the panel stays populated:
+		//   if (!nextQuery) { setResults(recentItems); return; }
+		// Also consider passing an `isShowingRecent` flag through to SearchResultsList
+		// so it can render a subtle "Recent" section label above the rows.
+
 		const aras = topWindow.aras;
 		if (!aras) return;
 		const nextResults = searchItems({
