@@ -6,6 +6,7 @@ import {
 	openSearchGrid,
 	openWhereUsed,
 } from "./aras/adapters";
+import { KeybindsHelp } from "./components/KeybindsHelp";
 import { SearchOverlay } from "./components/SearchOverlay";
 import { SearchPanel } from "./components/SearchPanel";
 import { SearchResultsList } from "./components/SearchResultsList";
@@ -31,6 +32,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	const [results, setResults] = useState<SearchItemData[]>([]);
 	const [openedItems, setOpenedItems] = useState<OpenedItemEntry[]>([]);
 	const [imageCache, setImageCache] = useState<Record<string, string>>({});
+	const [isHelpActive, setIsHelpActive] = useState(false);
 	const [pinnedItems, setPinnedItems] = useState<SearchItemData[]>(() => {
 		try {
 			const raw = topWindow.localStorage.getItem("_aras_power_search_pinned");
@@ -191,11 +193,21 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				performSearch("", nextScope);
 			},
 			togglePin,
+			showHelp: () => setIsHelpActive(true),
+			hideHelp: () => setIsHelpActive(false),
 		},
 	});
 
 	if (!isActive) {
 		return <SearchOverlay isActive={false} />;
+	}
+
+	if (isHelpActive) {
+		return (
+			<SearchOverlay isActive={true}>
+				<KeybindsHelp />
+			</SearchOverlay>
+		);
 	}
 
 	return (

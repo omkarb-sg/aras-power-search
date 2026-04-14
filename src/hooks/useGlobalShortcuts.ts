@@ -11,6 +11,8 @@ interface GlobalShortcutActions {
 	whereUsed: (item: SearchItemData) => void;
 	drillToItemType: (item: SearchItemData) => void;
 	togglePin: (item: SearchItemData) => void;
+	showHelp: () => void;
+	hideHelp: () => void;
 }
 
 interface UseGlobalShortcutsParams {
@@ -41,10 +43,17 @@ export const useGlobalShortcuts = ({
 
 		const handleKeyUp = (event: KeyboardEvent) => {
 			if (event.keyCode === 68) dKeyHeld.current = false;
+			if (event.keyCode === 191) stateRef.current.actions.hideHelp();
 		};
 
 		const handleKeyDown = (event: KeyboardEvent) => {
 			const current = stateRef.current;
+
+			if (event.keyCode === 191 && event.ctrlKey && !event.altKey && !event.shiftKey && current.isActive) {
+				event.preventDefault();
+				current.actions.showHelp();
+				return;
+			}
 
 			if (event.keyCode === 68 && event.ctrlKey && !event.altKey && !event.shiftKey && current.isActive) {
 				event.preventDefault();
