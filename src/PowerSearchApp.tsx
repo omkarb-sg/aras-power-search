@@ -6,10 +6,14 @@ import {
 	openSearchGrid,
 	openWhereUsed,
 } from "./aras/adapters";
+import { KeybindsHelp } from "./components/KeybindsHelp";
 import { SearchOverlay } from "./components/SearchOverlay";
 import { SearchPanel } from "./components/SearchPanel";
 import { SearchResultsList } from "./components/SearchResultsList";
+import { SettingsPanel } from "./components/SettingsPanel";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
+import type { KeybindsConfig } from "./keybinds/defaults";
+import { loadKeybinds, saveKeybinds } from "./keybinds/storage";
 import { searchItems } from "./search/fetcher";
 import {
 	createInitialScope,
@@ -31,11 +35,40 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	const [results, setResults] = useState<SearchItemData[]>([]);
 	const [openedItems, setOpenedItems] = useState<OpenedItemEntry[]>([]);
 	const [imageCache, setImageCache] = useState<Record<string, string>>({});
+	const [isHelpActive, setIsHelpActive] = useState(false);
+	const [isSettingsActive, setIsSettingsActive] = useState(false);
+	const [keybinds, setKeybinds] = useState<KeybindsConfig>(() =>
+		loadKeybinds(topWindow.localStorage),
+	);
+	const [pinnedItems, setPinnedItems] = useState<SearchItemData[]>(() => {
+		try {
+			const raw = topWindow.localStorage.getItem("_aras_power_search_pinned");
+			return raw ? (JSON.parse(raw) as SearchItemData[]) : [];
+		} catch {
+			return [];
+		}
+	});
 
 	const recentItems = useMemo(
 		() => trimOpenedItems(openedItems).map((entry) => entry.data).reverse(),
 		[openedItems],
 	);
+
+	const pinnedItemIds = useMemo(
+		() => new Set(pinnedItems.map((p) => p.itemConfigId)),
+		[pinnedItems],
+	);
+
+	const togglePin = (item: SearchItemData) => {
+		setPinnedItems((prev) => {
+			const exists = prev.some((p) => p.itemConfigId === item.itemConfigId);
+			const next = exists
+				? prev.filter((p) => p.itemConfigId !== item.itemConfigId)
+				: [...prev, item];
+			topWindow.localStorage.setItem("_aras_power_search_pinned", JSON.stringify(next));
+			return next;
+		});
+	};
 
 	const resetScope = () => {
 		setScope(resetToRootScope());
@@ -50,9 +83,17 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	const performSearch = (nextQuery: string, nextScope = scope) => {
 		setQuery(nextQuery);
+
+		// TODO(recent-items): Fuse.js returns [] for an empty string query, so clearing
+		// the search box currently leaves the results blank. Fall back to recentItems
+		// when the query is empty so the panel stays populated:
+		//   if (!nextQuery) { setResults(recentItems); return; }
+		// Also consider passing an `isShowingRecent` flag through to SearchResultsList
+		// so it can render a subtle "Recent" section label above the rows.
+
 		const aras = topWindow.aras;
 		if (!aras) return;
-		const nextResults = searchItems({
+		const fuseResults = searchItems({
 			aras,
 			storage: topWindow.localStorage,
 			query: nextQuery,
@@ -60,6 +101,13 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			defaultImage: nextScope.defaultImage,
 			imageCache,
 		});
+
+		const scopedPinned = pinnedItems.filter(
+			(p) => p.itemTypeName === nextScope.itemTypeName,
+		);
+		const fuseIds = new Set(fuseResults.map((r) => r.itemConfigId));
+		const dedupedPinned = scopedPinned.filter((p) => !fuseIds.has(p.itemConfigId));
+		const nextResults = [...dedupedPinned, ...fuseResults].slice(0, 9);
 		setResults(nextResults);
 
 		const cacheUpdates: Record<string, string> = {};
@@ -93,6 +141,14 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	};
 
 	const onEscape = () => {
+		if (isSettingsActive) {
+			setIsSettingsActive(false);
+			return;
+		}
+		if (isHelpActive) {
+			setIsHelpActive(false);
+			return;
+		}
 		if (query !== "") {
 			performSearch("");
 			return;
@@ -107,7 +163,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	useGlobalShortcuts({
 		topWindow,
 		isActive,
+		isSettingsActive,
 		results,
+		keybinds,
 		actions: {
 			openOverlay,
 			onEscape,
@@ -151,11 +209,38 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				setScope(nextScope);
 				performSearch("", nextScope);
 			},
+			togglePin,
+			showHelp: () => setIsHelpActive(true),
+			hideHelp: () => setIsHelpActive(false),
 		},
 	});
 
 	if (!isActive) {
 		return <SearchOverlay isActive={false} />;
+	}
+
+	if (isSettingsActive) {
+		return (
+			<SearchOverlay isActive={true}>
+				<SettingsPanel
+					keybinds={keybinds}
+					onSave={(config) => {
+						saveKeybinds(topWindow.localStorage, config);
+						setKeybinds(config);
+						setIsSettingsActive(false);
+					}}
+					onClose={() => setIsSettingsActive(false)}
+				/>
+			</SearchOverlay>
+		);
+	}
+
+	if (isHelpActive) {
+		return (
+			<SearchOverlay isActive={true}>
+				<KeybindsHelp keybinds={keybinds} />
+			</SearchOverlay>
+		);
 	}
 
 	return (
@@ -165,8 +250,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				placeholder={scope.placeholder}
 				query={query}
 				onQueryChange={performSearch}
+				onSettingsClick={() => setIsSettingsActive(true)}
 			>
-				<SearchResultsList items={results} />
+				<SearchResultsList items={results} pinnedItemIds={pinnedItemIds} />
 			</SearchPanel>
 		</SearchOverlay>
 	);
