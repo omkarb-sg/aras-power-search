@@ -10,7 +10,10 @@ import { KeybindsHelp } from "./components/KeybindsHelp";
 import { SearchOverlay } from "./components/SearchOverlay";
 import { SearchPanel } from "./components/SearchPanel";
 import { SearchResultsList } from "./components/SearchResultsList";
+import { SettingsPanel } from "./components/SettingsPanel";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
+import type { KeybindsConfig } from "./keybinds/defaults";
+import { loadKeybinds, saveKeybinds } from "./keybinds/storage";
 import { searchItems } from "./search/fetcher";
 import {
 	createInitialScope,
@@ -33,6 +36,10 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	const [openedItems, setOpenedItems] = useState<OpenedItemEntry[]>([]);
 	const [imageCache, setImageCache] = useState<Record<string, string>>({});
 	const [isHelpActive, setIsHelpActive] = useState(false);
+	const [isSettingsActive, setIsSettingsActive] = useState(false);
+	const [keybinds, setKeybinds] = useState<KeybindsConfig>(() =>
+		loadKeybinds(topWindow.localStorage),
+	);
 	const [pinnedItems, setPinnedItems] = useState<SearchItemData[]>(() => {
 		try {
 			const raw = topWindow.localStorage.getItem("_aras_power_search_pinned");
@@ -134,6 +141,14 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	};
 
 	const onEscape = () => {
+		if (isSettingsActive) {
+			setIsSettingsActive(false);
+			return;
+		}
+		if (isHelpActive) {
+			setIsHelpActive(false);
+			return;
+		}
 		if (query !== "") {
 			performSearch("");
 			return;
@@ -148,7 +163,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	useGlobalShortcuts({
 		topWindow,
 		isActive,
+		isSettingsActive,
 		results,
+		keybinds,
 		actions: {
 			openOverlay,
 			onEscape,
@@ -202,10 +219,26 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		return <SearchOverlay isActive={false} />;
 	}
 
+	if (isSettingsActive) {
+		return (
+			<SearchOverlay isActive={true}>
+				<SettingsPanel
+					keybinds={keybinds}
+					onSave={(config) => {
+						saveKeybinds(topWindow.localStorage, config);
+						setKeybinds(config);
+						setIsSettingsActive(false);
+					}}
+					onClose={() => setIsSettingsActive(false)}
+				/>
+			</SearchOverlay>
+		);
+	}
+
 	if (isHelpActive) {
 		return (
 			<SearchOverlay isActive={true}>
-				<KeybindsHelp />
+				<KeybindsHelp keybinds={keybinds} />
 			</SearchOverlay>
 		);
 	}
@@ -217,6 +250,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				placeholder={scope.placeholder}
 				query={query}
 				onQueryChange={performSearch}
+				onSettingsClick={() => setIsSettingsActive(true)}
 			>
 				<SearchResultsList items={results} pinnedItemIds={pinnedItemIds} />
 			</SearchPanel>
