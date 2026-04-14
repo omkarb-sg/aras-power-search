@@ -124,6 +124,306 @@ kbd {
 	box-shadow: 0 1px 0 #bbb;
 }
 
+/* ── Settings gear button in search header ── */
+.settings-gear-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 4px;
+	margin-right: 16px;
+	color: #444;
+	transition: background 0.15s, color 0.15s;
+}
+
+.settings-gear-btn svg {
+	width: 22px;
+	height: 22px;
+}
+
+.settings-gear-btn:hover {
+	background: rgba(0, 0, 0, 0.08);
+	color: #111;
+}
+
+/* ── Settings panel ── */
+.settings-panel {
+	min-width: 70vw;
+}
+
+.settings-header {
+	width: 90%;
+	margin: 0 auto 16px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.settings-back-btn {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 1.5rem;
+	font-family: sans-serif;
+	padding: 4px 8px 4px 4px;
+	border-radius: 4px;
+	color: #555;
+	transition: background 0.15s, color 0.15s;
+	flex-shrink: 0;
+}
+
+.settings-back-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
+.settings-back-btn:hover {
+	background: rgba(0, 0, 0, 0.08);
+	color: #111;
+}
+
+.settings-title {
+	margin: 0;
+	font-size: 1.8rem;
+	font-weight: bold;
+}
+
+.settings-tabs {
+	width: 90%;
+	margin: 0 auto;
+	display: flex;
+	border-bottom: 2px solid #e8e8e8;
+	margin-bottom: 4px;
+}
+
+.settings-tab {
+	background: none;
+	border: none;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -2px;
+	cursor: pointer;
+	padding: 6px 16px;
+	font-size: 1.5rem;
+	font-family: sans-serif;
+	color: #888;
+	transition: color 0.15s, border-color 0.15s;
+}
+
+.settings-tab:hover {
+	color: #333;
+}
+
+.settings-tab.active {
+	color: #111;
+	font-weight: bold;
+	border-bottom-color: #333;
+}
+
+/* ── Keybinds table ── */
+.settings-table {
+	width: 90%;
+	margin: 0 auto;
+	border-collapse: collapse;
+	font-size: 1.5rem;
+}
+
+.settings-table tr {
+	border-bottom: 1px solid #f0f0f0;
+}
+
+.settings-table tr:last-child {
+	border-bottom: none;
+}
+
+.settings-table tr:hover {
+	background: rgba(0, 0, 0, 0.03);
+}
+
+.settings-table-label {
+	padding: 10px 16px 10px 0;
+	color: #333;
+	width: 50%;
+	vertical-align: middle;
+}
+
+.settings-implicit-badge {
+	display: inline-block;
+	margin-left: 8px;
+	font-size: 1.125rem;
+	background: #f0f0f0;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1px 6px;
+	color: #777;
+	vertical-align: middle;
+	font-family: monospace;
+}
+
+.settings-table-control {
+	padding: 10px 0;
+	vertical-align: middle;
+}
+
+.settings-modifier-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+/* Toggle-pill buttons for modifier combos */
+.modifier-toggle {
+	display: inline-block;
+	padding: 2px 10px;
+	font-family: monospace;
+	font-size: 1.35rem;
+	background: #f0f0f0;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-shadow: 0 1px 0 #bbb;
+	cursor: pointer;
+	color: #555;
+	transition: background 0.1s, color 0.1s, border-color 0.1s, box-shadow 0.1s;
+	user-select: none;
+}
+
+.modifier-toggle:hover:not(.active) {
+	background: #e4e4e4;
+}
+
+.modifier-toggle.active {
+	background: rgb(51, 51, 51);
+	color: #fff;
+	border-color: rgb(51, 51, 51);
+	box-shadow: 0 1px 0 #111;
+}
+
+/* Clickable keybind badge for full-combo rows */
+.keybind-badge {
+	display: inline-block;
+	padding: 2px 10px;
+	font-family: monospace;
+	font-size: 1.35rem;
+	background: #f0f0f0;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-shadow: 0 1px 0 #bbb;
+	cursor: pointer;
+	min-width: 100px;
+	text-align: center;
+	color: #333;
+	transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.keybind-badge:hover:not(.capturing) {
+	background: #e4e4e4;
+}
+
+.keybind-badge.capturing {
+	background: rgb(51, 51, 51);
+	color: #fff;
+	border-color: rgb(51, 51, 51);
+	box-shadow: 0 1px 0 #111;
+	animation: capturing-pulse 1s ease-in-out infinite;
+}
+
+@keyframes capturing-pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.65; }
+}
+
+/* ── JSON editor ── */
+.json-editor-wrap {
+	width: 90%;
+	margin: 12px auto 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.json-editor {
+	width: 100%;
+	min-height: 300px;
+	font-family: monospace;
+	font-size: 1.35rem;
+	padding: 12px 16px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	resize: vertical;
+	box-sizing: border-box;
+	outline: none;
+	color: #222;
+	transition: border-color 0.15s;
+}
+
+.json-editor:focus {
+	border-color: #888;
+}
+
+.json-error {
+	color: #b22222;
+	font-size: 1.275rem;
+	margin: 0;
+	font-family: sans-serif;
+}
+
+/* ── Footer ── */
+.settings-footer {
+	width: 90%;
+	margin: 0 auto;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 20px;
+	padding-top: 12px;
+	border-top: 1px solid #e8e8e8;
+}
+
+.settings-btn-reset {
+	background: none;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	padding: 6px 14px;
+	cursor: pointer;
+	font-size: 1.425rem;
+	font-family: sans-serif;
+	color: #555;
+	transition: background 0.15s, border-color 0.15s;
+}
+
+.settings-btn-reset:hover {
+	background: rgba(0, 0, 0, 0.05);
+	border-color: #aaa;
+}
+
+.settings-btn-save {
+	background: rgb(51, 51, 51);
+	color: white;
+	border: none;
+	border-radius: 5px;
+	padding: 6px 20px;
+	cursor: pointer;
+	font-size: 1.425rem;
+	font-family: sans-serif;
+	font-weight: bold;
+	transition: background 0.15s;
+}
+
+.settings-btn-save:hover:not(:disabled) {
+	background: #111;
+}
+
+.settings-btn-save:disabled {
+	background: #bbb;
+	cursor: not-allowed;
+}
+
 .flex-row {
 	display: flex;
 	flex-direction: row;
