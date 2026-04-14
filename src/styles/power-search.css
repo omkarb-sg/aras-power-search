@@ -86,6 +86,44 @@
 	opacity: 0.7;
 }
 
+.keybinds-help {
+	padding: 10px 20px 20px;
+	margin: auto;
+}
+
+.keybinds-help-title {
+	font-size: 1.2rem;
+	font-weight: bold;
+	margin-bottom: 12px;
+}
+
+.keybinds-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 1rem;
+}
+
+.keybinds-table td {
+	padding: 6px 12px 6px 0;
+	vertical-align: middle;
+}
+
+.keybinds-table td:first-child {
+	white-space: nowrap;
+	width: 1%;
+}
+
+kbd {
+	display: inline-block;
+	padding: 2px 8px;
+	font-family: monospace;
+	font-size: 0.9rem;
+	background: #f0f0f0;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-shadow: 0 1px 0 #bbb;
+}
+
 .flex-row {
 	display: flex;
 	flex-direction: row;
