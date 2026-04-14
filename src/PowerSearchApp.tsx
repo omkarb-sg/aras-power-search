@@ -31,11 +31,35 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	const [results, setResults] = useState<SearchItemData[]>([]);
 	const [openedItems, setOpenedItems] = useState<OpenedItemEntry[]>([]);
 	const [imageCache, setImageCache] = useState<Record<string, string>>({});
+	const [pinnedItems, setPinnedItems] = useState<SearchItemData[]>(() => {
+		try {
+			const raw = topWindow.localStorage.getItem("_aras_power_search_pinned");
+			return raw ? (JSON.parse(raw) as SearchItemData[]) : [];
+		} catch {
+			return [];
+		}
+	});
 
 	const recentItems = useMemo(
 		() => trimOpenedItems(openedItems).map((entry) => entry.data).reverse(),
 		[openedItems],
 	);
+
+	const pinnedItemIds = useMemo(
+		() => new Set(pinnedItems.map((p) => p.itemConfigId)),
+		[pinnedItems],
+	);
+
+	const togglePin = (item: SearchItemData) => {
+		setPinnedItems((prev) => {
+			const exists = prev.some((p) => p.itemConfigId === item.itemConfigId);
+			const next = exists
+				? prev.filter((p) => p.itemConfigId !== item.itemConfigId)
+				: [...prev, item];
+			topWindow.localStorage.setItem("_aras_power_search_pinned", JSON.stringify(next));
+			return next;
+		});
+	};
 
 	const resetScope = () => {
 		setScope(resetToRootScope());
@@ -47,12 +71,6 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setIsActive(false);
 		resetScope();
 	};
-
-	// TODO(pinned-items): Add a `pinnedItems` state (SearchItemData[]) persisted to
-	// localStorage under '_aras_power_search_pinned'. On every search, prepend pinned
-	// items that match the current scope to the top of `results`, deduplicating against
-	// the Fuse results so pinned items don't appear twice. A togglePin(item) action
-	// should be wired to a Ctrl+D shortcut in useGlobalShortcuts — see the TODO there.
 
 	const performSearch = (nextQuery: string, nextScope = scope) => {
 		setQuery(nextQuery);
@@ -66,7 +84,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 		const aras = topWindow.aras;
 		if (!aras) return;
-		const nextResults = searchItems({
+		const fuseResults = searchItems({
 			aras,
 			storage: topWindow.localStorage,
 			query: nextQuery,
@@ -74,6 +92,13 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			defaultImage: nextScope.defaultImage,
 			imageCache,
 		});
+
+		const scopedPinned = pinnedItems.filter(
+			(p) => p.itemTypeName === nextScope.itemTypeName,
+		);
+		const fuseIds = new Set(fuseResults.map((r) => r.itemConfigId));
+		const dedupedPinned = scopedPinned.filter((p) => !fuseIds.has(p.itemConfigId));
+		const nextResults = [...dedupedPinned, ...fuseResults].slice(0, 9);
 		setResults(nextResults);
 
 		const cacheUpdates: Record<string, string> = {};
@@ -165,6 +190,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				setScope(nextScope);
 				performSearch("", nextScope);
 			},
+			togglePin,
 		},
 	});
 
@@ -180,7 +206,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				query={query}
 				onQueryChange={performSearch}
 			>
-				<SearchResultsList items={results} />
+				<SearchResultsList items={results} pinnedItemIds={pinnedItemIds} />
 			</SearchPanel>
 		</SearchOverlay>
 	);

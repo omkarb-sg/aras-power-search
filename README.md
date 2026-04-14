@@ -22,6 +22,7 @@ Once installed,
 | `Ctrl-Shift-k`            | Clear aras-power-cache   |
 | `Ctrl-Alt-Shift-<number>` | Create item              |
 | `Alt-Shift-<number>`      | Item Where Used          |
+| `Ctrl-D` + `<number>`     | Pin / unpin item         |
 
 ### 1. Download extension
 

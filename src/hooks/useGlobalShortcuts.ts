@@ -10,12 +10,7 @@ interface GlobalShortcutActions {
 	createItem: (item: SearchItemData) => void;
 	whereUsed: (item: SearchItemData) => void;
 	drillToItemType: (item: SearchItemData) => void;
-	// TODO(pinned-items): Add togglePin: (item: SearchItemData) => void here.
-	// Wire it to Ctrl+D (keyCode 68, ctrlKey, !altKey, !shiftKey) inside handleKeyDown,
-	// only firing when isActive and a digit shortcut selects a result. The handler
-	// should read the item at results[index] (same index resolution as the other
-	// digit shortcuts) and call actions.togglePin(item). In PowerSearchApp, togglePin
-	// should add/remove the item from pinnedItems state and persist to localStorage.
+	togglePin: (item: SearchItemData) => void;
 }
 
 interface UseGlobalShortcutsParams {
@@ -34,6 +29,7 @@ export const useGlobalShortcuts = ({
 	actions,
 }: UseGlobalShortcutsParams) => {
 	const stateRef = useRef({ isActive, results, actions });
+	const dKeyHeld = useRef(false);
 
 	useEffect(() => {
 		stateRef.current = { isActive, results, actions };
@@ -43,8 +39,18 @@ export const useGlobalShortcuts = ({
 		const attachedDocs = new WeakSet<Document>();
 		const iframeLoadHandlers = new WeakMap<HTMLIFrameElement, EventListener>();
 
+		const handleKeyUp = (event: KeyboardEvent) => {
+			if (event.keyCode === 68) dKeyHeld.current = false;
+		};
+
 		const handleKeyDown = (event: KeyboardEvent) => {
 			const current = stateRef.current;
+
+			if (event.keyCode === 68 && event.ctrlKey && !event.altKey && !event.shiftKey && current.isActive) {
+				event.preventDefault();
+				dKeyHeld.current = true;
+				return;
+			}
 
 			if (event.keyCode === 75 && event.ctrlKey && !event.altKey && !event.shiftKey) {
 				event.preventDefault();
@@ -69,6 +75,12 @@ export const useGlobalShortcuts = ({
 			const index = event.keyCode - 49;
 			const item = current.results[index];
 			if (!item) return;
+
+			if (event.ctrlKey && !event.altKey && !event.shiftKey && dKeyHeld.current) {
+				event.preventDefault();
+				current.actions.togglePin(item);
+				return;
+			}
 
 			if (
 				event.ctrlKey &&
@@ -124,6 +136,7 @@ export const useGlobalShortcuts = ({
 		const attachDocument = (doc: Document) => {
 			if (attachedDocs.has(doc)) return;
 			doc.addEventListener("keydown", handleKeyDown);
+			doc.addEventListener("keyup", handleKeyUp);
 			attachedDocs.add(doc);
 		};
 
@@ -163,8 +176,10 @@ export const useGlobalShortcuts = ({
 		}
 
 		return () => {
+			dKeyHeld.current = false;
 			observer.disconnect();
 			topDoc.removeEventListener("keydown", handleKeyDown);
+			topDoc.removeEventListener("keyup", handleKeyUp);
 			Array.from(topDoc.querySelectorAll("iframe")).forEach((iframeNode) => {
 				const iframe = iframeNode as HTMLIFrameElement;
 				const loadHandler = iframeLoadHandlers.get(iframe);
@@ -172,6 +187,7 @@ export const useGlobalShortcuts = ({
 					iframe.removeEventListener("load", loadHandler);
 				}
 				iframe.contentWindow?.document.removeEventListener("keydown", handleKeyDown);
+				iframe.contentWindow?.document.removeEventListener("keyup", handleKeyUp);
 			});
 		};
 	}, [topWindow]);
