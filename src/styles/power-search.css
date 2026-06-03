@@ -86,6 +86,51 @@
 	opacity: 0.7;
 }
 
+.copy-field {
+	position: relative;
+	display: inline-block;
+	cursor: pointer;
+	border-radius: 3px;
+	padding: 1px 3px;
+	margin: -1px -3px;
+	transition: background-color 0.15s ease;
+}
+
+.copy-field:hover {
+	background-color: rgba(0, 0, 0, 0.08);
+}
+
+.copy-popover {
+	position: absolute;
+	left: 0;
+	bottom: calc(100% + 4px);
+	background-color: #333;
+	color: #fff;
+	font-size: 0.65rem;
+	font-weight: normal;
+	padding: 2px 7px;
+	border-radius: 3px;
+	white-space: nowrap;
+	pointer-events: none;
+	animation: popover-fade 1.4s ease forwards;
+	z-index: 10;
+}
+
+@keyframes popover-fade {
+	0%   { opacity: 0; transform: translateY(3px); }
+	12%  { opacity: 1; transform: translateY(0); }
+	70%  { opacity: 1; }
+	100% { opacity: 0; }
+}
+
+.item-id {
+	font-size: 0.7rem;
+	font-weight: normal;
+	opacity: 0.55;
+	font-family: monospace;
+	letter-spacing: 0.02em;
+}
+
 .keybinds-help {
 	padding: 10px 20px 20px;
 	margin: auto;
