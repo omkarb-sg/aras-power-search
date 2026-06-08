@@ -7,6 +7,7 @@ interface GlobalShortcutActions {
 	openOverlay: () => void;
 	onEscape: () => void;
 	clearCache: () => void;
+	toggleFavorites: () => void;
 	activateSearchGrid: (item: SearchItemData) => void;
 	openItemForm: (item: SearchItemData) => void;
 	createItem: (item: SearchItemData) => void;
@@ -103,6 +104,13 @@ export const useGlobalShortcuts = ({
 			if (matchKeybind(event, keybinds.clearCache)) {
 				event.preventDefault();
 				current.actions.clearCache();
+				return;
+			}
+
+			// Toggle favorites mode
+			if (matchKeybind(event, keybinds.toggleFavorites)) {
+				event.preventDefault();
+				current.actions.toggleFavorites();
 				return;
 			}
 

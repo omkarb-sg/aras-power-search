@@ -14,10 +14,10 @@ interface SettingsPanelProps {
 	onClose: () => void;
 }
 
-type FullKeybindKey = "openOverlay" | "clearCache" | "showHelp" | "pinItem";
+type FullKeybindKey = "openOverlay" | "clearCache" | "showHelp" | "pinItem" | "toggleFavorites";
 type ModifierOnlyKey = "openItemForm" | "activateSearchGrid" | "createItem" | "whereUsed" | "drillToItemType";
 
-const FULL_KEYBIND_KEYS: FullKeybindKey[] = ["openOverlay", "clearCache", "showHelp", "pinItem"];
+const FULL_KEYBIND_KEYS: FullKeybindKey[] = ["openOverlay", "clearCache", "showHelp", "pinItem", "toggleFavorites"];
 const MODIFIER_ONLY_KEYS: ModifierOnlyKey[] = [
 	"openItemForm",
 	"activateSearchGrid",

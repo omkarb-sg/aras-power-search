@@ -16,6 +16,7 @@ export interface KeybindsConfig {
 	clearCache: Keybind;
 	showHelp: Keybind;
 	pinItem: Keybind; // hold this key, then press a digit
+	toggleFavorites: Keybind;
 
 	// Modifier-only combos (digit 1–9 is always the action key, readonly in UI)
 	openItemForm: ModifierCombo;
@@ -30,6 +31,7 @@ export const KEYBIND_LABELS: Record<keyof KeybindsConfig, string> = {
 	clearCache: "Clear aras-power-cache",
 	showHelp: "Show help (hold)",
 	pinItem: "Pin / unpin item (hold)",
+	toggleFavorites: "Toggle favorites mode",
 	openItemForm: "Open item form",
 	activateSearchGrid: "Launch Search Grid",
 	createItem: "Create item",
@@ -42,6 +44,7 @@ export const DEFAULT_KEYBINDS: KeybindsConfig = {
 	clearCache: { ctrl: true, alt: false, shift: true, key: "k" },
 	showHelp: { ctrl: true, alt: false, shift: false, key: "/" },
 	pinItem: { ctrl: true, alt: false, shift: false, key: "d" },
+	toggleFavorites: { ctrl: true, alt: false, shift: false, key: "`" },
 	openItemForm: { ctrl: true, alt: false, shift: false },
 	activateSearchGrid: { ctrl: true, alt: true, shift: false },
 	createItem: { ctrl: true, alt: true, shift: true },

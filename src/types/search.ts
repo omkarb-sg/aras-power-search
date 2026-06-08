@@ -8,7 +8,11 @@ export interface SearchItemData {
 	itemTypeId: string;
 	itemTypeName: string;
 	imageFileId: string | null;
+	/** Present when this item is a saved favorite search */
+	favoriteId?: string;
 }
+
+export type SearchMode = "items" | "favorites";
 
 export interface OpenedItemEntry {
 	data: SearchItemData;

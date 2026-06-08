@@ -6,6 +6,7 @@ interface ArasItem {
 	apply(): ArasItem;
 	getID(): string;
 	isError(): boolean;
+	getErrorString(): string;
 	node: Node;
 }
 
@@ -30,10 +31,12 @@ interface ArasGlobal {
 	uiShowItem(itemTypeName: string, id: string): void;
 	uiShowItemEx(node: Node): void;
 	AlertSuccess(message: string): void;
+	getIsAliasIdentityIDForLoggedUser(): string;
+	getItemTypeForClient(name: string, lookupBy: string): ArasItem;
 }
 
 interface ArasTabsGlobal {
-	openSearch(configId: string): void;
+	openSearch(configId: string, favoriteId?: string): void;
 }
 
 interface DependenciesGlobal {

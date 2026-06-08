@@ -13,7 +13,7 @@ export function SearchResultRow({ item, index, ref, isPinned }: SearchResultRowP
 	const [copied, setCopied] = useState<"name" | "id" | null>(null);
 
 	const displayImage =
-		item.image || `https://picsum.photos/seed/${item.itemConfigId || index}/50/50`;
+		item.image || (item.favoriteId ? "../images/favoriteon.svg" : `https://picsum.photos/seed/${item.itemConfigId || index}/50/50`);
 
 	function copyField(text: string, field: "name" | "id", e: React.MouseEvent) {
 		e.stopPropagation();
@@ -32,6 +32,9 @@ export function SearchResultRow({ item, index, ref, isPinned }: SearchResultRowP
 						onClick={(e) => copyField(item.name, "name", e)}
 					>
 						{item.name}
+						{item.favoriteId && item.description && (
+							<span className="fav-type-tag">{item.description}</span>
+						)}
 						{copied === "name" && <span className="copy-popover">Copied!</span>}
 					</span>
 					<span

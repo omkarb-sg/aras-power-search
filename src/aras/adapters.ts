@@ -52,6 +52,21 @@ export const openWhereUsed = (topWindow: Window, searchItemData: SearchItemData)
 	);
 };
 
+export const openFavoriteSearch = (
+	topWindow: Window,
+	item: SearchItemData,
+) => {
+	const runtime = resolveArasRuntime(topWindow);
+	if (!runtime.arasTabs || !item.favoriteId) return;
+
+	if (item.itemTypeId) {
+		runtime.arasTabs.openSearch(item.itemTypeId, item.favoriteId);
+	} else {
+		// best-effort fallback when type resolution failed
+		runtime.arasTabs.openSearch(item.favoriteId);
+	}
+};
+
 export const clearCacheAndNotify = (topWindow: Window) => {
 	clearPowerSearchCache(topWindow.localStorage);
 	topWindow.aras?.AlertSuccess("Cleared aras-power-search cache");

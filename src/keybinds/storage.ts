@@ -17,6 +17,7 @@ export function loadKeybinds(storage: Storage): KeybindsConfig {
 			clearCache: { ...DEFAULT_KEYBINDS.clearCache, ...parsed.clearCache },
 			showHelp: { ...DEFAULT_KEYBINDS.showHelp, ...parsed.showHelp },
 			pinItem: { ...DEFAULT_KEYBINDS.pinItem, ...parsed.pinItem },
+			toggleFavorites: { ...DEFAULT_KEYBINDS.toggleFavorites, ...parsed.toggleFavorites },
 			openItemForm: { ...DEFAULT_KEYBINDS.openItemForm, ...parsed.openItemForm },
 			activateSearchGrid: { ...DEFAULT_KEYBINDS.activateSearchGrid, ...parsed.activateSearchGrid },
 			createItem: { ...DEFAULT_KEYBINDS.createItem, ...parsed.createItem },

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
 	addItemForm,
 	clearCacheAndNotify,
+	openFavoriteSearch,
 	openItemForm,
 	openSearchGrid,
 	openWhereUsed,
@@ -14,6 +15,7 @@ import { SettingsPanel } from "./components/SettingsPanel";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import type { KeybindsConfig } from "./keybinds/defaults";
 import { loadKeybinds, saveKeybinds } from "./keybinds/storage";
+import { fetchFavorites, searchFavorites } from "./search/favorites";
 import { searchItems } from "./search/fetcher";
 import {
 	createInitialScope,
@@ -22,7 +24,7 @@ import {
 	setItemTypeScope,
 	trimOpenedItems,
 } from "./state/powerSearchStore";
-import type { OpenedItemEntry, SearchItemData } from "./types/search";
+import type { OpenedItemEntry, SearchItemData, SearchMode } from "./types/search";
 
 interface PowerSearchAppProps {
 	topWindow: Window;
@@ -48,6 +50,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			return [];
 		}
 	});
+
+	const [searchMode, setSearchMode] = useState<SearchMode>("items");
+	const [favorites, setFavorites] = useState<SearchItemData[]>([]);
 
 	const recentItems = useMemo(
 		() => trimOpenedItems(openedItems).map((entry) => entry.data).reverse(),
@@ -78,6 +83,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	const closeOverlay = () => {
 		setIsActive(false);
+		setSearchMode("items");
 		resetScope();
 	};
 
@@ -140,6 +146,46 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		);
 	};
 
+	const loadFavorites = (): SearchItemData[] => {
+		const aras = topWindow.aras;
+		if (!aras) return [];
+		if (favorites.length > 0) return favorites;
+		const fetched = fetchFavorites(aras);
+		setFavorites(fetched);
+		return fetched;
+	};
+
+	const toggleFavoritesMode = () => {
+		if (!isActive) {
+			// Open overlay directly into favorites mode
+			setOpenedItems((prev) => trimOpenedItems(prev));
+			setIsActive(true);
+			setSearchMode("favorites");
+			setQuery("");
+			const favs = loadFavorites();
+			setResults(favs.slice(0, 9));
+			return;
+		}
+		if (searchMode === "favorites") {
+			// Switch back to items mode
+			setSearchMode("items");
+			setQuery("");
+			setResults(recentItems);
+		} else {
+			// Switch to favorites mode
+			setSearchMode("favorites");
+			setQuery("");
+			const favs = loadFavorites();
+			setResults(favs.slice(0, 9));
+		}
+	};
+
+	const performFavoritesSearch = (nextQuery: string) => {
+		setQuery(nextQuery);
+		const favs = favorites.length > 0 ? favorites : loadFavorites();
+		setResults(searchFavorites(favs, nextQuery));
+	};
+
 	const onEscape = () => {
 		if (isSettingsActive) {
 			setIsSettingsActive(false);
@@ -150,7 +196,17 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			return;
 		}
 		if (query !== "") {
-			performSearch("");
+			if (searchMode === "favorites") {
+				performFavoritesSearch("");
+			} else {
+				performSearch("");
+			}
+			return;
+		}
+		if (searchMode === "favorites") {
+			// Switch back to items mode
+			setSearchMode("items");
+			setResults(recentItems);
 			return;
 		}
 		if (scope.itemTypeName !== "ItemType") {
@@ -170,7 +226,15 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			openOverlay,
 			onEscape,
 			clearCache: () => clearCacheAndNotify(topWindow),
+			toggleFavorites: toggleFavoritesMode,
 			activateSearchGrid: (item) => {
+				if (item.favoriteId) {
+					openFavoriteSearch(topWindow, item);
+					setQuery("");
+					setIsActive(false);
+					setSearchMode("items");
+					return;
+				}
 				if (item.itemTypeName !== "ItemType") {
 					addOpenedItem(item);
 				}
@@ -180,6 +244,13 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				openSearchGrid(topWindow, item);
 			},
 			openItemForm: (item) => {
+				if (item.favoriteId) {
+					openFavoriteSearch(topWindow, item);
+					setQuery("");
+					setIsActive(false);
+					setSearchMode("items");
+					return;
+				}
 				addOpenedItem(item);
 				setQuery("");
 				setIsActive(false);
@@ -243,13 +314,15 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		);
 	}
 
+	const isFavMode = searchMode === "favorites";
+
 	return (
 		<SearchOverlay isActive={isActive}>
 			<SearchPanel
-				title={scope.title}
-				placeholder={scope.placeholder}
+				title={isFavMode ? "Favorites" : scope.title}
+				placeholder={isFavMode ? "Search Favorites" : scope.placeholder}
 				query={query}
-				onQueryChange={performSearch}
+				onQueryChange={isFavMode ? performFavoritesSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>
 				<SearchResultsList items={results} pinnedItemIds={pinnedItemIds} />
