@@ -18,6 +18,7 @@ import { loadKeybinds, saveKeybinds } from "./keybinds/storage";
 import { fetchFavorites, searchFavorites } from "./search/favorites";
 import { searchItems } from "./search/fetcher";
 import {
+	ROOT_SCOPE,
 	createInitialScope,
 	pushOpenedItem,
 	resetToRootScope,
@@ -87,18 +88,78 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		resetScope();
 	};
 
+	const updateImageCache = (items: SearchItemData[]) => {
+		const cacheUpdates: Record<string, string> = {};
+		for (const item of items) {
+			if (item.imageFileId && item.image) {
+				cacheUpdates[item.imageFileId] = item.image;
+			}
+		}
+		if (Object.keys(cacheUpdates).length > 0) {
+			setImageCache((prev) => ({ ...prev, ...cacheUpdates }));
+		}
+	};
+
+	const mergeWithPinned = (
+		fuseResults: SearchItemData[],
+		itemTypeName: string,
+	): SearchItemData[] => {
+		const scopedPinned = pinnedItems.filter((p) => p.itemTypeName === itemTypeName);
+		const fuseIds = new Set(fuseResults.map((r) => r.itemConfigId));
+		const dedupedPinned = scopedPinned.filter((p) => !fuseIds.has(p.itemConfigId));
+		return [...dedupedPinned, ...fuseResults].slice(0, 9);
+	};
+
 	const performSearch = (nextQuery: string, nextScope = scope) => {
 		setQuery(nextQuery);
 
-		// TODO(recent-items): Fuse.js returns [] for an empty string query, so clearing
-		// the search box currently leaves the results blank. Fall back to recentItems
-		// when the query is empty so the panel stays populated:
-		//   if (!nextQuery) { setResults(recentItems); return; }
-		// Also consider passing an `isShowingRecent` flag through to SearchResultsList
-		// so it can render a subtle "Recent" section label above the rows.
-
 		const aras = topWindow.aras;
 		if (!aras) return;
+
+		// Compound drill-through: type/query
+		// Strip leading "/" then split on first "/" — two parts means auto-drill.
+		// Single "/" prefix with no second slash stays as Fuse extended search.
+		const stripped = nextQuery.replace(/^\//, "");
+		const slashIdx = stripped.indexOf("/");
+		if (slashIdx > 0) {
+			const typePart = stripped.slice(0, slashIdx);
+			const itemPart = stripped.slice(slashIdx + 1);
+
+			const typeResults = searchItems({
+				aras,
+				storage: topWindow.localStorage,
+				query: typePart,
+				itemTypeName: "ItemType",
+				defaultImage: ROOT_SCOPE.defaultImage,
+				imageCache,
+			});
+
+			if (typeResults.length > 0) {
+				const firstType = typeResults[0];
+				const drilledScope = setItemTypeScope(
+					firstType.name,
+					firstType.label_plural || firstType.name,
+					firstType.image,
+				);
+				setScope(drilledScope);
+
+				const subResults = searchItems({
+					aras,
+					storage: topWindow.localStorage,
+					query: itemPart,
+					itemTypeName: drilledScope.itemTypeName,
+					defaultImage: drilledScope.defaultImage,
+					imageCache,
+				});
+
+				const nextResults = mergeWithPinned(subResults, drilledScope.itemTypeName);
+				setResults(nextResults);
+				updateImageCache(nextResults);
+				return;
+			}
+		}
+
+		// Normal single-scope search
 		const fuseResults = searchItems({
 			aras,
 			storage: topWindow.localStorage,
@@ -108,26 +169,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			imageCache,
 		});
 
-		const scopedPinned = pinnedItems.filter(
-			(p) => p.itemTypeName === nextScope.itemTypeName,
-		);
-		const fuseIds = new Set(fuseResults.map((r) => r.itemConfigId));
-		const dedupedPinned = scopedPinned.filter((p) => !fuseIds.has(p.itemConfigId));
-		const nextResults = [...dedupedPinned, ...fuseResults].slice(0, 9);
+		const nextResults = mergeWithPinned(fuseResults, nextScope.itemTypeName);
 		setResults(nextResults);
-
-		const cacheUpdates: Record<string, string> = {};
-		nextResults.forEach((result) => {
-			if (result.imageFileId && result.image) {
-				cacheUpdates[result.imageFileId] = result.image;
-			}
-		});
-		if (Object.keys(cacheUpdates).length > 0) {
-			setImageCache((previous) => ({
-				...previous,
-				...cacheUpdates,
-			}));
-		}
+		updateImageCache(nextResults);
 	};
 
 	const openOverlay = () => {
