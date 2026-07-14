@@ -54,6 +54,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	const [searchMode, setSearchMode] = useState<SearchMode>("items");
 	const [favorites, setFavorites] = useState<SearchItemData[]>([]);
+	const [highlightedIndex, setHighlightedIndex] = useState(-1);
+	const [isCompoundSearch, setIsCompoundSearch] = useState(false);
 
 	const recentItems = useMemo(
 		() => trimOpenedItems(openedItems).map((entry) => entry.data).reverse(),
@@ -112,6 +114,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	const performSearch = (nextQuery: string, nextScope = scope) => {
 		setQuery(nextQuery);
+		setHighlightedIndex(-1);
 
 		const aras = topWindow.aras;
 		if (!aras) return;
@@ -142,6 +145,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 					firstType.image,
 				);
 				setScope(drilledScope);
+				setIsCompoundSearch(true);
 
 				const subResults = searchItems({
 					aras,
@@ -160,6 +164,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		}
 
 		// Normal single-scope search
+		setIsCompoundSearch(false);
 		const fuseResults = searchItems({
 			aras,
 			storage: topWindow.localStorage,
@@ -178,6 +183,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		if (isActive) return;
 		setOpenedItems((previous) => trimOpenedItems(previous));
 		setResults(recentItems);
+		setHighlightedIndex(-1);
 		setIsActive(true);
 	};
 
@@ -200,8 +206,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	};
 
 	const toggleFavoritesMode = () => {
+		setHighlightedIndex(-1);
 		if (!isActive) {
-			// Open overlay directly into favorites mode
 			setOpenedItems((prev) => trimOpenedItems(prev));
 			setIsActive(true);
 			setSearchMode("favorites");
@@ -211,12 +217,10 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			return;
 		}
 		if (searchMode === "favorites") {
-			// Switch back to items mode
 			setSearchMode("items");
 			setQuery("");
 			setResults(recentItems);
 		} else {
-			// Switch to favorites mode
 			setSearchMode("favorites");
 			setQuery("");
 			const favs = loadFavorites();
@@ -226,6 +230,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	const performFavoritesSearch = (nextQuery: string) => {
 		setQuery(nextQuery);
+		setHighlightedIndex(-1);
 		const favs = favorites.length > 0 ? favorites : loadFavorites();
 		setResults(searchFavorites(favs, nextQuery));
 	};
@@ -239,6 +244,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			setIsHelpActive(false);
 			return;
 		}
+		if (isCompoundSearch) {
+			setIsCompoundSearch(false);
+			resetScope();
+			return;
+		}
 		if (query !== "") {
 			if (searchMode === "favorites") {
 				performFavoritesSearch("");
@@ -248,7 +258,6 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			return;
 		}
 		if (searchMode === "favorites") {
-			// Switch back to items mode
 			setSearchMode("items");
 			setResults(recentItems);
 			return;
@@ -271,6 +280,38 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			onEscape,
 			clearCache: () => clearCacheAndNotify(topWindow),
 			toggleFavorites: toggleFavoritesMode,
+			navigateDown: () => {
+				setHighlightedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
+			},
+			navigateUp: () => {
+				setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
+			},
+			enterItem: () => {
+				if (highlightedIndex < 0 || highlightedIndex >= results.length) return;
+				const item = results[highlightedIndex];
+				if (item.favoriteId) {
+					openFavoriteSearch(topWindow, item);
+					setQuery("");
+					setIsActive(false);
+					setSearchMode("items");
+					return;
+				}
+				if (scope.itemTypeName === "ItemType") {
+					if (item.itemTypeName !== "ItemType") {
+						addOpenedItem(item);
+					}
+					setQuery("");
+					setIsActive(false);
+					resetScope();
+					openSearchGrid(topWindow, item);
+				} else {
+					addOpenedItem(item);
+					setQuery("");
+					setIsActive(false);
+					resetScope();
+					openItemForm(topWindow, item);
+				}
+			},
 			activateSearchGrid: (item) => {
 				if (item.favoriteId) {
 					openFavoriteSearch(topWindow, item);
@@ -369,7 +410,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				onQueryChange={isFavMode ? performFavoritesSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>
-				<SearchResultsList items={results} pinnedItemIds={pinnedItemIds} />
+				<SearchResultsList items={results} pinnedItemIds={pinnedItemIds} highlightedIndex={highlightedIndex} />
 			</SearchPanel>
 		</SearchOverlay>
 	);

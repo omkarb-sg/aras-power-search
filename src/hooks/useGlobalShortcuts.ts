@@ -8,6 +8,9 @@ interface GlobalShortcutActions {
 	onEscape: () => void;
 	clearCache: () => void;
 	toggleFavorites: () => void;
+	navigateUp: () => void;
+	navigateDown: () => void;
+	enterItem: () => void;
 	activateSearchGrid: (item: SearchItemData) => void;
 	openItemForm: (item: SearchItemData) => void;
 	createItem: (item: SearchItemData) => void;
@@ -115,6 +118,23 @@ export const useGlobalShortcuts = ({
 			}
 
 			if (!current.isActive || current.isSettingsActive) return;
+
+			// Arrow navigation + Enter
+			if (event.key === "ArrowDown") {
+				event.preventDefault();
+				current.actions.navigateDown();
+				return;
+			}
+			if (event.key === "ArrowUp") {
+				event.preventDefault();
+				current.actions.navigateUp();
+				return;
+			}
+			if (event.key === "Enter") {
+				event.preventDefault();
+				current.actions.enterItem();
+				return;
+			}
 
 			// Digit-based shortcuts (use event.code to handle Shift+digit correctly)
 			const index = getDigitFromCode(event.code);

@@ -82,7 +82,7 @@ export const searchItems = ({
 	const modeExtended = query.trimStart().startsWith("/");
 	const fuse = new Fuse(items, {
 		useExtendedSearch: modeExtended,
-		keys: ["itemTypeName", "itemConfigId", "name"],
+		keys: ["itemTypeName", "itemConfigId", "name", "label_plural"],
 	});
 	const searched = fuse.search(stripExtQuery(query));
 	return searched.map((element) => element.item).slice(0, 9);

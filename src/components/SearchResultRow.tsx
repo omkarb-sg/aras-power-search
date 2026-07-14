@@ -7,9 +7,10 @@ interface SearchResultRowProps {
 	index: number;
 	ref: Ref<HTMLDivElement>;
 	isPinned?: boolean;
+	isHighlighted?: boolean;
 }
 
-export function SearchResultRow({ item, index, ref, isPinned }: SearchResultRowProps) {
+export function SearchResultRow({ item, index, ref, isPinned, isHighlighted }: SearchResultRowProps) {
 	const [copied, setCopied] = useState<"name" | "id" | null>(null);
 
 	const displayImage =
@@ -23,7 +24,7 @@ export function SearchResultRow({ item, index, ref, isPinned }: SearchResultRowP
 	}
 
 	return (
-		<div className="search-item" ref={ref}>
+		<div className={`search-item${isHighlighted ? " highlighted" : ""}`} ref={ref}>
 			<div className="flex-row jcc aic">
 				<img src={displayImage} alt={item.name} />
 				<div className="flex-col">
@@ -32,6 +33,9 @@ export function SearchResultRow({ item, index, ref, isPinned }: SearchResultRowP
 						onClick={(e) => copyField(item.name, "name", e)}
 					>
 						{item.name}
+						{item.label_plural && item.label_plural !== item.name && (
+							<span className="fav-type-tag">{item.label_plural}</span>
+						)}
 						{item.favoriteId && item.description && (
 							<span className="fav-type-tag">{item.description}</span>
 						)}

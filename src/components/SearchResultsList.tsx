@@ -5,9 +5,10 @@ import { SearchResultRow } from "./SearchResultRow";
 interface SearchResultsListProps {
 	items: SearchItemData[];
 	pinnedItemIds: Set<string>;
+	highlightedIndex: number;
 }
 
-export function SearchResultsList({ items, pinnedItemIds }: SearchResultsListProps) {
+export function SearchResultsList({ items, pinnedItemIds, highlightedIndex }: SearchResultsListProps) {
 	const { getRef } = useFlipAnimation(items, (item) => item.itemId, {
 		duration: 300,
 		easing: "ease",
@@ -23,6 +24,7 @@ export function SearchResultsList({ items, pinnedItemIds }: SearchResultsListPro
 					item={item}
 					index={index}
 					isPinned={pinnedItemIds.has(item.itemConfigId)}
+					isHighlighted={index === highlightedIndex}
 				/>
 			))}
 		</div>
