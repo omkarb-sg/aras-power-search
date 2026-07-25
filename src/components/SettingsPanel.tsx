@@ -15,7 +15,7 @@ interface SettingsPanelProps {
 }
 
 type FullKeybindKey = "openOverlay" | "clearCache" | "showHelp" | "pinItem" | "toggleFavorites";
-type ModifierOnlyKey = "openItemForm" | "activateSearchGrid" | "createItem" | "whereUsed" | "drillToItemType";
+type ModifierOnlyKey = "openItemForm" | "activateSearchGrid" | "createItem" | "whereUsed" | "drillToItemType" | "exportItem";
 
 const FULL_KEYBIND_KEYS: FullKeybindKey[] = ["openOverlay", "clearCache", "showHelp", "pinItem", "toggleFavorites"];
 const MODIFIER_ONLY_KEYS: ModifierOnlyKey[] = [
@@ -24,6 +24,7 @@ const MODIFIER_ONLY_KEYS: ModifierOnlyKey[] = [
 	"createItem",
 	"whereUsed",
 	"drillToItemType",
+	"exportItem",
 ];
 
 const MODIFIER_KEY_CODES = new Set(["Control", "Alt", "Shift", "Meta", "CapsLock"]);

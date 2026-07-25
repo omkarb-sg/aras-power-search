@@ -15,6 +15,7 @@ export function KeybindsHelp({ keybinds }: KeybindsHelpProps) {
 		{ keys: formatKeybind(keybinds.clearCache), description: "Clear aras-power-cache" },
 		{ keys: formatModifierCombo(keybinds.createItem), description: "Create item" },
 		{ keys: formatModifierCombo(keybinds.whereUsed), description: "Item Where Used" },
+		{ keys: formatModifierCombo(keybinds.exportItem), description: "Quick Export" },
 		{
 			keys: `${formatKeybind(keybinds.pinItem)} + digit`,
 			description: "Pin / unpin item",

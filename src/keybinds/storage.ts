@@ -23,6 +23,7 @@ export function loadKeybinds(storage: Storage): KeybindsConfig {
 			createItem: { ...DEFAULT_KEYBINDS.createItem, ...parsed.createItem },
 			whereUsed: { ...DEFAULT_KEYBINDS.whereUsed, ...parsed.whereUsed },
 			drillToItemType: { ...DEFAULT_KEYBINDS.drillToItemType, ...parsed.drillToItemType },
+			exportItem: { ...DEFAULT_KEYBINDS.exportItem, ...parsed.exportItem },
 		};
 	} catch {
 		return DEFAULT_KEYBINDS;

@@ -6,9 +6,10 @@ interface SearchResultsListProps {
 	items: SearchItemData[];
 	pinnedItemIds: Set<string>;
 	highlightedIndex: number;
+	onExport?: (item: SearchItemData) => void;
 }
 
-export function SearchResultsList({ items, pinnedItemIds, highlightedIndex }: SearchResultsListProps) {
+export function SearchResultsList({ items, pinnedItemIds, highlightedIndex, onExport }: SearchResultsListProps) {
 	const { getRef } = useFlipAnimation(items, (item) => item.itemId, {
 		duration: 300,
 		easing: "ease",
@@ -25,6 +26,7 @@ export function SearchResultsList({ items, pinnedItemIds, highlightedIndex }: Se
 					index={index}
 					isPinned={pinnedItemIds.has(item.itemConfigId)}
 					isHighlighted={index === highlightedIndex}
+					onExport={onExport}
 				/>
 			))}
 		</div>

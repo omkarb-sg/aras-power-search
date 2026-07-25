@@ -1,5 +1,6 @@
 interface ArasItem {
 	getProperty(name: string): string;
+	getPropertyItem(name: string): ArasItem | null;
 	getPropertyAttribute(name: string, attribute: string): string;
 	setAttribute(name: string, value: string): void;
 	setProperty(name: string, value: string): void;
@@ -13,6 +14,8 @@ interface ArasItem {
 interface ArasItemCollection {
 	getItemCount(): number;
 	getItemByIndex(index: number): ArasItem;
+	isError(): boolean;
+	getErrorString(): string;
 }
 
 interface ArasInnovator {
@@ -20,17 +23,25 @@ interface ArasInnovator {
 	newItem(type: string, action: string): ArasItem;
 }
 
+interface ArasOAuthClient {
+	getAuthorizationHeader(): { Authorization: string };
+}
+
 interface ArasGlobal {
 	IomInnovator: ArasInnovator;
+	OAuthClient: ArasOAuthClient;
 	vault: {
 		vault: {
 			makeFileDownloadUrl(url: string): string;
 		};
 	};
 	getFileURLEx(node: Node): string;
+	getServerURL(): string;
+	getDatabase(): string;
 	uiShowItem(itemTypeName: string, id: string): void;
 	uiShowItemEx(node: Node): void;
 	AlertSuccess(message: string): void;
+	AlertError(message: string): void;
 	getIsAliasIdentityIDForLoggedUser(): string;
 	getItemTypeForClient(name: string, lookupBy: string): ArasItem;
 }

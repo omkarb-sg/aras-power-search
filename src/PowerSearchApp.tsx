@@ -7,6 +7,7 @@ import {
 	openSearchGrid,
 	openWhereUsed,
 } from "./aras/adapters";
+import { exportItem } from "./aras/export";
 import { KeybindsHelp } from "./components/KeybindsHelp";
 import { SearchOverlay } from "./components/SearchOverlay";
 import { SearchPanel } from "./components/SearchPanel";
@@ -366,6 +367,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				performSearch("", nextScope);
 			},
 			togglePin,
+			exportItem: (item) => exportItem(topWindow, item),
 			showHelp: () => setIsHelpActive(true),
 			hideHelp: () => setIsHelpActive(false),
 		},
@@ -410,7 +412,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				onQueryChange={isFavMode ? performFavoritesSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>
-				<SearchResultsList items={results} pinnedItemIds={pinnedItemIds} highlightedIndex={highlightedIndex} />
+				<SearchResultsList items={results} pinnedItemIds={pinnedItemIds} highlightedIndex={highlightedIndex} onExport={(item) => exportItem(topWindow, item)} />
 			</SearchPanel>
 		</SearchOverlay>
 	);

@@ -24,6 +24,7 @@ export interface KeybindsConfig {
 	createItem: ModifierCombo;
 	whereUsed: ModifierCombo;
 	drillToItemType: ModifierCombo;
+	exportItem: ModifierCombo;
 }
 
 export const KEYBIND_LABELS: Record<keyof KeybindsConfig, string> = {
@@ -37,6 +38,7 @@ export const KEYBIND_LABELS: Record<keyof KeybindsConfig, string> = {
 	createItem: "Create item",
 	whereUsed: "Item Where Used",
 	drillToItemType: "Further search items",
+	exportItem: "Quick Export",
 };
 
 export const DEFAULT_KEYBINDS: KeybindsConfig = {
@@ -50,6 +52,7 @@ export const DEFAULT_KEYBINDS: KeybindsConfig = {
 	createItem: { ctrl: true, alt: true, shift: true },
 	whereUsed: { ctrl: false, alt: true, shift: true },
 	drillToItemType: { ctrl: false, alt: true, shift: false },
+	exportItem: { ctrl: true, alt: false, shift: true },
 };
 
 export const KEYBINDS_STORAGE_KEY = "_aras_power_search_keybinds";

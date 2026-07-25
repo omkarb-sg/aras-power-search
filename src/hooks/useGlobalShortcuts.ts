@@ -17,6 +17,7 @@ interface GlobalShortcutActions {
 	whereUsed: (item: SearchItemData) => void;
 	drillToItemType: (item: SearchItemData) => void;
 	togglePin: (item: SearchItemData) => void;
+	exportItem: (item: SearchItemData) => void;
 	showHelp: () => void;
 	hideHelp: () => void;
 }
@@ -147,6 +148,13 @@ export const useGlobalShortcuts = ({
 			if (pinHoldActive.current && matchModifiers(event, keybinds.pinItem)) {
 				event.preventDefault();
 				current.actions.togglePin(item);
+				return;
+			}
+
+			// Export item
+			if (matchModifiers(event, keybinds.exportItem)) {
+				event.preventDefault();
+				current.actions.exportItem(item);
 				return;
 			}
 

@@ -79,6 +79,48 @@
 }
 
 
+.search-item-leader {
+	flex: 1;
+	border-bottom: 1px dotted rgba(0, 0, 0, 0.15);
+	margin: 0 12px;
+	align-self: center;
+	min-width: 20px;
+}
+
+.search-item-actions {
+	flex-shrink: 0;
+	gap: 6px;
+}
+
+.export-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: none;
+	border: none;
+	cursor: pointer;
+	padding: 4px;
+	border-radius: 4px;
+	color: #999;
+	opacity: 0;
+	transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+.search-item:hover .export-btn,
+.search-item.highlighted .export-btn {
+	opacity: 1;
+}
+
+.export-btn:hover {
+	background: rgba(0, 0, 0, 0.08);
+	color: #333;
+}
+
+.export-btn svg {
+	width: 16px;
+	height: 16px;
+}
+
 .search-item img {
 	width: 50px;
 	height: 50px;
