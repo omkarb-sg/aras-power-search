@@ -1,17 +1,20 @@
-import { useState } from "react";
-import type { Ref } from "react";
+import { forwardRef, useState } from "react";
 import type { SearchItemData } from "../types/search";
 
 interface SearchResultRowProps {
 	item: SearchItemData;
 	index: number;
-	ref: Ref<HTMLDivElement>;
 	isPinned?: boolean;
 	isHighlighted?: boolean;
 	onExport?: (item: SearchItemData) => void;
 }
 
-export function SearchResultRow({ item, index, ref, isPinned, isHighlighted, onExport }: SearchResultRowProps) {
+// forwardRef rather than React 19's ref-as-a-prop: preact/compat strips `ref`
+// out of props, which would silently leave the FLIP animation with no nodes.
+export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(function SearchResultRow(
+	{ item, index, isPinned, isHighlighted, onExport },
+	ref,
+) {
 	const [copied, setCopied] = useState<"name" | "id" | null>(null);
 
 	const displayImage =
@@ -71,4 +74,4 @@ export function SearchResultRow({ item, index, ref, isPinned, isHighlighted, onE
 			</div>
 		</div>
 	);
-}
+});

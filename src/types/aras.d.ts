@@ -2,6 +2,7 @@ interface ArasItem {
 	getProperty(name: string): string;
 	getPropertyItem(name: string): ArasItem | null;
 	getPropertyAttribute(name: string, attribute: string): string;
+	getAttribute(name: string): string;
 	setAttribute(name: string, value: string): void;
 	setProperty(name: string, value: string): void;
 	apply(): ArasItem;
