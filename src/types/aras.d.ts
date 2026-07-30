@@ -29,9 +29,16 @@ interface ArasOAuthClient {
 	getAuthorizationHeader(): { Authorization: string };
 }
 
+interface ArasMetadataCache {
+	GetItemType(name: string, lookupBy: string): { results?: Element } | undefined;
+	CreateCacheKey(...parts: string[]): unknown;
+	GetItem(key: unknown): { content?: Record<string, string> } | undefined;
+}
+
 interface ArasGlobal {
 	IomInnovator: ArasInnovator;
 	OAuthClient: ArasOAuthClient;
+	MetadataCache?: ArasMetadataCache;
 	vault: {
 		vault: {
 			makeFileDownloadUrl(url: string): string;

@@ -256,7 +256,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	};
 
 	const showOpenTabs = () => {
-		const tabs = getOpenTabs(topWindow);
+		const tabs = getOpenTabs(topWindow, imageCache);
+		updateImageCache(tabs);
 		setOpenTabs(tabs);
 		setSearchMode("tabs");
 		setQuery("");

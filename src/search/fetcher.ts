@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import { getAllItems } from "../controllers/getItems";
+import { getAllItems, getAllItemTypes } from "../controllers/getItems";
 import type { SearchItemData } from "../types/search";
 
 const stripExtQuery = (query: string) => query.trimStart().replace(/^\/+/, "");
@@ -73,10 +73,17 @@ export const searchItems = ({
 	defaultImage: string;
 	imageCache: Record<string, string>;
 }): SearchItemData[] => {
-	let items = getCache(storage, itemTypeName);
-	if (!items.length) {
-		items = getAllItems(aras, itemTypeName, defaultImage, imageCache);
-		setCache(storage, itemTypeName, items);
+	let items: SearchItemData[];
+	if (itemTypeName === "ItemType") {
+		storage.removeItem(getCacheKey(itemTypeName));
+		storage.removeItem(getTimestampKey(itemTypeName));
+		items = getAllItemTypes(aras, defaultImage, imageCache);
+	} else {
+		items = getCache(storage, itemTypeName);
+		if (!items.length) {
+			items = getAllItems(aras, itemTypeName, defaultImage, imageCache);
+			setCache(storage, itemTypeName, items);
+		}
 	}
 
 	const modeExtended = query.trimStart().startsWith("/");

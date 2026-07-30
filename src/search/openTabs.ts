@@ -1,7 +1,11 @@
 import Fuse from "fuse.js";
+import { getItemTypeIcon } from "../controllers/getItems";
 import type { SearchItemData } from "../types/search";
 
-export function getOpenTabs(topWindow: Window): SearchItemData[] {
+export function getOpenTabs(
+	topWindow: Window,
+	imageCache: Record<string, string> = {},
+): SearchItemData[] {
 	return (topWindow.arasTabs?.tabs || []).flatMap((tabId) => {
 		const frame = topWindow.document.getElementById(
 			tabId,
@@ -13,6 +17,14 @@ export function getOpenTabs(topWindow: Window): SearchItemData[] {
 		if (!itemTypeName) return [];
 
 		const itemId = item?.getID() || "";
+		const { image, imageFileId } = topWindow.aras
+			? getItemTypeIcon(
+					topWindow.aras,
+					itemTypeName,
+					"../images/DefaultItemType.svg",
+					imageCache,
+				)
+			: { image: "../images/DefaultItemType.svg", imageFileId: null };
 		return [
 			{
 				name:
@@ -25,8 +37,8 @@ export function getOpenTabs(topWindow: Window): SearchItemData[] {
 				label_plural: "",
 				itemTypeId: "",
 				itemTypeName,
-				image: null,
-				imageFileId: null,
+				image,
+				imageFileId,
 				tabId,
 			},
 		];
