@@ -48,6 +48,39 @@ interface ExportResult {
 	error?: string;
 }
 
+/**
+ * Ping the quick-export extension's content script and wait for its pong.
+ *
+ * Export only works when that extension is loaded, so the UI probes for it up front rather
+ * than letting the user click an export button that can only fail 30s later. Resolves false
+ * on timeout — absence is the expected answer, not an error.
+ */
+export function probeExtension(topWindow: Window, timeoutMs = 800): Promise<boolean> {
+	return new Promise((resolve) => {
+		const id = `ps-ping-${Date.now()}`;
+
+		const cleanup = () => {
+			topWindow.removeEventListener("message", handler);
+			clearTimeout(timer);
+		};
+
+		const handler = (ev: MessageEvent) => {
+			const d = ev.data;
+			if (!d || d.__ps !== "pong" || d.id !== id) return;
+			cleanup();
+			resolve(true);
+		};
+
+		topWindow.addEventListener("message", handler);
+		topWindow.postMessage({ __ps: "ping", id }, "*");
+
+		const timer = setTimeout(() => {
+			cleanup();
+			resolve(false);
+		}, timeoutMs);
+	});
+}
+
 function callExtension(
 	topWindow: Window,
 	body: Record<string, unknown>,

@@ -7,9 +7,18 @@ interface SearchResultsListProps {
 	pinnedItemIds: Set<string>;
 	highlightedIndex: number;
 	onExport?: (item: SearchItemData) => void;
+	isExportReady?: boolean;
+	onExportHelp?: () => void;
 }
 
-export function SearchResultsList({ items, pinnedItemIds, highlightedIndex, onExport }: SearchResultsListProps) {
+export function SearchResultsList({
+	items,
+	pinnedItemIds,
+	highlightedIndex,
+	onExport,
+	isExportReady,
+	onExportHelp,
+}: SearchResultsListProps) {
 	const { getRef } = useFlipAnimation(items, (item) => item.itemId, {
 		duration: 300,
 		easing: "ease",
@@ -27,6 +36,8 @@ export function SearchResultsList({ items, pinnedItemIds, highlightedIndex, onEx
 					isPinned={pinnedItemIds.has(item.itemConfigId)}
 					isHighlighted={index === highlightedIndex}
 					onExport={onExport}
+					isExportReady={isExportReady}
+					onExportHelp={onExportHelp}
 				/>
 			))}
 		</div>

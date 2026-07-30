@@ -8,6 +8,10 @@ interface KeybindsHelpProps {
 export function KeybindsHelp({ keybinds }: KeybindsHelpProps) {
 	const rows = [
 		{ keys: formatKeybind(keybinds.openOverlay), description: "Launch aras-power-search" },
+		{
+			keys: formatKeybind(keybinds.openTabs),
+			description: "Search open tabs",
+		},
 		{ keys: formatKeybind(keybinds.toggleFavorites), description: "Toggle favorites mode" },
 		{ keys: formatModifierCombo(keybinds.drillToItemType), description: "Further search items" },
 		{ keys: formatModifierCombo(keybinds.activateSearchGrid), description: "Launch Search Grid" },

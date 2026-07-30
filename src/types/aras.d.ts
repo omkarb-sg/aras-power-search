@@ -7,6 +7,7 @@ interface ArasItem {
 	setProperty(name: string, value: string): void;
 	apply(): ArasItem;
 	getID(): string;
+	getType(): string;
 	isError(): boolean;
 	getErrorString(): string;
 	node: Node;
@@ -49,6 +50,12 @@ interface ArasGlobal {
 
 interface ArasTabsGlobal {
 	openSearch(configId: string, favoriteId?: string): void;
+	tabs?: string[];
+	selectTab(tabId: string): void;
+}
+
+interface ArasSearchContainer {
+	itemTypeName: string;
 }
 
 interface DependenciesGlobal {
@@ -64,4 +71,6 @@ interface Window {
 	aras?: ArasGlobal;
 	arasTabs?: ArasTabsGlobal;
 	Dependencies?: DependenciesGlobal;
+	thisItem?: ArasItem;
+	searchContainer?: ArasSearchContainer;
 }

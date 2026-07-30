@@ -16,6 +16,7 @@ Once installed,
 | Keybind                   | Description              |
 | ------------------------- | ------------------------ |
 | `Ctrl-k`                  | Launch aras-power-search |
+| <kbd>Ctrl+Shift+&#96;</kbd> | Search open tabs         |
 | `Ctrl-/` (Hold)           | Show Help                |
 | `Alt-<number>`            | Further Search items     |
 | `Ctrl-Alt-<number>`       | Launch Search Grid       |

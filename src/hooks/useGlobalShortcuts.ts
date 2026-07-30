@@ -8,6 +8,7 @@ interface GlobalShortcutActions {
 	onEscape: () => void;
 	clearCache: () => void;
 	toggleFavorites: () => void;
+	openTabs: () => void;
 	navigateUp: () => void;
 	navigateDown: () => void;
 	enterItem: () => void;
@@ -115,6 +116,12 @@ export const useGlobalShortcuts = ({
 			if (matchKeybind(event, keybinds.toggleFavorites)) {
 				event.preventDefault();
 				current.actions.toggleFavorites();
+				return;
+			}
+
+			if (matchKeybind(event, keybinds.openTabs)) {
+				event.preventDefault();
+				current.actions.openTabs();
 				return;
 			}
 

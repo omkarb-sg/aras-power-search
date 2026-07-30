@@ -14,10 +14,17 @@ interface SettingsPanelProps {
 	onClose: () => void;
 }
 
-type FullKeybindKey = "openOverlay" | "clearCache" | "showHelp" | "pinItem" | "toggleFavorites";
+type FullKeybindKey = "openOverlay" | "clearCache" | "showHelp" | "pinItem" | "toggleFavorites" | "openTabs";
 type ModifierOnlyKey = "openItemForm" | "activateSearchGrid" | "createItem" | "whereUsed" | "drillToItemType" | "exportItem";
 
-const FULL_KEYBIND_KEYS: FullKeybindKey[] = ["openOverlay", "clearCache", "showHelp", "pinItem", "toggleFavorites"];
+const FULL_KEYBIND_KEYS: FullKeybindKey[] = [
+	"openOverlay",
+	"openTabs",
+	"toggleFavorites",
+	"clearCache",
+	"showHelp",
+	"pinItem",
+];
 const MODIFIER_ONLY_KEYS: ModifierOnlyKey[] = [
 	"openItemForm",
 	"activateSearchGrid",
@@ -69,7 +76,7 @@ export function SettingsPanel({ keybinds, onSave, onClose }: SettingsPanelProps)
 				ctrl: e.ctrlKey,
 				alt: e.altKey,
 				shift: e.shiftKey,
-				key: e.key.toLowerCase() === e.key ? e.key : e.key.toLowerCase(),
+				key: e.code === "Backquote" ? "`" : e.key.toLowerCase(),
 			};
 
 			setDraft((prev) => ({

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
 	addItemForm,
 	clearCacheAndNotify,
@@ -7,8 +7,9 @@ import {
 	openSearchGrid,
 	openWhereUsed,
 } from "./aras/adapters";
-import { exportItem } from "./aras/export";
+import { exportItem, probeExtension } from "./aras/export";
 import { KeybindsHelp } from "./components/KeybindsHelp";
+import { QuickExportHelp } from "./components/QuickExportHelp";
 import { SearchOverlay } from "./components/SearchOverlay";
 import { SearchPanel } from "./components/SearchPanel";
 import { SearchResultsList } from "./components/SearchResultsList";
@@ -18,6 +19,7 @@ import type { KeybindsConfig } from "./keybinds/defaults";
 import { loadKeybinds, saveKeybinds } from "./keybinds/storage";
 import { fetchFavorites, searchFavorites } from "./search/favorites";
 import { searchItems } from "./search/fetcher";
+import { getOpenTabs, searchOpenTabs } from "./search/openTabs";
 import {
 	ROOT_SCOPE,
 	createInitialScope,
@@ -55,8 +57,25 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	const [searchMode, setSearchMode] = useState<SearchMode>("items");
 	const [favorites, setFavorites] = useState<SearchItemData[]>([]);
+	const [openTabs, setOpenTabs] = useState<SearchItemData[]>([]);
 	const [highlightedIndex, setHighlightedIndex] = useState(-1);
 	const [isCompoundSearch, setIsCompoundSearch] = useState(false);
+	// null while the probe is in flight — rows stay optimistic so the export icon doesn't
+	// flash to a warning on every open. Re-probed each time the overlay opens, so installing
+	// the extension mid-session is picked up without a page reload.
+	const [isExportReady, setIsExportReady] = useState<boolean | null>(null);
+	const [isExportHelpActive, setIsExportHelpActive] = useState(false);
+
+	useEffect(() => {
+		if (!isActive) return;
+		let cancelled = false;
+		probeExtension(topWindow).then((available) => {
+			if (!cancelled) setIsExportReady(available);
+		});
+		return () => {
+			cancelled = true;
+		};
+	}, [isActive, topWindow]);
 
 	const recentItems = useMemo(
 		() => trimOpenedItems(openedItems).map((entry) => entry.data).reverse(),
@@ -236,7 +255,34 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setResults(searchFavorites(favs, nextQuery));
 	};
 
+	const showOpenTabs = () => {
+		const tabs = getOpenTabs(topWindow);
+		setOpenTabs(tabs);
+		setSearchMode("tabs");
+		setQuery("");
+		setResults(tabs.slice(0, 9));
+		setHighlightedIndex(-1);
+		setIsActive(true);
+	};
+
+	const performOpenTabsSearch = (nextQuery: string) => {
+		setQuery(nextQuery);
+		setHighlightedIndex(-1);
+		setResults(searchOpenTabs(openTabs, nextQuery));
+	};
+
+	const selectOpenTab = (item: SearchItemData) => {
+		if (!item.tabId) return false;
+		topWindow.arasTabs?.selectTab(item.tabId);
+		closeOverlay();
+		return true;
+	};
+
 	const onEscape = () => {
+		if (isExportHelpActive) {
+			setIsExportHelpActive(false);
+			return;
+		}
 		if (isSettingsActive) {
 			setIsSettingsActive(false);
 			return;
@@ -253,12 +299,19 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		if (query !== "") {
 			if (searchMode === "favorites") {
 				performFavoritesSearch("");
+			} else if (searchMode === "tabs") {
+				performOpenTabsSearch("");
 			} else {
 				performSearch("");
 			}
 			return;
 		}
 		if (searchMode === "favorites") {
+			setSearchMode("items");
+			setResults(recentItems);
+			return;
+		}
+		if (searchMode === "tabs") {
 			setSearchMode("items");
 			setResults(recentItems);
 			return;
@@ -281,6 +334,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			onEscape,
 			clearCache: () => clearCacheAndNotify(topWindow),
 			toggleFavorites: toggleFavoritesMode,
+			openTabs: showOpenTabs,
 			navigateDown: () => {
 				setHighlightedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
 			},
@@ -290,6 +344,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			enterItem: () => {
 				if (highlightedIndex < 0 || highlightedIndex >= results.length) return;
 				const item = results[highlightedIndex];
+				if (selectOpenTab(item)) return;
 				if (item.favoriteId) {
 					openFavoriteSearch(topWindow, item);
 					setQuery("");
@@ -330,6 +385,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				openSearchGrid(topWindow, item);
 			},
 			openItemForm: (item) => {
+				if (selectOpenTab(item)) return;
 				if (item.favoriteId) {
 					openFavoriteSearch(topWindow, item);
 					setQuery("");
@@ -367,7 +423,15 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				performSearch("", nextScope);
 			},
 			togglePin,
-			exportItem: (item) => exportItem(topWindow, item),
+			exportItem: (item) => {
+				// Same guard as the row button: surface the setup steps instead of firing a
+				// request that can only fail once the 30s relay timeout elapses.
+				if (isExportReady === false) {
+					setIsExportHelpActive(true);
+					return;
+				}
+				exportItem(topWindow, item);
+			},
 			showHelp: () => setIsHelpActive(true),
 			hideHelp: () => setIsHelpActive(false),
 		},
@@ -401,18 +465,34 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		);
 	}
 
+	if (isExportHelpActive) {
+		return (
+			<SearchOverlay isActive={true}>
+				<QuickExportHelp onClose={() => setIsExportHelpActive(false)} />
+			</SearchOverlay>
+		);
+	}
+
 	const isFavMode = searchMode === "favorites";
+	const isTabsMode = searchMode === "tabs";
 
 	return (
 		<SearchOverlay isActive={isActive}>
 			<SearchPanel
-				title={isFavMode ? "Favorites" : scope.title}
-				placeholder={isFavMode ? "Search Favorites" : scope.placeholder}
+				title={isFavMode ? "Favorites" : isTabsMode ? "Open Tabs" : scope.title}
+				placeholder={isFavMode ? "Search Favorites" : isTabsMode ? "Search Open Tabs" : scope.placeholder}
 				query={query}
-				onQueryChange={isFavMode ? performFavoritesSearch : performSearch}
+				onQueryChange={isFavMode ? performFavoritesSearch : isTabsMode ? performOpenTabsSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>
-				<SearchResultsList items={results} pinnedItemIds={pinnedItemIds} highlightedIndex={highlightedIndex} onExport={(item) => exportItem(topWindow, item)} />
+				<SearchResultsList
+					items={results}
+					pinnedItemIds={pinnedItemIds}
+					highlightedIndex={highlightedIndex}
+					onExport={isTabsMode ? undefined : (item) => exportItem(topWindow, item)}
+					isExportReady={isExportReady !== false}
+					onExportHelp={() => setIsExportHelpActive(true)}
+				/>
 			</SearchPanel>
 		</SearchOverlay>
 	);

@@ -18,6 +18,7 @@ export function loadKeybinds(storage: Storage): KeybindsConfig {
 			showHelp: { ...DEFAULT_KEYBINDS.showHelp, ...parsed.showHelp },
 			pinItem: { ...DEFAULT_KEYBINDS.pinItem, ...parsed.pinItem },
 			toggleFavorites: { ...DEFAULT_KEYBINDS.toggleFavorites, ...parsed.toggleFavorites },
+			openTabs: { ...DEFAULT_KEYBINDS.openTabs, ...parsed.openTabs },
 			openItemForm: { ...DEFAULT_KEYBINDS.openItemForm, ...parsed.openItemForm },
 			activateSearchGrid: { ...DEFAULT_KEYBINDS.activateSearchGrid, ...parsed.activateSearchGrid },
 			createItem: { ...DEFAULT_KEYBINDS.createItem, ...parsed.createItem },
@@ -53,7 +54,7 @@ export function formatModifierCombo(combo: ModifierCombo): string {
 
 export function matchKeybind(event: KeyboardEvent, kb: Keybind): boolean {
 	return (
-		event.key.toLowerCase() === kb.key.toLowerCase() &&
+		(event.code === "Backquote" ? "`" : event.key.toLowerCase()) === kb.key.toLowerCase() &&
 		event.ctrlKey === kb.ctrl &&
 		event.altKey === kb.alt &&
 		event.shiftKey === kb.shift
