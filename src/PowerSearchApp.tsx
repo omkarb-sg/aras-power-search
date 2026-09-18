@@ -58,7 +58,10 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	const [searchMode, setSearchMode] = useState<SearchMode>("items");
 	const [favorites, setFavorites] = useState<SearchItemData[]>([]);
 	const [openTabs, setOpenTabs] = useState<SearchItemData[]>([]);
-	const [highlightedIndex, setHighlightedIndex] = useState(-1);
+	// The first result is highlighted by default, so Enter acts on the obvious
+	// candidate straight away. Previously this reset to -1 on every keystroke,
+	// which cost an ArrowDown press before Enter would do anything at all.
+	const [highlightedIndex, setHighlightedIndex] = useState(0);
 	const [isCompoundSearch, setIsCompoundSearch] = useState(false);
 	// null while the probe is in flight — rows stay optimistic so the export icon doesn't
 	// flash to a warning on every open. Re-probed each time the overlay opens, so installing
@@ -134,7 +137,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	const performSearch = (nextQuery: string, nextScope = scope) => {
 		setQuery(nextQuery);
-		setHighlightedIndex(-1);
+		setHighlightedIndex(0);
 
 		const aras = topWindow.aras;
 		if (!aras) return;
@@ -203,7 +206,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		if (isActive) return;
 		setOpenedItems((previous) => trimOpenedItems(previous));
 		setResults(recentItems);
-		setHighlightedIndex(-1);
+		setHighlightedIndex(0);
 		setIsActive(true);
 	};
 
@@ -226,7 +229,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	};
 
 	const toggleFavoritesMode = () => {
-		setHighlightedIndex(-1);
+		setHighlightedIndex(0);
 		if (!isActive) {
 			setOpenedItems((prev) => trimOpenedItems(prev));
 			setIsActive(true);
@@ -250,7 +253,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	const performFavoritesSearch = (nextQuery: string) => {
 		setQuery(nextQuery);
-		setHighlightedIndex(-1);
+		setHighlightedIndex(0);
 		const favs = favorites.length > 0 ? favorites : loadFavorites();
 		setResults(searchFavorites(favs, nextQuery));
 	};
@@ -262,13 +265,13 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setSearchMode("tabs");
 		setQuery("");
 		setResults(tabs.slice(0, 9));
-		setHighlightedIndex(-1);
+		setHighlightedIndex(0);
 		setIsActive(true);
 	};
 
 	const performOpenTabsSearch = (nextQuery: string) => {
 		setQuery(nextQuery);
-		setHighlightedIndex(-1);
+		setHighlightedIndex(0);
 		setResults(searchOpenTabs(openTabs, nextQuery));
 	};
 
