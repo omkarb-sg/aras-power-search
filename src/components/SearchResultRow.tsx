@@ -38,7 +38,13 @@ export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
 	}
 
 	return (
-		<div className={`search-item${isHighlighted ? " highlighted" : ""}`} ref={ref}>
+		<div
+			className={`search-item${isHighlighted ? " highlighted" : ""}`}
+			ref={ref}
+			id={`aps-result-${index}`}
+			role="option"
+			aria-selected={!!isHighlighted}
+		>
 			<div className="flex-row jcc aic">
 				<img src={displayImage} alt={item.name} />
 				<div className="flex-col">

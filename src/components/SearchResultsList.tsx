@@ -26,7 +26,7 @@ export function SearchResultsList({
 	});
 
 	return (
-		<div className="searchResults">
+		<div className="searchResults" id="aps-results" role="listbox" aria-label="Search results">
 			{items.map((item, index) => (
 				<SearchResultRow
 					key={item.itemId}
