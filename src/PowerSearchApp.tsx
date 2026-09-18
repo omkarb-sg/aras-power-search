@@ -447,7 +447,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	if (isSettingsActive) {
 		return (
-			<SearchOverlay isActive={true}>
+			<SearchOverlay isActive={true} label="Power Search settings">
 				<SettingsPanel
 					keybinds={keybinds}
 					onSave={(config) => {
@@ -463,7 +463,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	if (isHelpActive) {
 		return (
-			<SearchOverlay isActive={true}>
+			<SearchOverlay isActive={true} label="Keyboard shortcuts">
 				<KeybindsHelp keybinds={keybinds} />
 			</SearchOverlay>
 		);
@@ -471,7 +471,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 	if (isExportHelpActive) {
 		return (
-			<SearchOverlay isActive={true}>
+			<SearchOverlay isActive={true} label="Quick Export setup">
 				<QuickExportHelp onClose={() => setIsExportHelpActive(false)} />
 			</SearchOverlay>
 		);
@@ -487,6 +487,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				placeholder={isFavMode ? "Search Favorites" : isTabsMode ? "Search Open Tabs" : scope.placeholder}
 				query={query}
 				helpKeybind={formatKeybind(keybinds.showHelp)}
+				activeIndex={highlightedIndex}
+				resultCount={results.length}
 				onQueryChange={isFavMode ? performFavoritesSearch : isTabsMode ? performOpenTabsSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>

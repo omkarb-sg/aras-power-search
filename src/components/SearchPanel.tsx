@@ -6,6 +6,10 @@ interface SearchPanelProps extends PropsWithChildren {
 	query: string;
 	/** Formatted showHelp keybind, e.g. "Ctrl+/" — reflects the user's own binding. */
 	helpKeybind: string;
+	/** Index of the active result, or -1 when nothing is highlighted. */
+	activeIndex?: number;
+	/** How many results are currently listed, for aria-expanded. */
+	resultCount?: number;
 	onQueryChange: (value: string) => void;
 	onSettingsClick: () => void;
 }
@@ -15,6 +19,8 @@ export function SearchPanel({
 	placeholder,
 	query,
 	helpKeybind,
+	activeIndex = -1,
+	resultCount = 0,
 	onQueryChange,
 	onSettingsClick,
 	children,
@@ -83,6 +89,16 @@ export function SearchPanel({
 				value={query}
 				onChange={(event) => onQueryChange(event.target.value)}
 				placeholder={placeholder}
+				aria-label={placeholder}
+				role="combobox"
+				aria-autocomplete="list"
+				aria-controls="aps-results"
+				aria-expanded={resultCount > 0}
+				aria-activedescendant={
+					activeIndex >= 0 && activeIndex < resultCount
+						? `aps-result-${activeIndex}`
+						: undefined
+				}
 			/>
 			{children}
 		</div>
