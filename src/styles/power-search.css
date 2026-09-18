@@ -778,3 +778,33 @@ kbd {
 	border-color: #f2ddc2;
 	color: #b45309;
 }
+
+/* ── Result list: scrolls past the nine digit-addressable rows ── */
+.searchResults {
+	max-height: 52vh;
+	overflow-y: auto;
+	scrollbar-width: thin;
+}
+
+/* Keeps the numbered column aligned once a row has no digit of its own. */
+.row-no-digit {
+	display: inline-block;
+	width: 1ch;
+}
+
+/* ── Match count under the results ── */
+.result-count {
+	width: 90%;
+	margin: 8px auto 0;
+	padding-top: 8px;
+	border-top: 1px solid #eee;
+	font-size: 0.8rem;
+	font-weight: bold;
+	color: #6b6b6b;
+}
+
+.result-count-hint {
+	margin-left: 6px;
+	font-weight: normal;
+	color: #a8a8a8;
+}

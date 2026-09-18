@@ -1,5 +1,6 @@
 import Fuse from "fuse.js";
 import { getItemTypeIcon } from "../controllers/getItems";
+import { MAX_VISIBLE_RESULTS, type SearchResultPage } from "./fetcher";
 import type { SearchItemData } from "../types/search";
 
 export function getOpenTabs(
@@ -48,10 +49,10 @@ export function getOpenTabs(
 export function searchOpenTabs(
 	tabs: SearchItemData[],
 	query: string,
-): SearchItemData[] {
-	if (!query.trim()) return tabs.slice(0, 9);
-	return new Fuse(tabs, { keys: ["name", "itemTypeName"] })
+): SearchResultPage {
+	if (!query.trim()) return { items: tabs.slice(0, MAX_VISIBLE_RESULTS), total: tabs.length };
+	const matches = new Fuse(tabs, { keys: ["name", "itemTypeName"] })
 		.search(query)
-		.map(({ item }) => item)
-		.slice(0, 9);
+		.map(({ item }) => item);
+	return { items: matches.slice(0, MAX_VISIBLE_RESULTS), total: matches.length };
 }

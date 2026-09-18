@@ -1,5 +1,6 @@
 import Fuse from "fuse.js";
 import type { SearchItemData } from "../types/search";
+import { MAX_VISIBLE_RESULTS, type SearchResultPage } from "./fetcher";
 
 /**
  * Fetch the current user's saved favorite searches via AML.
@@ -73,14 +74,13 @@ export function fetchFavorites(aras: ArasGlobal): SearchItemData[] {
 export function searchFavorites(
 	favorites: SearchItemData[],
 	query: string,
-): SearchItemData[] {
-	if (!query.trim()) return favorites.slice(0, 9);
+): SearchResultPage {
+	if (!query.trim())
+		return { items: favorites.slice(0, MAX_VISIBLE_RESULTS), total: favorites.length };
 
 	const fuse = new Fuse(favorites, {
 		keys: ["name", "itemTypeName"],
 	});
-	return fuse
-		.search(query)
-		.map((r) => r.item)
-		.slice(0, 9);
+	const matches = fuse.search(query).map((r) => r.item);
+	return { items: matches.slice(0, MAX_VISIBLE_RESULTS), total: matches.length };
 }

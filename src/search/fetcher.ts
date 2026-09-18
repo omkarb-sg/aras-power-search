@@ -2,6 +2,15 @@ import Fuse from "fuse.js";
 import { getAllItems } from "../controllers/getItems";
 import type { SearchItemData } from "../types/search";
 
+/** How many results the list renders. Digits 1-9 still address the first nine. */
+export const MAX_VISIBLE_RESULTS = 50;
+
+/** A page of results plus how many matched in total, so the UI can say "9 of 247". */
+export interface SearchResultPage {
+	items: SearchItemData[];
+	total: number;
+}
+
 const stripExtQuery = (query: string) => query.trimStart().replace(/^\/+/, "");
 
 const getCacheKey = (itemTypeName: string) =>
@@ -87,7 +96,7 @@ export const searchItems = ({
 	itemTypeName: string;
 	defaultImage: string;
 	imageCache: Record<string, string>;
-}): SearchItemData[] => {
+}): SearchResultPage => {
 	let items = getCache(storage, itemTypeName);
 	if (!items.length) {
 		items = getAllItems(aras, itemTypeName, defaultImage, imageCache);
@@ -100,5 +109,6 @@ export const searchItems = ({
 		keys: ["itemTypeName", "itemConfigId", "name", "label_plural"],
 	});
 	const searched = fuse.search(stripExtQuery(query));
-	return searched.map((element) => element.item).slice(0, 9);
+	const matches = searched.map((element) => element.item);
+	return { items: matches.slice(0, MAX_VISIBLE_RESULTS), total: matches.length };
 };
