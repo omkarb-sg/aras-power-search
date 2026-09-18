@@ -6,6 +6,8 @@ export interface SearchStatusState {
 	scopeTitle?: string;
 	/** The query that produced an empty result. */
 	query?: string;
+	/** True in the root ItemType scope, where Escape has no wider scope to go to. */
+	isRootScope?: boolean;
 	/** Underlying failure text, when Aras gave us one. */
 	message?: string;
 }
@@ -43,7 +45,13 @@ export function SearchStatus({ state, reindexKeybind, onRetry }: SearchStatusPro
 				<div className="search-status-options">
 					<div className="search-status-option">
 						<kbd>Escape</kbd>
-						<span>search all ItemTypes instead</span>
+						{/* In the root scope there is nothing wider to fall back to —
+						    Escape just clears the query. Only a drilled scope can widen. */}
+						<span>
+							{state.isRootScope
+								? "clear the query"
+								: "search all ItemTypes instead"}
+						</span>
 					</div>
 					<div className="search-status-option">
 						<kbd>{reindexKeybind}</kbd>

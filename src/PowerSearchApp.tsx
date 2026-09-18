@@ -229,7 +229,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				setTotalMatches(subResults.total);
 				setStatus(
 					nextResults.length === 0
-						? { kind: "empty", scopeTitle: drilledScope.title, query: itemPart }
+						? {
+							kind: "empty",
+							scopeTitle: drilledScope.title,
+							query: itemPart,
+						  }
 						: null,
 				);
 				updateImageCache(nextResults);
@@ -268,7 +272,12 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setTotalMatches(fuseResults.total);
 		setStatus(
 			nextResults.length === 0 && nextQuery.trim() !== ""
-				? { kind: "empty", scopeTitle: nextScope.title, query: nextQuery }
+				? {
+						kind: "empty",
+						scopeTitle: nextScope.title,
+						query: nextQuery,
+						isRootScope: nextScope.itemTypeName === "ItemType",
+					  }
 				: null,
 		);
 		updateImageCache(nextResults);
