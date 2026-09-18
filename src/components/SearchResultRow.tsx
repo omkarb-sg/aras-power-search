@@ -6,6 +6,7 @@ interface SearchResultRowProps {
 	index: number;
 	isPinned?: boolean;
 	isHighlighted?: boolean;
+	onActivate: (item: SearchItemData) => void;
 	onExport?: (item: SearchItemData) => void;
 	/** False once the quick-export extension has been probed for and not found. */
 	isExportReady?: boolean;
@@ -15,7 +16,7 @@ interface SearchResultRowProps {
 // forwardRef rather than React 19's ref-as-a-prop: preact/compat strips `ref`
 // out of props, which would silently leave the FLIP animation with no nodes.
 export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(function SearchResultRow(
-	{ item, index, isPinned, isHighlighted, onExport, isExportReady = true, onExportHelp },
+	{ item, index, isPinned, isHighlighted, onActivate, onExport, isExportReady = true, onExportHelp },
 	ref,
 ) {
 	const [copied, setCopied] = useState<"name" | "id" | null>(null);
@@ -44,12 +45,14 @@ export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
 			id={`aps-result-${index}`}
 			role="option"
 			aria-selected={!!isHighlighted}
+			onClick={() => onActivate(item)}
 		>
 			<div className="flex-row jcc aic">
 				<img src={displayImage} alt={item.name} />
 				<div className="flex-col">
 					<span
 						className="copy-field"
+						title="Copy name"
 						onClick={(e) => copyField(item.name, "name", e)}
 					>
 						{item.name}
@@ -63,9 +66,23 @@ export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
 					</span>
 					<span
 						className="copy-field fw-normal"
+						title="Copy id"
 						onClick={(e) => copyField(item.itemId, "id", e)}
 					>
 						{item.itemId}
+						<svg
+							className="copy-glyph"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							strokeWidth="2"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<rect x="9" y="9" width="11" height="11" rx="2" />
+							<path d="M5 15V5a2 2 0 0 1 2-2h10" />
+						</svg>
 						{copied === "id" && <span className="copy-popover">Copied!</span>}
 					</span>
 				</div>
