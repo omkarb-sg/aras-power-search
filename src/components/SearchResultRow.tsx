@@ -67,7 +67,7 @@ export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
 						{copied === "name" && <span className="copy-popover">Copied!</span>}
 					</span>
 					<span
-						className="copy-field fw-normal"
+						className="copy-field fw-normal item-id"
 						title="Copy id"
 						onClick={(e) => copyField(item.itemId, "id", e)}
 					>
