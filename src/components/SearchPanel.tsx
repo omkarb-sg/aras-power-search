@@ -64,19 +64,9 @@ export function SearchPanel({
 							<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
 						</svg>
 					</button>
-					<div style={{ marginRight: "32px", fontSize: "1.4rem" }}>
-						<span style={{ marginRight: "8px" }}>Help</span>
-						<span
-							style={{
-								padding: "4px",
-								border: "1px solid gray",
-								borderRadius: "4px",
-								background: "rgb(51,51,51)",
-								color: "white",
-							}}
-						>
-							{helpKeybind}
-						</span>
+					<div className="help-hint">
+						<span>Help</span>
+						<kbd>{helpKeybind}</kbd>
 					</div>
 					<a
 						href="https://github.com/omkarb-sg/aras-power-search"
