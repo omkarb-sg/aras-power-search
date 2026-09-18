@@ -734,3 +734,20 @@ kbd {
 		--angle: 360deg;
 	}
 } */
+
+/* ── Copy affordance on the name / id ── */
+/* The row itself now activates on click, so the copy targets need to say what
+   they are rather than looking like inert text that happens to react. */
+.copy-glyph {
+	width: 11px;
+	height: 11px;
+	margin-left: 5px;
+	vertical-align: baseline;
+	opacity: 0;
+	color: #888;
+	transition: opacity 0.15s;
+}
+
+.copy-field:hover .copy-glyph {
+	opacity: 1;
+}

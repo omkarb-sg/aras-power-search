@@ -327,6 +327,35 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		closeOverlay();
 	};
 
+	// One activation path for Enter and for a click on the row. Previously the row
+	// had cursor:pointer and a hover highlight but no click handler at all, so the
+	// whole surface was dead to the mouse.
+	const activateItem = (item: SearchItemData) => {
+		if (selectOpenTab(item)) return;
+		if (item.favoriteId) {
+			openFavoriteSearch(topWindow, item);
+			setQuery("");
+			setIsActive(false);
+			setSearchMode("items");
+			return;
+		}
+		if (scope.itemTypeName === "ItemType") {
+			if (item.itemTypeName !== "ItemType") {
+				addOpenedItem(item);
+			}
+			setQuery("");
+			setIsActive(false);
+			resetScope();
+			openSearchGrid(topWindow, item);
+		} else {
+			addOpenedItem(item);
+			setQuery("");
+			setIsActive(false);
+			resetScope();
+			openItemForm(topWindow, item);
+		}
+	};
+
 	useGlobalShortcuts({
 		topWindow,
 		isActive,
@@ -347,30 +376,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			},
 			enterItem: () => {
 				if (highlightedIndex < 0 || highlightedIndex >= results.length) return;
-				const item = results[highlightedIndex];
-				if (selectOpenTab(item)) return;
-				if (item.favoriteId) {
-					openFavoriteSearch(topWindow, item);
-					setQuery("");
-					setIsActive(false);
-					setSearchMode("items");
-					return;
-				}
-				if (scope.itemTypeName === "ItemType") {
-					if (item.itemTypeName !== "ItemType") {
-						addOpenedItem(item);
-					}
-					setQuery("");
-					setIsActive(false);
-					resetScope();
-					openSearchGrid(topWindow, item);
-				} else {
-					addOpenedItem(item);
-					setQuery("");
-					setIsActive(false);
-					resetScope();
-					openItemForm(topWindow, item);
-				}
+				activateItem(results[highlightedIndex]);
 			},
 			activateSearchGrid: (item) => {
 				if (item.favoriteId) {
@@ -497,6 +503,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 					pinnedItemIds={pinnedItemIds}
 					highlightedIndex={highlightedIndex}
 					onExport={isTabsMode ? undefined : (item) => exportItem(topWindow, item)}
+					onActivate={activateItem}
 					isExportReady={isExportReady !== false}
 					onExportHelp={() => setIsExportHelpActive(true)}
 				/>

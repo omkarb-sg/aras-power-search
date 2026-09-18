@@ -6,6 +6,8 @@ interface SearchResultsListProps {
 	items: SearchItemData[];
 	pinnedItemIds: Set<string>;
 	highlightedIndex: number;
+	/** Called when a row is clicked — same behaviour as pressing Enter on it. */
+	onActivate: (item: SearchItemData) => void;
 	onExport?: (item: SearchItemData) => void;
 	isExportReady?: boolean;
 	onExportHelp?: () => void;
@@ -15,6 +17,7 @@ export function SearchResultsList({
 	items,
 	pinnedItemIds,
 	highlightedIndex,
+	onActivate,
 	onExport,
 	isExportReady,
 	onExportHelp,
@@ -35,6 +38,7 @@ export function SearchResultsList({
 					index={index}
 					isPinned={pinnedItemIds.has(item.itemConfigId)}
 					isHighlighted={index === highlightedIndex}
+					onActivate={onActivate}
 					onExport={onExport}
 					isExportReady={isExportReady}
 					onExportHelp={onExportHelp}
