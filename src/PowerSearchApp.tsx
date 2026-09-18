@@ -19,7 +19,12 @@ import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import type { KeybindsConfig, ModifierCombo } from "./keybinds/defaults";
 import { formatKeybind, loadKeybinds, resolveModifierAction, saveKeybinds } from "./keybinds/storage";
 import { fetchFavorites, searchFavorites } from "./search/favorites";
-import { MAX_VISIBLE_RESULTS, getCacheTimestamp, searchItems } from "./search/fetcher";
+import {
+	MAX_VISIBLE_RESULTS,
+	getCacheTimestamp,
+	searchItems,
+	type SearchResultPage,
+} from "./search/fetcher";
 import { getOpenTabs, searchOpenTabs } from "./search/openTabs";
 import {
 	ROOT_SCOPE,
@@ -223,7 +228,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 		// Normal single-scope search
 		setIsCompoundSearch(false);
-		let fuseResults: SearchItemData[];
+		let fuseResults: SearchResultPage;
 		try {
 			fuseResults = searchItems({
 				aras,
