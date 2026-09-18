@@ -11,11 +11,17 @@
    export-warning colour.
    ────────────────────────────────────────────────────────────────────── */
 :root {
-	--fs-input: 1.25rem;
-	--fs-body: 0.95rem;
-	--fs-ui: 0.75rem;
-	--fs-meta: 0.69rem;
-	--fs-micro: 0.6rem;
+	/* Sizes are the originals. One step per ROLE: the settings panel and the
+	   inline hints are different roles and must not share a step — collapsing
+	   them is what halved the panel. */
+	--fs-input: 1.3rem;
+	--fs-body: 1.2rem;
+	--fs-control: 1.5rem;
+	--fs-action: 1.425rem;
+	--fs-badge: 1.35rem;
+	--fs-note: 0.95rem;
+	--fs-meta: 0.9rem;
+	--fs-micro: 0.65rem;
 
 	--ink: #1a1a1a;
 	--muted: #6b6b6b;
@@ -28,6 +34,7 @@
 	--accent-soft: #fdf3e7;
 	--accent-line: #f2ddc2;
 
+	--danger: #b22222;
 	--row-hover: rgba(0, 0, 0, 0.06);
 	--row-active: rgba(0, 0, 0, 0.1);
 	--overlay-dim: brightness(25%);
@@ -87,7 +94,7 @@
 	display: flex;
 	align-items: center;
 	gap: 7px;
-	font-size: var(--fs-ui);
+	font-size: 1.4rem;
 	color: var(--muted);
 }
 
@@ -242,7 +249,7 @@
 
 .qe-help-lead {
 	margin: 0 0 16px;
-	font-size: var(--fs-body);
+	font-size: var(--fs-note);
 	color: var(--muted);
 	line-height: 1.5;
 }
@@ -256,7 +263,7 @@
 }
 
 .qe-help-steps li {
-	font-size: var(--fs-body);
+	font-size: var(--fs-note);
 	line-height: 1.5;
 }
 
@@ -275,7 +282,7 @@
 	margin-top: 5px;
 	padding: 3px 9px;
 	font-family: monospace;
-	font-size: var(--fs-ui);
+	font-size: 0.85rem;
 	background: var(--raised);
 	border: 1px solid #ddd;
 	border-radius: 4px;
@@ -292,7 +299,7 @@
 }
 
 .qe-help-hint {
-	font-size: var(--fs-ui);
+	font-size: 0.85rem;
 	color: var(--faint);
 }
 
@@ -300,7 +307,7 @@
 	flex-shrink: 0;
 	padding: 6px 18px;
 	font-family: inherit;
-	font-size: var(--fs-body);
+	font-size: var(--fs-note);
 	font-weight: bold;
 	color: #fff;
 	background: var(--ink);
@@ -322,7 +329,7 @@
 }
 
 .pin-icon {
-	font-size: var(--fs-body);
+	font-size: 1.5rem;
 	margin-right: 0.75rem;
 	opacity: 0.7;
 }
@@ -367,7 +374,7 @@
 /* Applied by SearchResultRow; previously defined here and never used, while
    the id rendered at the same size as the name. */
 .item-id {
-	font-size: var(--fs-meta);
+	font-size: var(--fs-body);
 	font-weight: normal;
 	color: var(--faint);
 	font-family: monospace;
@@ -379,7 +386,7 @@
 	display: inline-block;
 	margin-left: 8px;
 	padding: 1px 6px;
-	font-size: var(--fs-micro);
+	font-size: 0.6rem;
 	font-weight: normal;
 	background: var(--raised);
 	color: var(--muted);
@@ -394,7 +401,7 @@
 }
 
 .keybinds-help-title {
-	font-size: 1rem;
+	font-size: 1.2rem;
 	font-weight: bold;
 	margin-bottom: 12px;
 }
@@ -402,7 +409,7 @@
 .keybinds-table {
 	width: 100%;
 	border-collapse: collapse;
-	font-size: var(--fs-body);
+	font-size: 1rem;
 }
 
 .keybinds-table td {
@@ -437,7 +444,7 @@ kbd {
 	padding: 4px;
 	border-radius: 4px;
 	margin-right: 16px;
-	color: #444;
+	color: var(--muted);
 	transition: background 0.15s, color 0.15s;
 }
 
@@ -448,7 +455,7 @@ kbd {
 
 .settings-gear-btn:hover {
 	background: var(--row-hover);
-	color: #111;
+	color: var(--ink);
 }
 
 /* ── Settings panel ── */
@@ -471,11 +478,11 @@ kbd {
 	background: none;
 	border: none;
 	cursor: pointer;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-control);
 	font-family: sans-serif;
 	padding: 4px 8px 4px 4px;
 	border-radius: 4px;
-	color: #555;
+	color: var(--muted);
 	transition: background 0.15s, color 0.15s;
 	flex-shrink: 0;
 }
@@ -487,12 +494,12 @@ kbd {
 
 .settings-back-btn:hover {
 	background: var(--row-hover);
-	color: #111;
+	color: var(--ink);
 }
 
 .settings-title {
 	margin: 0;
-	font-size: 1.15rem;
+	font-size: 1.8rem;
 	font-weight: bold;
 }
 
@@ -500,7 +507,7 @@ kbd {
 	width: 90%;
 	margin: 0 auto;
 	display: flex;
-	border-bottom: 2px solid #e8e8e8;
+	border-bottom: 2px solid var(--hairline);
 	margin-bottom: 4px;
 }
 
@@ -511,20 +518,20 @@ kbd {
 	margin-bottom: -2px;
 	cursor: pointer;
 	padding: 6px 16px;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-control);
 	font-family: sans-serif;
-	color: #888;
+	color: var(--muted);
 	transition: color 0.15s, border-color 0.15s;
 }
 
 .settings-tab:hover {
-	color: #333;
+	color: var(--ink);
 }
 
 .settings-tab.active {
-	color: #111;
+	color: var(--ink);
 	font-weight: bold;
-	border-bottom-color: #333;
+	border-bottom-color: var(--ink);
 }
 
 /* ── Keybinds table ── */
@@ -532,11 +539,11 @@ kbd {
 	width: 90%;
 	margin: 0 auto;
 	border-collapse: collapse;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-control);
 }
 
 .settings-table tr {
-	border-bottom: 1px solid #f0f0f0;
+	border-bottom: 1px solid var(--hairline);
 }
 
 .settings-table tr:last-child {
@@ -549,7 +556,7 @@ kbd {
 
 .settings-table-label {
 	padding: 10px 16px 10px 0;
-	color: #333;
+	color: var(--ink);
 	width: 50%;
 	vertical-align: middle;
 }
@@ -557,12 +564,12 @@ kbd {
 .settings-implicit-badge {
 	display: inline-block;
 	margin-left: 8px;
-	font-size: var(--fs-meta);
+	font-size: 1.125rem;
 	background: var(--raised);
 	border: 1px solid #ddd;
 	border-radius: 3px;
 	padding: 1px 6px;
-	color: #777;
+	color: var(--muted);
 	vertical-align: middle;
 	font-family: monospace;
 }
@@ -584,7 +591,7 @@ kbd {
 	display: inline-block;
 	padding: 2px 10px;
 	font-family: monospace;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-badge);
 	background: var(--raised);
 	border: 1px solid #ccc;
 	border-radius: 4px;
@@ -611,7 +618,7 @@ kbd {
 	display: inline-block;
 	padding: 2px 10px;
 	font-family: monospace;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-badge);
 	background: var(--raised);
 	border: 1px solid #ccc;
 	border-radius: 4px;
@@ -619,7 +626,7 @@ kbd {
 	cursor: pointer;
 	min-width: 100px;
 	text-align: center;
-	color: #333;
+	color: var(--ink);
 	transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
 
@@ -653,24 +660,25 @@ kbd {
 	width: 100%;
 	min-height: 300px;
 	font-family: monospace;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-badge);
 	padding: 12px 16px;
 	border: 1px solid #ccc;
 	border-radius: 5px;
 	resize: vertical;
 	box-sizing: border-box;
 	outline: none;
-	color: #222;
+	color: var(--ink);
+	background: var(--surface);
 	transition: border-color 0.15s;
 }
 
 .json-editor:focus {
-	border-color: #888;
+	border-color: var(--faint);
 }
 
 .json-error {
-	color: #b22222;
-	font-size: var(--fs-meta);
+	color: var(--danger);
+	font-size: 1.275rem;
 	margin: 0;
 	font-family: sans-serif;
 }
@@ -684,7 +692,7 @@ kbd {
 	align-items: center;
 	margin-top: 20px;
 	padding-top: 12px;
-	border-top: 1px solid #e8e8e8;
+	border-top: 1px solid var(--hairline);
 }
 
 .settings-btn-reset {
@@ -693,15 +701,15 @@ kbd {
 	border-radius: 5px;
 	padding: 6px 14px;
 	cursor: pointer;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-action);
 	font-family: sans-serif;
-	color: #555;
+	color: var(--muted);
 	transition: background 0.15s, border-color 0.15s;
 }
 
 .settings-btn-reset:hover {
-	background: rgba(0, 0, 0, 0.05);
-	border-color: #aaa;
+	background: var(--row-hover);
+	border-color: var(--faint);
 }
 
 .settings-btn-save {
@@ -711,7 +719,7 @@ kbd {
 	border-radius: 5px;
 	padding: 6px 20px;
 	cursor: pointer;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-action);
 	font-family: sans-serif;
 	font-weight: bold;
 	transition: background 0.15s;
@@ -825,7 +833,7 @@ kbd {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-note);
 	color: var(--faint);
 }
 
@@ -864,7 +872,7 @@ kbd {
 	margin: 8px auto 0;
 	padding-top: 8px;
 	border-top: 1px solid var(--hairline);
-	font-size: var(--fs-ui);
+	font-size: var(--fs-note);
 	font-weight: bold;
 	color: var(--muted);
 }
@@ -925,7 +933,7 @@ kbd {
 
 .search-status-title {
 	margin: 0;
-	font-size: 1rem;
+	font-size: 1.2rem;
 	font-weight: bold;
 	color: var(--ink);
 }
@@ -933,7 +941,7 @@ kbd {
 .search-status-detail {
 	margin: 0;
 	max-width: 42ch;
-	font-size: var(--fs-body);
+	font-size: var(--fs-note);
 	line-height: 1.55;
 	color: var(--muted);
 }
@@ -954,7 +962,7 @@ kbd {
 	padding: 7px 10px;
 	border: 1px solid var(--hairline);
 	border-radius: 4px;
-	font-size: var(--fs-body);
+	font-size: var(--fs-note);
 	color: var(--muted);
 }
 
@@ -962,7 +970,7 @@ kbd {
 	margin-top: 4px;
 	padding: 6px 18px;
 	font-family: inherit;
-	font-size: var(--fs-body);
+	font-size: var(--fs-note);
 	font-weight: bold;
 	color: var(--surface);
 	background: var(--ink);
@@ -1007,7 +1015,7 @@ kbd {
 	max-width: 22rem;
 	display: flex;
 	justify-content: space-between;
-	font-size: var(--fs-ui);
+	font-size: var(--fs-note);
 	color: var(--muted);
 }
 
@@ -1017,7 +1025,7 @@ kbd {
 }
 
 .indexing-hint {
-	font-size: var(--fs-ui);
+	font-size: var(--fs-note);
 	color: var(--faint);
 }
 
@@ -1047,6 +1055,7 @@ kbd {
 		--row-hover: rgba(255, 255, 255, 0.06);
 		--row-active: rgba(255, 255, 255, 0.1);
 		/* A dark page needs less dimming than a light one to read as behind. */
+		--danger: #f08a8a;
 		--overlay-dim: brightness(45%);
 	}
 
@@ -1071,6 +1080,7 @@ kbd {
 		background: #fff;
 	}
 
+	.settings-btn-reset,
 	.modifier-toggle,
 	.keybind-badge,
 	kbd {
