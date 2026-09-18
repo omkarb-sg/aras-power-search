@@ -13,12 +13,18 @@ import { QuickExportHelp } from "./components/QuickExportHelp";
 import { SearchOverlay } from "./components/SearchOverlay";
 import { SearchPanel } from "./components/SearchPanel";
 import { SearchResultsList } from "./components/SearchResultsList";
+import { SearchStatus, type SearchStatusState } from "./components/SearchStatus";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import type { KeybindsConfig, ModifierCombo } from "./keybinds/defaults";
 import { formatKeybind, loadKeybinds, resolveModifierAction, saveKeybinds } from "./keybinds/storage";
 import { fetchFavorites, searchFavorites } from "./search/favorites";
-import { MAX_VISIBLE_RESULTS, getCacheTimestamp, searchItems } from "./search/fetcher";
+import {
+	MAX_VISIBLE_RESULTS,
+	getCacheTimestamp,
+	searchItems,
+	type SearchResultPage,
+} from "./search/fetcher";
 import { getOpenTabs, searchOpenTabs } from "./search/openTabs";
 import {
 	ROOT_SCOPE,
@@ -73,6 +79,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		alt: false,
 		shift: false,
 	});
+	// Null means "show the results list". Anything else is a state the palette
+	// used to reach silently, rendering an empty white box.
+	const [status, setStatus] = useState<SearchStatusState | null>(null);
 	// null while the probe is in flight — rows stay optimistic so the export icon doesn't
 	// flash to a warning on every open. Re-probed each time the overlay opens, so installing
 	// the extension mid-session is picked up without a page reload.
@@ -123,6 +132,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setQuery("");
 		setResults(recentItems);
 		setTotalMatches(recentItems.length);
+		setStatus(null);
 	};
 
 	const closeOverlay = () => {
@@ -158,7 +168,13 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setHighlightedIndex(0);
 
 		const aras = topWindow.aras;
-		if (!aras) return;
+		if (!aras) {
+			// Previously this returned without touching results, so the rows from
+			// the previous query stayed on screen under the new text.
+			setResults([]);
+			setStatus({ kind: "no-runtime" });
+			return;
+		}
 
 		// Compound drill-through: type/query
 		// Strip leading "/" then split on first "/" — two parts means auto-drill.
@@ -200,6 +216,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				const nextResults = mergeWithPinned(subResults.items, drilledScope.itemTypeName);
 				setResults(nextResults);
 				setTotalMatches(subResults.total);
+				setStatus(
+					nextResults.length === 0
+						? { kind: "empty", scopeTitle: drilledScope.title, query: itemPart }
+						: null,
+				);
 				updateImageCache(nextResults);
 				return;
 			}
@@ -207,18 +228,33 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 		// Normal single-scope search
 		setIsCompoundSearch(false);
-		const fuseResults = searchItems({
-			aras,
-			storage: topWindow.localStorage,
-			query: nextQuery,
-			itemTypeName: nextScope.itemTypeName,
-			defaultImage: nextScope.defaultImage,
-			imageCache,
-		});
+		let fuseResults: SearchResultPage;
+		try {
+			fuseResults = searchItems({
+				aras,
+				storage: topWindow.localStorage,
+				query: nextQuery,
+				itemTypeName: nextScope.itemTypeName,
+				defaultImage: nextScope.defaultImage,
+				imageCache,
+			});
+		} catch (error) {
+			setResults([]);
+			setStatus({
+				kind: "error",
+				message: error instanceof Error ? error.message : undefined,
+			});
+			return;
+		}
 
 		const nextResults = mergeWithPinned(fuseResults.items, nextScope.itemTypeName);
 		setResults(nextResults);
 		setTotalMatches(fuseResults.total);
+		setStatus(
+			nextResults.length === 0 && nextQuery.trim() !== ""
+				? { kind: "empty", scopeTitle: nextScope.title, query: nextQuery }
+				: null,
+		);
 		updateImageCache(nextResults);
 	};
 
@@ -227,6 +263,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setOpenedItems((previous) => trimOpenedItems(previous));
 		setResults(recentItems);
 		setTotalMatches(recentItems.length);
+		setStatus(null);
 		setHighlightedIndex(0);
 		setIsActive(true);
 	};
@@ -281,6 +318,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		const page = searchFavorites(favs, nextQuery);
 		setResults(page.items);
 		setTotalMatches(page.total);
+		setStatus(
+			page.items.length === 0 && nextQuery.trim() !== ""
+				? { kind: "empty", scopeTitle: "favorites", query: nextQuery }
+				: null,
+		);
 	};
 
 	const showOpenTabs = () => {
@@ -301,6 +343,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		const page = searchOpenTabs(openTabs, nextQuery);
 		setResults(page.items);
 		setTotalMatches(page.total);
+		setStatus(
+			page.items.length === 0 && nextQuery.trim() !== ""
+				? { kind: "empty", scopeTitle: "open tabs", query: nextQuery }
+				: null,
+		);
 	};
 
 	const selectOpenTab = (item: SearchItemData) => {
@@ -537,6 +584,13 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				onQueryChange={isFavMode ? performFavoritesSearch : isTabsMode ? performOpenTabsSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>
+				{status ? (
+					<SearchStatus
+						state={status}
+						reindexKeybind={formatKeybind(keybinds.clearCache)}
+						onRetry={() => performSearch(query)}
+					/>
+				) : (
 				<SearchResultsList
 					items={results}
 					pinnedItemIds={pinnedItemIds}
@@ -547,6 +601,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 					isExportReady={isExportReady !== false}
 					onExportHelp={() => setIsExportHelpActive(true)}
 				/>
+				)}
 			</SearchPanel>
 		</SearchOverlay>
 	);
