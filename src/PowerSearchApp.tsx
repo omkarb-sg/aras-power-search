@@ -18,7 +18,7 @@ import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import type { KeybindsConfig } from "./keybinds/defaults";
 import { formatKeybind, loadKeybinds, saveKeybinds } from "./keybinds/storage";
 import { fetchFavorites, searchFavorites } from "./search/favorites";
-import { getCacheTimestamp, searchItems } from "./search/fetcher";
+import { MAX_VISIBLE_RESULTS, getCacheTimestamp, searchItems } from "./search/fetcher";
 import { getOpenTabs, searchOpenTabs } from "./search/openTabs";
 import {
 	ROOT_SCOPE,
@@ -66,6 +66,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	const [isCompoundSearch, setIsCompoundSearch] = useState(false);
 	// Bumped when the cache is cleared, so the freshness hint recomputes.
 	const [cacheEpoch, setCacheEpoch] = useState(0);
+	// How many items matched in total, which is usually more than the list shows.
+	const [totalMatches, setTotalMatches] = useState(0);
 	// null while the probe is in flight — rows stay optimistic so the export icon doesn't
 	// flash to a warning on every open. Re-probed each time the overlay opens, so installing
 	// the extension mid-session is picked up without a page reload.
@@ -115,6 +117,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setScope(resetToRootScope());
 		setQuery("");
 		setResults(recentItems);
+		setTotalMatches(recentItems.length);
 	};
 
 	const closeOverlay = () => {
@@ -142,7 +145,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		const scopedPinned = pinnedItems.filter((p) => p.itemTypeName === itemTypeName);
 		const fuseIds = new Set(fuseResults.map((r) => r.itemConfigId));
 		const dedupedPinned = scopedPinned.filter((p) => !fuseIds.has(p.itemConfigId));
-		return [...dedupedPinned, ...fuseResults].slice(0, 9);
+		return [...dedupedPinned, ...fuseResults].slice(0, MAX_VISIBLE_RESULTS);
 	};
 
 	const performSearch = (nextQuery: string, nextScope = scope) => {
@@ -168,7 +171,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				itemTypeName: "ItemType",
 				defaultImage: ROOT_SCOPE.defaultImage,
 				imageCache,
-			});
+			}).items;
 
 			if (typeResults.length > 0) {
 				const firstType = typeResults[0];
@@ -189,8 +192,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 					imageCache,
 				});
 
-				const nextResults = mergeWithPinned(subResults, drilledScope.itemTypeName);
+				const nextResults = mergeWithPinned(subResults.items, drilledScope.itemTypeName);
 				setResults(nextResults);
+				setTotalMatches(subResults.total);
 				updateImageCache(nextResults);
 				return;
 			}
@@ -207,8 +211,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			imageCache,
 		});
 
-		const nextResults = mergeWithPinned(fuseResults, nextScope.itemTypeName);
+		const nextResults = mergeWithPinned(fuseResults.items, nextScope.itemTypeName);
 		setResults(nextResults);
+		setTotalMatches(fuseResults.total);
 		updateImageCache(nextResults);
 	};
 
@@ -216,6 +221,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		if (isActive) return;
 		setOpenedItems((previous) => trimOpenedItems(previous));
 		setResults(recentItems);
+		setTotalMatches(recentItems.length);
 		setHighlightedIndex(0);
 		setIsActive(true);
 	};
@@ -246,7 +252,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			setSearchMode("favorites");
 			setQuery("");
 			const favs = loadFavorites();
-			setResults(favs.slice(0, 9));
+			setResults(favs.slice(0, MAX_VISIBLE_RESULTS));
+			setTotalMatches(favs.length);
 			return;
 		}
 		if (searchMode === "favorites") {
@@ -257,7 +264,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			setSearchMode("favorites");
 			setQuery("");
 			const favs = loadFavorites();
-			setResults(favs.slice(0, 9));
+			setResults(favs.slice(0, MAX_VISIBLE_RESULTS));
+			setTotalMatches(favs.length);
 		}
 	};
 
@@ -265,7 +273,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setQuery(nextQuery);
 		setHighlightedIndex(0);
 		const favs = favorites.length > 0 ? favorites : loadFavorites();
-		setResults(searchFavorites(favs, nextQuery));
+		const page = searchFavorites(favs, nextQuery);
+		setResults(page.items);
+		setTotalMatches(page.total);
 	};
 
 	const showOpenTabs = () => {
@@ -274,7 +284,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		setOpenTabs(tabs);
 		setSearchMode("tabs");
 		setQuery("");
-		setResults(tabs.slice(0, 9));
+		setResults(tabs.slice(0, MAX_VISIBLE_RESULTS));
+		setTotalMatches(tabs.length);
 		setHighlightedIndex(0);
 		setIsActive(true);
 	};
@@ -282,7 +293,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	const performOpenTabsSearch = (nextQuery: string) => {
 		setQuery(nextQuery);
 		setHighlightedIndex(0);
-		setResults(searchOpenTabs(openTabs, nextQuery));
+		const page = searchOpenTabs(openTabs, nextQuery);
+		setResults(page.items);
+		setTotalMatches(page.total);
 	};
 
 	const selectOpenTab = (item: SearchItemData) => {
@@ -513,6 +526,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 					cacheTimestamp !== null && Date.now() - cacheTimestamp > STALE_CACHE_MS
 				}
 				reindexKeybind={formatKeybind(keybinds.clearCache)}
+				shownCount={results.length}
+				totalCount={totalMatches}
 				onQueryChange={isFavMode ? performFavoritesSearch : isTabsMode ? performOpenTabsSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>

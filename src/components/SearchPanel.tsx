@@ -16,6 +16,10 @@ interface SearchPanelProps extends PropsWithChildren {
 	isCacheStale?: boolean;
 	/** Formatted clearCache keybind, shown alongside the freshness hint. */
 	reindexKeybind: string;
+	/** Rows currently rendered. */
+	shownCount: number;
+	/** Rows that matched in total, which may be far more than are rendered. */
+	totalCount: number;
 	onQueryChange: (value: string) => void;
 	onSettingsClick: () => void;
 }
@@ -30,6 +34,8 @@ export function SearchPanel({
 	cacheAge,
 	isCacheStale,
 	reindexKeybind,
+	shownCount,
+	totalCount,
 	onQueryChange,
 	onSettingsClick,
 	children,
@@ -117,6 +123,18 @@ export function SearchPanel({
 				</div>
 			)}
 			{children}
+			{totalCount > 0 && (
+				<div className="result-count">
+					{shownCount === totalCount
+						? `${totalCount} ${totalCount === 1 ? "match" : "matches"}`
+						: `${shownCount} of ${totalCount} matches`}
+					{totalCount > 9 && (
+						<span className="result-count-hint">
+							&mdash; 1&ndash;9 address the first nine, arrows reach the rest
+						</span>
+					)}
+				</div>
+			)}
 		</div>
 	);
 }

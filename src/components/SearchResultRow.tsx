@@ -117,7 +117,9 @@ export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
 					</button>
 				)}
 				{isPinned && <span className="pin-icon" title="Pinned">📌</span>}
-				<span>{index + 1}</span>
+				{/* Only the first nine rows have a digit accelerator; the rest are
+				    reached with the arrow keys, so numbering them would lie. */}
+				{index < 9 ? <span>{index + 1}</span> : <span className="row-no-digit" />}
 			</div>
 		</div>
 	);
