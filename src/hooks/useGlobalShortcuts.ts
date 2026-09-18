@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import type { KeybindsConfig } from "../keybinds/defaults";
+import type { KeybindsConfig, ModifierCombo } from "../keybinds/defaults";
 import { matchKeybind, matchModifiers } from "../keybinds/storage";
 import type { SearchItemData } from "../types/search";
 
@@ -21,6 +21,8 @@ interface GlobalShortcutActions {
 	exportItem: (item: SearchItemData) => void;
 	showHelp: () => void;
 	hideHelp: () => void;
+	/** Fires whenever the held modifier set changes, so rows can relabel live. */
+	modifiersChanged: (modifiers: ModifierCombo) => void;
 }
 
 interface UseGlobalShortcutsParams {
@@ -48,6 +50,7 @@ export const useGlobalShortcuts = ({
 }: UseGlobalShortcutsParams) => {
 	const stateRef = useRef({ isActive, isSettingsActive, results, actions, keybinds });
 	const pinHoldActive = useRef(false);
+	const heldModifiers = useRef<ModifierCombo>({ ctrl: false, alt: false, shift: false });
 
 	useEffect(() => {
 		stateRef.current = { isActive, isSettingsActive, results, actions, keybinds };
@@ -57,7 +60,28 @@ export const useGlobalShortcuts = ({
 		const attachedDocs = new WeakSet<Document>();
 		const iframeLoadHandlers = new WeakMap<HTMLIFrameElement, EventListener>();
 
+		// Report the modifier set on every key event so the result rows can show
+		// what the digit keys would do right now.
+		const syncModifiers = (event: KeyboardEvent) => {
+			const next = {
+				ctrl: event.ctrlKey,
+				alt: event.altKey,
+				shift: event.shiftKey,
+			};
+			const previous = heldModifiers.current;
+			if (
+				next.ctrl === previous.ctrl &&
+				next.alt === previous.alt &&
+				next.shift === previous.shift
+			) {
+				return;
+			}
+			heldModifiers.current = next;
+			stateRef.current.actions.modifiersChanged(next);
+		};
+
 		const handleKeyUp = (event: KeyboardEvent) => {
+			syncModifiers(event);
 			const { keybinds } = stateRef.current;
 			if (event.key.toLowerCase() === keybinds.pinItem.key.toLowerCase()) {
 				pinHoldActive.current = false;
@@ -69,6 +93,7 @@ export const useGlobalShortcuts = ({
 		};
 
 		const handleKeyDown = (event: KeyboardEvent) => {
+			syncModifiers(event);
 			const current = stateRef.current;
 			const { keybinds } = current;
 
@@ -242,7 +267,20 @@ export const useGlobalShortcuts = ({
 			observer.observe(topDoc.body, { childList: true, subtree: true });
 		}
 
+		const handleBlur = () => {
+			if (
+				heldModifiers.current.ctrl ||
+				heldModifiers.current.alt ||
+				heldModifiers.current.shift
+			) {
+				heldModifiers.current = { ctrl: false, alt: false, shift: false };
+				stateRef.current.actions.modifiersChanged(heldModifiers.current);
+			}
+		};
+		topWindow.addEventListener("blur", handleBlur);
+
 		return () => {
+			topWindow.removeEventListener("blur", handleBlur);
 			pinHoldActive.current = false;
 			observer.disconnect();
 			topDoc.removeEventListener("keydown", handleKeyDown);

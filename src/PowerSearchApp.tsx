@@ -15,8 +15,8 @@ import { SearchPanel } from "./components/SearchPanel";
 import { SearchResultsList } from "./components/SearchResultsList";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
-import type { KeybindsConfig } from "./keybinds/defaults";
-import { formatKeybind, loadKeybinds, saveKeybinds } from "./keybinds/storage";
+import type { KeybindsConfig, ModifierCombo } from "./keybinds/defaults";
+import { formatKeybind, loadKeybinds, resolveModifierAction, saveKeybinds } from "./keybinds/storage";
 import { fetchFavorites, searchFavorites } from "./search/favorites";
 import { MAX_VISIBLE_RESULTS, getCacheTimestamp, searchItems } from "./search/fetcher";
 import { getOpenTabs, searchOpenTabs } from "./search/openTabs";
@@ -68,6 +68,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	const [cacheEpoch, setCacheEpoch] = useState(0);
 	// How many items matched in total, which is usually more than the list shows.
 	const [totalMatches, setTotalMatches] = useState(0);
+	const [heldModifiers, setHeldModifiers] = useState<ModifierCombo>({
+		ctrl: false,
+		alt: false,
+		shift: false,
+	});
 	// null while the probe is in flight — rows stay optimistic so the export icon doesn't
 	// flash to a warning on every open. Re-probed each time the overlay opens, so installing
 	// the extension mid-session is picked up without a page reload.
@@ -468,6 +473,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				}
 				exportItem(topWindow, item);
 			},
+			modifiersChanged: setHeldModifiers,
 			showHelp: () => setIsHelpActive(true),
 			hideHelp: () => setIsHelpActive(false),
 		},
@@ -537,6 +543,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 					highlightedIndex={highlightedIndex}
 					onExport={isTabsMode ? undefined : (item) => exportItem(topWindow, item)}
 					onActivate={activateItem}
+					modifierAction={resolveModifierAction(heldModifiers, keybinds)}
 					isExportReady={isExportReady !== false}
 					onExportHelp={() => setIsExportHelpActive(true)}
 				/>

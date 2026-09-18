@@ -1,4 +1,5 @@
 import { useFlipAnimation } from "../hooks/useFlipAnimation";
+import type { ModifierAction } from "../keybinds/storage";
 import type { SearchItemData } from "../types/search";
 import { SearchResultRow } from "./SearchResultRow";
 
@@ -8,6 +9,8 @@ interface SearchResultsListProps {
 	highlightedIndex: number;
 	/** Called when a row is clicked — same behaviour as pressing Enter on it. */
 	onActivate: (item: SearchItemData) => void;
+	/** What a digit press would do right now, or null when no modifier is held. */
+	modifierAction: ModifierAction | null;
 	onExport?: (item: SearchItemData) => void;
 	isExportReady?: boolean;
 	onExportHelp?: () => void;
@@ -18,6 +21,7 @@ export function SearchResultsList({
 	pinnedItemIds,
 	highlightedIndex,
 	onActivate,
+	modifierAction,
 	onExport,
 	isExportReady,
 	onExportHelp,
@@ -39,6 +43,7 @@ export function SearchResultsList({
 					isPinned={pinnedItemIds.has(item.itemConfigId)}
 					isHighlighted={index === highlightedIndex}
 					onActivate={onActivate}
+					modifierAction={modifierAction}
 					onExport={onExport}
 					isExportReady={isExportReady}
 					onExportHelp={onExportHelp}

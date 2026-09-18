@@ -68,3 +68,40 @@ export function matchModifiers(event: KeyboardEvent, combo: ModifierCombo): bool
 		event.shiftKey === combo.shift
 	);
 }
+
+/** What a digit press would do right now, given the modifiers being held. */
+export interface ModifierAction {
+	label: string;
+	/** True for actions useGlobalShortcuts only fires on ItemType rows. */
+	itemTypeOnly: boolean;
+}
+
+const sameModifiers = (a: ModifierCombo, b: ModifierCombo) =>
+	a.ctrl === b.ctrl && a.alt === b.alt && a.shift === b.shift;
+
+/**
+ * Seven different actions hang off the digit keys, and the row used to show
+ * only the digit. Resolving the held modifiers to a label lets each row say
+ * what it would do, so the map teaches itself instead of living in a table
+ * behind a hold-to-view shortcut.
+ */
+export function resolveModifierAction(
+	held: ModifierCombo,
+	keybinds: KeybindsConfig,
+): ModifierAction | null {
+	if (!held.ctrl && !held.alt && !held.shift) return null;
+
+	const candidates: Array<[ModifierCombo, string, boolean]> = [
+		[keybinds.createItem, "create", true],
+		[keybinds.activateSearchGrid, "search grid", false],
+		[keybinds.whereUsed, "where used", false],
+		[keybinds.exportItem, "quick export", false],
+		[keybinds.drillToItemType, "drill in", true],
+		[keybinds.openItemForm, "open form", false],
+	];
+
+	for (const [combo, label, itemTypeOnly] of candidates) {
+		if (sameModifiers(held, combo)) return { label, itemTypeOnly };
+	}
+	return null;
+}

@@ -1,4 +1,5 @@
 import { forwardRef, useState } from "react";
+import type { ModifierAction } from "../keybinds/storage";
 import type { SearchItemData } from "../types/search";
 
 interface SearchResultRowProps {
@@ -7,6 +8,7 @@ interface SearchResultRowProps {
 	isPinned?: boolean;
 	isHighlighted?: boolean;
 	onActivate: (item: SearchItemData) => void;
+	modifierAction?: ModifierAction | null;
 	onExport?: (item: SearchItemData) => void;
 	/** False once the quick-export extension has been probed for and not found. */
 	isExportReady?: boolean;
@@ -16,7 +18,7 @@ interface SearchResultRowProps {
 // forwardRef rather than React 19's ref-as-a-prop: preact/compat strips `ref`
 // out of props, which would silently leave the FLIP animation with no nodes.
 export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(function SearchResultRow(
-	{ item, index, isPinned, isHighlighted, onActivate, onExport, isExportReady = true, onExportHelp },
+	{ item, index, isPinned, isHighlighted, onActivate, modifierAction, onExport, isExportReady = true, onExportHelp },
 	ref,
 ) {
 	const [copied, setCopied] = useState<"name" | "id" | null>(null);
@@ -117,6 +119,19 @@ export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
 					</button>
 				)}
 				{isPinned && <span className="pin-icon" title="Pinned">📌</span>}
+				{modifierAction && (
+					<span
+						className={`modifier-hint${
+							modifierAction.itemTypeOnly && item.itemTypeName !== "ItemType"
+								? " unavailable"
+								: ""
+						}`}
+					>
+						{modifierAction.itemTypeOnly && item.itemTypeName !== "ItemType"
+							? "ItemTypes only"
+							: modifierAction.label}
+					</span>
+				)}
 				{/* Only the first nine rows have a digit accelerator; the rest are
 				    reached with the arrow keys, so numbering them would lie. */}
 				{index < 9 ? <span>{index + 1}</span> : <span className="row-no-digit" />}
