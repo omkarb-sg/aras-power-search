@@ -28,6 +28,10 @@
 	--accent-soft: #fdf3e7;
 	--accent-line: #f2ddc2;
 
+	--row-hover: rgba(0, 0, 0, 0.06);
+	--row-active: rgba(0, 0, 0, 0.1);
+	--overlay-dim: brightness(25%);
+
 	--radius: 5px;
 	--radius-sm: 3px;
 	--row-icon: 32px;
@@ -47,7 +51,7 @@
 
 .overlay.active {
 	display: block;
-	backdrop-filter: blur(3px) brightness(25%);
+	backdrop-filter: blur(3px) var(--overlay-dim);
 }
 
 .search-overlay-content {
@@ -56,7 +60,8 @@
 	left: 50%;
 	min-width: 60vw;
 	transform: translateX(-50%);
-	background-color: #fff;
+	background-color: var(--surface);
+	color: var(--ink);
 	padding: 20px;
 	border-radius: 5px;
 	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -106,6 +111,9 @@
 	font-family: sans-serif;
 	font-size: var(--fs-input);
 	color: var(--ink);
+	background: var(--surface);
+	border: 1px solid var(--hairline);
+	border-radius: var(--radius-sm);
 	outline: none;
 }
 
@@ -126,17 +134,17 @@
 }
 
 .search-item:hover {
-	background-color: rgba(0, 0, 0, 0.08);
+	background-color: var(--row-hover);
 }
 
 .search-item.highlighted {
-	background-color: rgba(0, 0, 0, 0.12);
+	background-color: var(--row-active);
 }
 
 
 .search-item-leader {
 	flex: 1;
-	border-bottom: 1px dotted rgba(0, 0, 0, 0.15);
+	border-bottom: 1px dotted var(--hairline);
 	margin: 0 12px;
 	align-self: center;
 	min-width: 20px;
@@ -167,7 +175,7 @@
 }
 
 .export-btn:hover {
-	background: rgba(0, 0, 0, 0.08);
+	background: var(--row-hover);
 	color: #333;
 }
 
@@ -295,7 +303,7 @@
 	font-size: var(--fs-body);
 	font-weight: bold;
 	color: #fff;
-	background: #333;
+	background: var(--ink);
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
@@ -330,15 +338,15 @@
 }
 
 .copy-field:hover {
-	background-color: rgba(0, 0, 0, 0.08);
+	background-color: var(--row-hover);
 }
 
 .copy-popover {
 	position: absolute;
 	left: 0;
 	bottom: calc(100% + 4px);
-	background-color: #333;
-	color: #fff;
+	background-color: var(--ink);
+	color: var(--surface);
 	font-size: var(--fs-micro);
 	font-weight: normal;
 	padding: 2px 7px;
@@ -439,7 +447,7 @@ kbd {
 }
 
 .settings-gear-btn:hover {
-	background: rgba(0, 0, 0, 0.08);
+	background: var(--row-hover);
 	color: #111;
 }
 
@@ -478,7 +486,7 @@ kbd {
 }
 
 .settings-back-btn:hover {
-	background: rgba(0, 0, 0, 0.08);
+	background: var(--row-hover);
 	color: #111;
 }
 
@@ -1012,4 +1020,82 @@ kbd {
 .indexing-hint {
 	font-size: var(--fs-ui);
 	color: #999;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Dark surface
+
+   The panel was a hardcoded white 60vw sheet over a full-screen
+   brightness(25%) backdrop, so opening it on a dark desktop was a flashbang.
+   Only the tokens change here; every rule above already reads them.
+
+   Follows the OS setting, which is also what the Innovator client does.
+   ────────────────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--ink: #f0efed;
+		--muted: #a3a09c;
+		--faint: #74716d;
+		--hairline: #343434;
+		--surface: #1e1e1e;
+		--raised: #2a2a2a;
+
+		/* The same amber, lifted for contrast on a dark ground. */
+		--accent: #d98324;
+		--accent-soft: #2a2015;
+		--accent-line: #4a3921;
+
+		--row-hover: rgba(255, 255, 255, 0.06);
+		--row-active: rgba(255, 255, 255, 0.1);
+		/* A dark page needs less dimming than a light one to read as behind. */
+		--overlay-dim: brightness(45%);
+	}
+
+	.search-overlay-content {
+		border: 1px solid #303030;
+		box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+	}
+
+	/* These keep a light-on-dark fill, so they need the inverse pair. */
+	.copy-popover,
+	.qe-help-close,
+	.settings-btn-save,
+	.help-hint kbd {
+		background: var(--ink);
+		color: #1e1e1e;
+	}
+
+	.settings-btn-save:hover:not(:disabled),
+	.qe-help-close:hover {
+		background: #fff;
+	}
+
+	.modifier-toggle,
+	.keybind-badge,
+	kbd {
+		border-color: #3a3a3a;
+		box-shadow: 0 1px 0 #151515;
+	}
+
+	.modifier-toggle.active,
+	.keybind-badge.capturing {
+		background: var(--ink);
+		color: #1e1e1e;
+		border-color: var(--ink);
+	}
+
+	.json-editor {
+		background: var(--raised);
+		border-color: #3a3a3a;
+		color: var(--ink);
+	}
+
+	.settings-tab.active {
+		border-bottom-color: var(--ink);
+	}
+
+	/* Aras ships light-on-transparent icons; a subtle plate keeps them legible. */
+	.search-item img {
+		background: #2e2e2e;
+	}
 }
