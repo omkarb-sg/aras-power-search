@@ -927,7 +927,7 @@ kbd {
 	margin: 0;
 	font-size: 1rem;
 	font-weight: bold;
-	color: #222;
+	color: var(--ink);
 }
 
 .search-status-detail {
@@ -935,7 +935,7 @@ kbd {
 	max-width: 42ch;
 	font-size: var(--fs-body);
 	line-height: 1.55;
-	color: #666;
+	color: var(--muted);
 }
 
 .search-status-options {
@@ -955,7 +955,7 @@ kbd {
 	border: 1px solid var(--hairline);
 	border-radius: 4px;
 	font-size: var(--fs-body);
-	color: #555;
+	color: var(--muted);
 }
 
 .search-status-retry {
@@ -964,8 +964,8 @@ kbd {
 	font-family: inherit;
 	font-size: var(--fs-body);
 	font-weight: bold;
-	color: #fff;
-	background: #333;
+	color: var(--surface);
+	background: var(--ink);
 	border: none;
 	border-radius: 4px;
 	cursor: pointer;
@@ -973,7 +973,6 @@ kbd {
 
 .search-status-retry:hover {
 	background: #111;
-	gap: 10px;
 }
 
 .indexing-bar {
@@ -1009,17 +1008,17 @@ kbd {
 	display: flex;
 	justify-content: space-between;
 	font-size: var(--fs-ui);
-	color: #666;
+	color: var(--muted);
 }
 
 .indexing-count {
 	font-family: monospace;
-	color: #999;
+	color: var(--faint);
 }
 
 .indexing-hint {
 	font-size: var(--fs-ui);
-	color: #999;
+	color: var(--faint);
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -1059,6 +1058,7 @@ kbd {
 	/* These keep a light-on-dark fill, so they need the inverse pair. */
 	.copy-popover,
 	.qe-help-close,
+	.search-status-retry,
 	.settings-btn-save,
 	.help-hint kbd {
 		background: var(--ink);
@@ -1066,6 +1066,7 @@ kbd {
 	}
 
 	.settings-btn-save:hover:not(:disabled),
+	.search-status-retry:hover,
 	.qe-help-close:hover {
 		background: #fff;
 	}
