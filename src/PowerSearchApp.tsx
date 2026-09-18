@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
 	addItemForm,
 	clearCacheAndNotify,
@@ -14,6 +14,7 @@ import { SearchOverlay } from "./components/SearchOverlay";
 import { SearchPanel } from "./components/SearchPanel";
 import { SearchResultsList } from "./components/SearchResultsList";
 import { SearchStatus, type SearchStatusState } from "./components/SearchStatus";
+import { IndexingStatus, type IndexingState } from "./components/IndexingStatus";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import type { KeybindsConfig, ModifierCombo } from "./keybinds/defaults";
@@ -22,6 +23,8 @@ import { fetchFavorites, searchFavorites } from "./search/favorites";
 import {
 	MAX_VISIBLE_RESULTS,
 	getCacheTimestamp,
+	hasCachedItems,
+	indexItemType,
 	searchItems,
 	type SearchResultPage,
 } from "./search/fetcher";
@@ -82,6 +85,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	// Null means "show the results list". Anything else is a state the palette
 	// used to reach silently, rendering an empty white box.
 	const [status, setStatus] = useState<SearchStatusState | null>(null);
+	const [indexing, setIndexing] = useState<IndexingState | null>(null);
+	const isIndexing = useRef(false);
+	const cancelIndexing = useRef(false);
 	// null while the probe is in flight — rows stay optimistic so the export icon doesn't
 	// flash to a warning on every open. Re-probed each time the overlay opens, so installing
 	// the extension mid-session is picked up without a page reload.
@@ -185,6 +191,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			const typePart = stripped.slice(0, slashIdx);
 			const itemPart = stripped.slice(slashIdx + 1);
 
+			if (!hasCachedItems(topWindow.localStorage, "ItemType")) {
+				startIndexing(ROOT_SCOPE, nextQuery, nextScope);
+				return;
+			}
+
 			const typeResults = searchItems({
 				aras,
 				storage: topWindow.localStorage,
@@ -228,6 +239,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 
 		// Normal single-scope search
 		setIsCompoundSearch(false);
+		if (!hasCachedItems(topWindow.localStorage, nextScope.itemTypeName)) {
+			startIndexing(nextScope, nextQuery, nextScope);
+			return;
+		}
+
 		let fuseResults: SearchResultPage;
 		try {
 			fuseResults = searchItems({
@@ -256,6 +272,44 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				: null,
 		);
 		updateImageCache(nextResults);
+	};
+
+	/**
+	 * Build the cache for a scope, then re-run the search that needed it.
+	 * Indexing used to happen inline inside searchItems, on the keystroke, with
+	 * the whole tab frozen for the duration and nothing on screen to say so.
+	 */
+	const startIndexing = (
+		indexScope: typeof scope,
+		pendingQuery: string,
+		resumeScope: typeof scope,
+	) => {
+		const aras = topWindow.aras;
+		if (!aras || isIndexing.current) return;
+
+		isIndexing.current = true;
+		cancelIndexing.current = false;
+		setIndexing({ title: indexScope.title, loaded: 0, total: null });
+
+		indexItemType({
+			aras,
+			storage: topWindow.localStorage,
+			itemTypeName: indexScope.itemTypeName,
+			defaultImage: indexScope.defaultImage,
+			imageCache,
+			onProgress: ({ loaded, total }) =>
+				setIndexing({ title: indexScope.title, loaded, total }),
+			isCancelled: () => cancelIndexing.current,
+		})
+			.then(() => {
+				isIndexing.current = false;
+				setIndexing(null);
+				if (!cancelIndexing.current) performSearch(pendingQuery, resumeScope);
+			})
+			.catch(() => {
+				isIndexing.current = false;
+				setIndexing(null);
+			});
 	};
 
 	const openOverlay = () => {
@@ -358,6 +412,12 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	};
 
 	const onEscape = () => {
+		if (indexing) {
+			cancelIndexing.current = true;
+			isIndexing.current = false;
+			setIndexing(null);
+			return;
+		}
 		if (isExportHelpActive) {
 			setIsExportHelpActive(false);
 			return;
@@ -584,7 +644,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				onQueryChange={isFavMode ? performFavoritesSearch : isTabsMode ? performOpenTabsSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>
-				{status ? (
+				{indexing ? (
+					<IndexingStatus state={indexing} />
+				) : status ? (
 					<SearchStatus
 						state={status}
 						reindexKeybind={formatKeybind(keybinds.clearCache)}
