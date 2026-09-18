@@ -4,6 +4,8 @@ interface SearchPanelProps extends PropsWithChildren {
 	title: string;
 	placeholder: string;
 	query: string;
+	/** Formatted showHelp keybind, e.g. "Ctrl+/" — reflects the user's own binding. */
+	helpKeybind: string;
 	onQueryChange: (value: string) => void;
 	onSettingsClick: () => void;
 }
@@ -12,6 +14,7 @@ export function SearchPanel({
 	title,
 	placeholder,
 	query,
+	helpKeybind,
 	onQueryChange,
 	onSettingsClick,
 	children,
@@ -51,7 +54,7 @@ export function SearchPanel({
 								color: "white",
 							}}
 						>
-							Ctrl + /
+							{helpKeybind}
 						</span>
 					</div>
 					<a

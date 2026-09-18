@@ -16,7 +16,7 @@ import { SearchResultsList } from "./components/SearchResultsList";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import type { KeybindsConfig } from "./keybinds/defaults";
-import { loadKeybinds, saveKeybinds } from "./keybinds/storage";
+import { formatKeybind, loadKeybinds, saveKeybinds } from "./keybinds/storage";
 import { fetchFavorites, searchFavorites } from "./search/favorites";
 import { searchItems } from "./search/fetcher";
 import { getOpenTabs, searchOpenTabs } from "./search/openTabs";
@@ -483,6 +483,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				title={isFavMode ? "Favorites" : isTabsMode ? "Open Tabs" : scope.title}
 				placeholder={isFavMode ? "Search Favorites" : isTabsMode ? "Search Open Tabs" : scope.placeholder}
 				query={query}
+				helpKeybind={formatKeybind(keybinds.showHelp)}
 				onQueryChange={isFavMode ? performFavoritesSearch : isTabsMode ? performOpenTabsSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>
