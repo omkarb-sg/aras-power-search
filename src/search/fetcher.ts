@@ -1,5 +1,5 @@
 import Fuse from "fuse.js";
-import { getAllItems } from "../controllers/getItems";
+import { getAllItems, type GetAllItemsOptions } from "../controllers/getItems";
 import type { SearchItemData } from "../types/search";
 
 /** How many results the list renders. Digits 1-9 still address the first nine. */
@@ -54,6 +54,42 @@ export const getCacheTimestamp = (
 	return Number.isFinite(parsed) ? parsed : null;
 };
 
+/** True once this ItemType has been indexed at least once. */
+export const hasCachedItems = (storage: Storage, itemTypeName: string): boolean =>
+	getCache(storage, itemTypeName).length > 0;
+
+/**
+ * Build the cache for an ItemType. Separated from searchItems so the search
+ * itself stays synchronous and instant against a warm cache, and only the
+ * first visit to a type pays for the fetch -- visibly, and cancellably.
+ */
+export const indexItemType = async ({
+	aras,
+	storage,
+	itemTypeName,
+	defaultImage,
+	imageCache,
+	onProgress,
+	isCancelled,
+}: {
+	aras: ArasGlobal;
+	storage: Storage;
+	itemTypeName: string;
+	defaultImage: string;
+	imageCache: Record<string, string>;
+} & GetAllItemsOptions): Promise<SearchItemData[]> => {
+	const items = await getAllItems(aras, itemTypeName, defaultImage, imageCache, {
+		onProgress,
+		isCancelled,
+	});
+	// A cancelled run is partial; caching it would make the partial set look
+	// authoritative on the next search.
+	if (items.length > 0 && !isCancelled?.()) {
+		setCache(storage, itemTypeName, items);
+	}
+	return items;
+};
+
 export const clearPowerSearchCache = (storage: Storage) => {
 	const keys: string[] = [];
 	for (let i = 0; i < storage.length; i++) {
@@ -97,11 +133,8 @@ export const searchItems = ({
 	defaultImage: string;
 	imageCache: Record<string, string>;
 }): SearchResultPage => {
-	let items = getCache(storage, itemTypeName);
-	if (!items.length) {
-		items = getAllItems(aras, itemTypeName, defaultImage, imageCache);
-		setCache(storage, itemTypeName, items);
-	}
+	// Cache-only: indexing is indexItemType's job, so a search never blocks.
+	const items = getCache(storage, itemTypeName);
 
 	const modeExtended = query.trimStart().startsWith("/");
 	const fuse = new Fuse(items, {
