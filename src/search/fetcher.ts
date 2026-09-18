@@ -30,6 +30,21 @@ const getCache = (storage: Storage, itemTypeName: string): SearchItemData[] => {
 	}
 };
 
+/**
+ * When this ItemType was last indexed, or null if it has never been cached.
+ * setCache has always written this timestamp; nothing read it back, so a cache
+ * stayed authoritative forever until someone remembered the clear-cache keybind.
+ */
+export const getCacheTimestamp = (
+	storage: Storage,
+	itemTypeName: string,
+): number | null => {
+	const raw = storage.getItem(getTimestampKey(itemTypeName));
+	if (!raw) return null;
+	const parsed = Number(raw);
+	return Number.isFinite(parsed) ? parsed : null;
+};
+
 export const clearPowerSearchCache = (storage: Storage) => {
 	const keys: string[] = [];
 	for (let i = 0; i < storage.length; i++) {

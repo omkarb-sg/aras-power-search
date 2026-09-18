@@ -735,6 +735,7 @@ kbd {
 	}
 } */
 
+<<<<<<< HEAD
 /* ── Copy affordance on the name / id ── */
 /* The row itself now activates on click, so the copy targets need to say what
    they are rather than looking like inert text that happens to react. */
@@ -750,4 +751,31 @@ kbd {
 
 .copy-field:hover .copy-glyph {
 	opacity: 1;
+=======
+/* ── Cache freshness hint under the query field ── */
+.cache-age {
+	width: 90%;
+	margin: 6px auto 0;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.75rem;
+	color: #9a9a9a;
+}
+
+.cache-age kbd {
+	font-size: 0.7rem;
+	padding: 1px 5px;
+	box-shadow: none;
+}
+
+.cache-age.stale {
+	color: #b45309;
+}
+
+.cache-age.stale kbd {
+	background: #fdf3e7;
+	border-color: #f2ddc2;
+	color: #b45309;
+>>>>>>> 9b8c227 (feat: surface how old the current index is)
 }
