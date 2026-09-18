@@ -97,3 +97,17 @@ export const keepUniqueOrdered = <T>(
 		return true;
 	});
 };
+
+/** Compact age for the cache-freshness hint: "just now", "12m ago", "3h ago", "2d ago". */
+export const formatAge = (timestamp: number, now: number = Date.now()): string => {
+	const seconds = Math.max(0, Math.round((now - timestamp) / 1000));
+	if (seconds < 60) return "just now";
+	const minutes = Math.round(seconds / 60);
+	if (minutes < 60) return `${minutes}m ago`;
+	const hours = Math.round(minutes / 60);
+	if (hours < 24) return `${hours}h ago`;
+	return `${Math.round(hours / 24)}d ago`;
+};
+
+/** Past this age the index is old enough that a missing item is plausibly a stale cache. */
+export const STALE_CACHE_MS = 24 * 60 * 60 * 1000;

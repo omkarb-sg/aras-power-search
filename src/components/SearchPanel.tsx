@@ -10,6 +10,12 @@ interface SearchPanelProps extends PropsWithChildren {
 	activeIndex?: number;
 	/** How many results are currently listed, for aria-expanded. */
 	resultCount?: number;
+	/** When this scope was last indexed, e.g. "2h ago". Null when there is no cache. */
+	cacheAge: string | null;
+	/** True once the index is old enough to be worth calling out. */
+	isCacheStale?: boolean;
+	/** Formatted clearCache keybind, shown alongside the freshness hint. */
+	reindexKeybind: string;
 	onQueryChange: (value: string) => void;
 	onSettingsClick: () => void;
 }
@@ -21,6 +27,9 @@ export function SearchPanel({
 	helpKeybind,
 	activeIndex = -1,
 	resultCount = 0,
+	cacheAge,
+	isCacheStale,
+	reindexKeybind,
 	onQueryChange,
 	onSettingsClick,
 	children,
@@ -100,6 +109,13 @@ export function SearchPanel({
 						: undefined
 				}
 			/>
+			{cacheAge && (
+				<div className={`cache-age${isCacheStale ? " stale" : ""}`}>
+					<span>indexed {cacheAge}</span>
+					<kbd>{reindexKeybind}</kbd>
+					<span>to reindex</span>
+				</div>
+			)}
 			{children}
 		</div>
 	);

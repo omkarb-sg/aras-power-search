@@ -18,7 +18,7 @@ import { useGlobalShortcuts } from "./hooks/useGlobalShortcuts";
 import type { KeybindsConfig } from "./keybinds/defaults";
 import { formatKeybind, loadKeybinds, saveKeybinds } from "./keybinds/storage";
 import { fetchFavorites, searchFavorites } from "./search/favorites";
-import { searchItems } from "./search/fetcher";
+import { getCacheTimestamp, searchItems } from "./search/fetcher";
 import { getOpenTabs, searchOpenTabs } from "./search/openTabs";
 import {
 	ROOT_SCOPE,
@@ -29,6 +29,7 @@ import {
 	trimOpenedItems,
 } from "./state/powerSearchStore";
 import type { OpenedItemEntry, SearchItemData, SearchMode } from "./types/search";
+import { STALE_CACHE_MS, formatAge } from "./utils";
 
 interface PowerSearchAppProps {
 	topWindow: Window;
@@ -63,6 +64,8 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	// which cost an ArrowDown press before Enter would do anything at all.
 	const [highlightedIndex, setHighlightedIndex] = useState(0);
 	const [isCompoundSearch, setIsCompoundSearch] = useState(false);
+	// Bumped when the cache is cleared, so the freshness hint recomputes.
+	const [cacheEpoch, setCacheEpoch] = useState(0);
 	// null while the probe is in flight — rows stay optimistic so the export icon doesn't
 	// flash to a warning on every open. Re-probed each time the overlay opens, so installing
 	// the extension mid-session is picked up without a page reload.
@@ -84,6 +87,13 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		() => trimOpenedItems(openedItems).map((entry) => entry.data).reverse(),
 		[openedItems],
 	);
+
+	// Re-read on every search so the hint appears as soon as a scope is indexed
+	// for the first time, and disappears when the cache is cleared.
+	const cacheTimestamp = useMemo(() => {
+		if (searchMode !== "items") return null;
+		return getCacheTimestamp(topWindow.localStorage, scope.itemTypeName);
+	}, [searchMode, scope.itemTypeName, query, topWindow, cacheEpoch]);
 
 	const pinnedItemIds = useMemo(
 		() => new Set(pinnedItems.map((p) => p.itemConfigId)),
@@ -365,7 +375,10 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		actions: {
 			openOverlay,
 			onEscape,
-			clearCache: () => clearCacheAndNotify(topWindow),
+			clearCache: () => {
+				clearCacheAndNotify(topWindow);
+				setCacheEpoch((n) => n + 1);
+			},
 			toggleFavorites: toggleFavoritesMode,
 			openTabs: showOpenTabs,
 			navigateDown: () => {
@@ -495,6 +508,11 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				helpKeybind={formatKeybind(keybinds.showHelp)}
 				activeIndex={highlightedIndex}
 				resultCount={results.length}
+				cacheAge={cacheTimestamp === null ? null : formatAge(cacheTimestamp)}
+				isCacheStale={
+					cacheTimestamp !== null && Date.now() - cacheTimestamp > STALE_CACHE_MS
+				}
+				reindexKeybind={formatKeybind(keybinds.clearCache)}
 				onQueryChange={isFavMode ? performFavoritesSearch : isTabsMode ? performOpenTabsSearch : performSearch}
 				onSettingsClick={() => setIsSettingsActive(true)}
 			>
