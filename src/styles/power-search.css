@@ -808,3 +808,24 @@ kbd {
 	font-weight: normal;
 	color: #a8a8a8;
 }
+
+/* ── Live modifier hint on each row ── */
+/* Appears while a modifier is held, so the digit says what it would do. */
+.modifier-hint {
+	font-size: 0.72rem;
+	font-weight: normal;
+	letter-spacing: 0.01em;
+	color: #b45309;
+	background: #fdf3e7;
+	border: 1px solid #f2ddc2;
+	border-radius: 3px;
+	padding: 1px 6px;
+	margin-right: 8px;
+	white-space: nowrap;
+}
+
+.modifier-hint.unavailable {
+	color: #a0a0a0;
+	background: #f4f4f4;
+	border-color: #e4e4e4;
+}
