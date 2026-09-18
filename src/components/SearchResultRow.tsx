@@ -20,8 +20,15 @@ export const SearchResultRow = forwardRef<HTMLDivElement, SearchResultRowProps>(
 ) {
 	const [copied, setCopied] = useState<"name" | "id" | null>(null);
 
+	// Every producer of SearchItemData already substitutes a local icon when the
+	// item has none (parseItem falls back to the scope's defaultImage, getOpenTabs
+	// to DefaultItemType.svg), so this last resort is only reached if a future
+	// scope supplies an empty defaultImage. Keep it local: the previous fallback
+	// fetched a random photo from picsum.photos, an outbound request to the public
+	// internet from inside a customer's Innovator instance.
 	const displayImage =
-		item.image || (item.favoriteId ? "../images/favoriteon.svg" : `https://picsum.photos/seed/${item.itemConfigId || index}/50/50`);
+		item.image ||
+		(item.favoriteId ? "../images/favoriteon.svg" : "../images/DefaultItemType.svg");
 
 	function copyField(text: string, field: "name" | "id", e: React.MouseEvent) {
 		e.stopPropagation();
