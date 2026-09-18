@@ -829,3 +829,78 @@ kbd {
 	background: #f4f4f4;
 	border-color: #e4e4e4;
 }
+
+/* ── Empty / failure states ── */
+/* These states were all reachable before and rendered nothing at all. */
+.search-status {
+	width: 90%;
+	margin: 0 auto;
+	padding: 26px 18px 22px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 9px;
+	text-align: center;
+}
+
+.search-status-icon {
+	display: flex;
+	color: #b45309;
+}
+
+.search-status-icon svg {
+	width: 22px;
+	height: 22px;
+}
+
+.search-status-title {
+	margin: 0;
+	font-size: 1rem;
+	font-weight: bold;
+	color: #222;
+}
+
+.search-status-detail {
+	margin: 0;
+	max-width: 42ch;
+	font-size: 0.85rem;
+	line-height: 1.55;
+	color: #666;
+}
+
+.search-status-options {
+	margin-top: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	width: 100%;
+	max-width: 34rem;
+}
+
+.search-status-option {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	padding: 7px 10px;
+	border: 1px solid #ececec;
+	border-radius: 4px;
+	font-size: 0.85rem;
+	color: #555;
+}
+
+.search-status-retry {
+	margin-top: 4px;
+	padding: 6px 18px;
+	font-family: inherit;
+	font-size: 0.85rem;
+	font-weight: bold;
+	color: #fff;
+	background: #333;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.search-status-retry:hover {
+	background: #111;
+}
