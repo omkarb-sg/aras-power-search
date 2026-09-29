@@ -214,6 +214,9 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				);
 				setScope(drilledScope);
 				setIsCompoundSearch(true);
+				// The "type/" prefix has done its job once the scope is drilled — drop it
+				// so the box holds only what still filters the drilled list.
+				setQuery(itemPart);
 
 				const subResults = searchItems({
 					aras,
