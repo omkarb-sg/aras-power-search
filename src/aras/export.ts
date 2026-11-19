@@ -61,13 +61,17 @@ function stripXml(name: string): string {
 /**
  * Choose the one .xml file that is the requested item's export. A native export lays each
  * element out as `<package>/Import/<ItemType>/<keyedName>.xml`, and referenced items land
- * beside it, so match on the ItemType folder and the file name:
+ * beside it, so keep only files in the item's package (when any) and match on the ItemType
+ * folder and the file name:
  *   1. exact: folder == itemType AND file == keyedName.xml
  *   2. the single file under the itemType folder
  *   3. the single file named keyedName.xml
  *   4. the single file overall
  */
-function pickItemXml(paths: string[], itemType: string, keyedName: string): string {
+function pickItemXml(allPaths: string[], packageName: string, itemType: string, keyedName: string): string {
+	const pkgLc = packageName.toLowerCase();
+	const inPackage = allPaths.filter((f) => f.split("/")[0]!.toLowerCase() === pkgLc);
+	const paths = inPackage.length > 0 ? inPackage : allPaths;
 	const typeLc = itemType.toLowerCase();
 	const nameLc = keyedName.toLowerCase();
 
@@ -143,7 +147,7 @@ export async function exportItem(
 			return;
 		}
 
-		const picked = pickItemXml(xmlPaths, item.itemTypeName, item.name);
+		const picked = pickItemXml(xmlPaths, pkg.packageName, item.itemTypeName, item.name);
 		const filename = basename(picked);
 		const blob = new Blob([files.get(picked) as Uint8Array<ArrayBuffer>], { type: "application/xml" });
 		const href = URL.createObjectURL(blob);
