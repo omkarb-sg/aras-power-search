@@ -1,6 +1,25 @@
 import { defineConfig } from "vite";
 
+// import-export-libs-js's createEngineWorker loads its Worker with
+// `new Worker(new URL("./browser-worker.js", import.meta.url))`, which makes Vite emit a
+// 600 kB worker asset beside the bundle. Power search runs the export on the page and never
+// starts that Worker, so cut the reference before Vite sees it.
+const skipLibsJsWorker = {
+	name: "skip-import-export-libs-js-worker",
+	enforce: "pre",
+	transform(code, id) {
+		if (!id.includes("import-export-libs-js")) return null;
+		const ref = 'new URL("./browser-worker.js", import.meta.url)';
+		if (!code.includes(ref)) return null;
+		return {
+			code: code.replace(ref, '(() => { throw new Error("createEngineWorker is not bundled in power-search"); })()'),
+			map: null,
+		};
+	},
+};
+
 export default defineConfig({
+	plugins: [skipLibsJsWorker],
 	define: {
 		"process.env.NODE_ENV": JSON.stringify("production"),
 	},

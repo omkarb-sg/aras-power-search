@@ -7,9 +7,8 @@ import {
 	openSearchGrid,
 	openWhereUsed,
 } from "./aras/adapters";
-import { exportItem, probeExtension } from "./aras/export";
+import { exportItem } from "./aras/export";
 import { KeybindsHelp } from "./components/KeybindsHelp";
-import { QuickExportHelp } from "./components/QuickExportHelp";
 import { SearchOverlay } from "./components/SearchOverlay";
 import { SearchPanel } from "./components/SearchPanel";
 import { SearchResultsList } from "./components/SearchResultsList";
@@ -88,23 +87,6 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 	const [indexing, setIndexing] = useState<IndexingState | null>(null);
 	const isIndexing = useRef(false);
 	const cancelIndexing = useRef(false);
-	// null while the probe is in flight — rows stay optimistic so the export icon doesn't
-	// flash to a warning on every open. Re-probed each time the overlay opens, so installing
-	// the extension mid-session is picked up without a page reload.
-	const [isExportReady, setIsExportReady] = useState<boolean | null>(null);
-	const [isExportHelpActive, setIsExportHelpActive] = useState(false);
-
-	useEffect(() => {
-		if (!isActive) return;
-		let cancelled = false;
-		probeExtension(topWindow).then((available) => {
-			if (!cancelled) setIsExportReady(available);
-		});
-		return () => {
-			cancelled = true;
-		};
-	}, [isActive, topWindow]);
-
 	const recentItems = useMemo(
 		() => trimOpenedItems(openedItems).map((entry) => entry.data).reverse(),
 		[openedItems],
@@ -430,10 +412,6 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 			setIndexing(null);
 			return;
 		}
-		if (isExportHelpActive) {
-			setIsExportHelpActive(false);
-			return;
-		}
 		if (isSettingsActive) {
 			setIsSettingsActive(false);
 			return;
@@ -583,15 +561,7 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 				performSearch("", nextScope);
 			},
 			togglePin,
-			exportItem: (item) => {
-				// Same guard as the row button: surface the setup steps instead of firing a
-				// request that can only fail once the 30s relay timeout elapses.
-				if (isExportReady === false) {
-					setIsExportHelpActive(true);
-					return;
-				}
-				exportItem(topWindow, item);
-			},
+			exportItem: (item) => exportItem(topWindow, item),
 			modifiersChanged: setHeldModifiers,
 			showHelp: () => setIsHelpActive(true),
 			hideHelp: () => setIsHelpActive(false),
@@ -622,14 +592,6 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 		return (
 			<SearchOverlay isActive={true} label="Keyboard shortcuts">
 				<KeybindsHelp keybinds={keybinds} />
-			</SearchOverlay>
-		);
-	}
-
-	if (isExportHelpActive) {
-		return (
-			<SearchOverlay isActive={true} label="Quick Export setup">
-				<QuickExportHelp onClose={() => setIsExportHelpActive(false)} />
 			</SearchOverlay>
 		);
 	}
@@ -672,8 +634,6 @@ export function PowerSearchApp({ topWindow }: PowerSearchAppProps) {
 					onExport={isTabsMode ? undefined : (item) => exportItem(topWindow, item)}
 					onActivate={activateItem}
 					modifierAction={resolveModifierAction(heldModifiers, keybinds)}
-					isExportReady={isExportReady !== false}
-					onExportHelp={() => setIsExportHelpActive(true)}
 				/>
 				)}
 			</SearchPanel>

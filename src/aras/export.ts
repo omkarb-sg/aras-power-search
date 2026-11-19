@@ -1,3 +1,4 @@
+import { connect, exportPackages, type Session } from "import-export-libs-js/browser";
 import type { SearchItemData } from "../types/search";
 
 function deriveBaseUrl(serverUrl: string): string {
@@ -41,72 +42,61 @@ function checkPackage(
 	return { inPackage: true, packageName };
 }
 
-interface ExportResult {
-	ok: boolean;
-	filename?: string;
-	xml?: string;
-	error?: string;
+/** Last path segment of an export-tree path. */
+function basename(p: string): string {
+	const idx = p.lastIndexOf("/");
+	return idx >= 0 ? p.slice(idx + 1) : p;
+}
+
+/** Second-to-last path segment: the ItemType folder in a native export tree. */
+function parentSegment(p: string): string {
+	const parts = p.split("/");
+	return parts.length >= 2 ? parts[parts.length - 2]! : "";
+}
+
+function stripXml(name: string): string {
+	return name.replace(/\.xml$/i, "");
 }
 
 /**
- * Ping the quick-export extension's content script and wait for its pong.
- *
- * Export only works when that extension is loaded, so the UI probes for it up front rather
- * than letting the user click an export button that can only fail 30s later. Resolves false
- * on timeout — absence is the expected answer, not an error.
+ * Choose the one .xml file that is the requested item's export. A native export lays each
+ * element out as `<package>/Import/<ItemType>/<keyedName>.xml`, and referenced items land
+ * beside it, so match on the ItemType folder and the file name:
+ *   1. exact: folder == itemType AND file == keyedName.xml
+ *   2. the single file under the itemType folder
+ *   3. the single file named keyedName.xml
+ *   4. the single file overall
  */
-export function probeExtension(topWindow: Window, timeoutMs = 800): Promise<boolean> {
-	return new Promise((resolve) => {
-		const id = `ps-ping-${Date.now()}`;
+function pickItemXml(paths: string[], itemType: string, keyedName: string): string {
+	const typeLc = itemType.toLowerCase();
+	const nameLc = keyedName.toLowerCase();
 
-		const cleanup = () => {
-			topWindow.removeEventListener("message", handler);
-			clearTimeout(timer);
-		};
+	const exact = paths.find(
+		(f) => parentSegment(f).toLowerCase() === typeLc && stripXml(basename(f)).toLowerCase() === nameLc,
+	);
+	if (exact) return exact;
 
-		const handler = (ev: MessageEvent) => {
-			const d = ev.data;
-			if (!d || d.__ps !== "pong" || d.id !== id) return;
-			cleanup();
-			resolve(true);
-		};
+	const underType = paths.filter((f) => parentSegment(f).toLowerCase() === typeLc);
+	if (underType.length === 1) return underType[0]!;
 
-		topWindow.addEventListener("message", handler);
-		topWindow.postMessage({ __ps: "ping", id }, "*");
+	const byName = paths.filter((f) => stripXml(basename(f)).toLowerCase() === nameLc);
+	if (byName.length === 1) return byName[0]!;
 
-		const timer = setTimeout(() => {
-			cleanup();
-			resolve(false);
-		}, timeoutMs);
-	});
+	if (paths.length === 1) return paths[0]!;
+
+	throw new Error(
+		`Export is ambiguous: ${paths.length} files, none uniquely match ${itemType}/${keyedName}: ${paths
+			.map(basename)
+			.join(", ")}`,
+	);
 }
 
-function callExtension(
-	topWindow: Window,
-	body: Record<string, unknown>,
-): Promise<ExportResult> {
-	return new Promise((resolve, reject) => {
-		const id = `ps-${Date.now()}`;
-
-		const handler = (ev: MessageEvent) => {
-			const d = ev.data;
-			if (!d || d.__ps !== "export-res" || d.id !== id) return;
-			topWindow.removeEventListener("message", handler);
-			clearTimeout(timer);
-			if (d.ok) resolve(d.result as ExportResult);
-			else reject(new Error(d.error || "export failed"));
-		};
-
-		topWindow.addEventListener("message", handler);
-		topWindow.postMessage({ __ps: "export-req", id, body }, "*");
-
-		const timer = setTimeout(() => {
-			topWindow.removeEventListener("message", handler);
-			reject(new Error("Export timed out — is the quick-export extension installed?"));
-		}, 30000);
-	});
-}
-
+/**
+ * Export one packaged item the way the Package Import/Export utility does (level 1,
+ * referenced items included, references to unknown packages kept) and download exactly
+ * that item's XML file. Runs in the page through import-export-libs-js, reusing the
+ * signed-in Aras client's session token.
+ */
 export async function exportItem(
 	topWindow: Window,
 	item: SearchItemData,
@@ -120,43 +110,52 @@ export async function exportItem(
 		return;
 	}
 
-	const conn = getConnContext(aras);
-	const reqId = `ps-${Date.now()}-${Math.floor(Math.random() * 1e9)}`;
-
-	const body = {
-		reqId,
-		conn,
-		item: {
-			itemType: item.itemTypeName,
-			itemId: item.itemId,
-			keyedName: item.name,
-			package: pkg.packageName,
-		},
-		options: { exportReferenced: true },
-	};
-
+	const { url, database } = getConnContext(aras);
+	let session: Session | undefined;
 	try {
-		const result = await callExtension(topWindow, body);
+		session = await connect({
+			url,
+			database,
+			tokenProvider: {
+				// Asked again when the server refuses a token, so read the client's current one.
+				getAccessToken: async () =>
+					getConnContext(aras).token.replace(/^Bearer\s+/i, ""),
+			},
+		});
 
-		if (!result.ok) {
-			aras.AlertError(`Export failed: ${result.error || "unknown error"}`);
+		const { files, summary } = await exportPackages(session, {
+			items: [{ type: item.itemTypeName, id: item.itemId }],
+			level: "1",
+			exportReferencedItems: true,
+			unknownReferences: "do-not-remove",
+		});
+
+		if (summary.messages.errors > 0) {
+			aras.AlertError(
+				`Export failed: export engine reported ${summary.messages.errors} error(s) — result is partial`,
+			);
 			return;
 		}
 
-		if (result.xml && result.filename) {
-			const blob = new Blob([result.xml], { type: "application/xml" });
-			const url = URL.createObjectURL(blob);
-			const a = topWindow.document.createElement("a");
-			a.href = url;
-			a.download = result.filename;
-			a.click();
-			URL.revokeObjectURL(url);
-			aras.AlertSuccess(`Exported ${result.filename}`);
+		const xmlPaths = [...files.keys()].filter((p) => /\.xml$/i.test(p));
+		if (xmlPaths.length === 0) {
+			aras.AlertError("Export failed: export produced no .xml files");
+			return;
 		}
+
+		const picked = pickItemXml(xmlPaths, item.itemTypeName, item.name);
+		const filename = basename(picked);
+		const blob = new Blob([files.get(picked) as Uint8Array<ArrayBuffer>], { type: "application/xml" });
+		const href = URL.createObjectURL(blob);
+		const a = topWindow.document.createElement("a");
+		a.href = href;
+		a.download = filename;
+		a.click();
+		URL.revokeObjectURL(href);
+		aras.AlertSuccess(`Exported ${filename}`);
 	} catch (e) {
-		aras.AlertError(
-			(e as Error).message ||
-				"Export service unreachable. Is quick-export running?",
-		);
+		aras.AlertError(`Export failed: ${(e as Error).message || "unknown error"}`);
+	} finally {
+		await session?.close().catch(() => {});
 	}
 }

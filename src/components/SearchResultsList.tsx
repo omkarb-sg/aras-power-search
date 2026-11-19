@@ -12,8 +12,6 @@ interface SearchResultsListProps {
 	/** What a digit press would do right now, or null when no modifier is held. */
 	modifierAction: ModifierAction | null;
 	onExport?: (item: SearchItemData) => void;
-	isExportReady?: boolean;
-	onExportHelp?: () => void;
 }
 
 export function SearchResultsList({
@@ -23,8 +21,6 @@ export function SearchResultsList({
 	onActivate,
 	modifierAction,
 	onExport,
-	isExportReady,
-	onExportHelp,
 }: SearchResultsListProps) {
 	const { getRef } = useFlipAnimation(items, (item) => item.itemId, {
 		duration: 300,
@@ -45,8 +41,6 @@ export function SearchResultsList({
 					onActivate={onActivate}
 					modifierAction={modifierAction}
 					onExport={onExport}
-					isExportReady={isExportReady}
-					onExportHelp={onExportHelp}
 				/>
 			))}
 		</div>
