@@ -23,6 +23,7 @@
 	},
 	"dependencies": {
 		"fuse.js": "^7.1.0",
+		"import-export-libs-js": "github:omkarbhale/import-export-libs-js#cb1938a8c9ade30f566cceaf95f093e9b8b32e59",
 		"preact": "^10.29.7"
 	}
 }
