@@ -36,8 +36,12 @@ export const addItemForm = (topWindow: Window, searchItemData: SearchItemData) =
 	const runtime = resolveArasRuntime(topWindow);
 	if (!runtime.aras) return;
 
-	const item = runtime.aras.IomInnovator.newItem(searchItemData.name, "add");
-	runtime.aras.uiShowItemEx(item.node);
+	// aras.newItem builds a proper client-side "new" item (isNew/isTemp, current
+	// generation, default values, lifecycle). A bare IOM newItem(..., "add") is
+	// only an AML request, so the form rendered it as an old, non-current version.
+	const itemNode = runtime.aras.newItem(searchItemData.name);
+	if (!itemNode) return;
+	runtime.aras.uiShowItemEx(itemNode, "new");
 };
 
 export const openWhereUsed = (topWindow: Window, searchItemData: SearchItemData) => {

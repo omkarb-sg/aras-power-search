@@ -46,7 +46,8 @@ interface ArasGlobal {
 	getServerURL(): string;
 	getDatabase(): string;
 	uiShowItem(itemTypeName: string, id: string): void;
-	uiShowItemEx(node: Node): void;
+	uiShowItemEx(node: Node, viewMode?: string): void;
+	newItem(itemTypeName: string, itemId?: string): Element | null;
 	AlertSuccess(message: string): void;
 	AlertError(message: string): void;
 	getIsAliasIdentityIDForLoggedUser(): string;
