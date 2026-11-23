@@ -1,4 +1,5 @@
-import { connect, exportPackages, type Session } from "import-export-libs-js/browser";
+import { exportPackages, type Session } from "import-export-libs-js/browser";
+import { arasVersionText, connectForExport } from "./exportSession";
 import type { SearchItemData } from "../types/search";
 
 function deriveBaseUrl(serverUrl: string): string {
@@ -117,7 +118,8 @@ export async function exportItem(
 	const { url, database } = getConnContext(aras);
 	let session: Session | undefined;
 	try {
-		session = await connect({
+		// The engine follows the server's version; a server no engine supports is refused here.
+		session = await connectForExport({
 			url,
 			database,
 			tokenProvider: {
@@ -126,6 +128,9 @@ export async function exportItem(
 					getConnContext(aras).token.replace(/^Bearer\s+/i, ""),
 			},
 		});
+		console.info(
+			`[power-search] quick export: Aras ${arasVersionText(session.serverVersion)}, export engine ${session.engine}`,
+		);
 
 		const { files, summary } = await exportPackages(session, {
 			items: [{ type: item.itemTypeName, id: item.itemId }],
